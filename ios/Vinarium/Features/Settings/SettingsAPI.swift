@@ -84,4 +84,13 @@ enum SettingsAPI {
             journal: result.journal
         )
     }
+
+    /// Permanently delete the signed-in account and all of its data. Irreversible.
+    /// The caller signs out locally afterwards to route back to the login screen.
+    static func deleteAccount() async throws {
+        _ = try await GraphQLHelpers.perform(
+            GraphQLClient.shared.apollo,
+            mutation: VinariumGraphQL.DeleteAccountMutation()
+        )
+    }
 }

@@ -6,6 +6,9 @@ struct ProfileSettingsView: View {
     @State private var isLoadingFirstName = true
     @State private var loadError: String?
     @State private var signOutError: String?
+    @State private var showDeleteConfirmation = false
+    @State private var isDeletingAccount = false
+    @State private var deleteError: String?
 
     var body: some View {
         Form {
@@ -37,10 +40,38 @@ struct ProfileSettingsView: View {
                     Text(signOutError).foregroundStyle(.red)
                 }
             }
+
+            Section {
+                DeleteAccountButton(isDeleting: isDeletingAccount) {
+                    showDeleteConfirmation = true
+                }
+            } footer: {
+                if let deleteError {
+                    Text(deleteError).foregroundStyle(.red)
+                } else {
+                    Text(
+                        "Supprime définitivement le compte et toutes ses données. Cette action est irréversible. Un abonnement Premium n'est pas résilié : il reste à annuler dans les réglages de l'App Store."
+                    )
+                }
+            }
         }
         .navigationTitle("Profil")
         .navigationBarTitleDisplayMode(.inline)
         .task { await loadFirstName() }
+        .confirmationDialog(
+            "Supprimer définitivement le compte ?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Supprimer mon compte", role: .destructive) {
+                Task { await deleteAccount() }
+            }
+            Button("Annuler", role: .cancel) {}
+        } message: {
+            Text(
+                "Toutes les données seront effacées sans possibilité de récupération. Un abonnement Premium éventuel n'est pas résilié et reste à annuler dans l'App Store."
+            )
+        }
     }
 
     @ViewBuilder
@@ -77,6 +108,20 @@ struct ProfileSettingsView: View {
             try authSession.signOut()
         } catch {
             signOutError = error.localizedDescription
+        }
+    }
+
+    private func deleteAccount() async {
+        isDeletingAccount = true
+        deleteError = nil
+        do {
+            try await SettingsAPI.deleteAccount()
+            // The server has deleted the Firebase user; sign out locally to drop the
+            // now-invalid session and route back to the login screen.
+            try authSession.signOut()
+        } catch {
+            deleteError = error.localizedDescription
+            isDeletingAccount = false
         }
     }
 }

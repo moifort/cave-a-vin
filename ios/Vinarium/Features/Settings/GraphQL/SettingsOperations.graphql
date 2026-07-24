@@ -46,3 +46,7 @@ mutation ImportData($payload: String!) {
     journal
   }
 }
+
+mutation DeleteAccount {
+  deleteAccount
+}
