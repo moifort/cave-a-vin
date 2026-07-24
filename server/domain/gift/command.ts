@@ -26,9 +26,14 @@ export namespace GiftCommand {
     await repository.remove(userId, beverageId, batch)
   }
 
+  // Erase the user's gifts — an account deletion wipes them outright.
+  export const deleteAllForUser = async (userId: UserId) => {
+    await repository.removeAllByUser(userId)
+  }
+
   // Wipe the user's gifts and restore the given records (account import).
   export const replaceAllForUser = async (userId: UserId, gifts: Gift[]) => {
-    await repository.removeAllByUser(userId)
+    await deleteAllForUser(userId)
     await bulkSave(gifts, repository.save)
   }
 }

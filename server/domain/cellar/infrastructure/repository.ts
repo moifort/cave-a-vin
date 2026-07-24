@@ -35,6 +35,14 @@ export const saveConfig = async (
   return config
 }
 
+// Delete a cellar config doc by key. Used by an account deletion to drop the
+// solo `usr_<userId>` grid; a shared `hh_<householdId>` grid is a housemate's
+// concern, never removed here. A no-op if the doc is already gone (idempotent).
+export const removeConfig = async (key: string): Promise<void> => {
+  await configs().doc(key).delete()
+  evictFromRequestCache(configCacheKey(key))
+}
+
 const docId = (userId: UserId, beverageId: BeverageId) => `${userId}_${beverageId}`
 const allCacheKey = (userId: UserId) => `cellar:all:${userId}`
 // A household shares one grid, so its reads are keyed by the whole member set.

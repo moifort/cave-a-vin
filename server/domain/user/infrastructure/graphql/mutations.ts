@@ -32,6 +32,22 @@ builder.mutationField('completeOnboarding', (t) =>
   }),
 )
 
+builder.mutationField('deleteAccount', (t) =>
+  t.boolean({
+    description:
+      'Permanently delete the signed-in account and all of its data.\n\n' +
+      'Irreversible. Leaves any shared household (passing ownership on if needed), erases every ' +
+      'collection the account owns (wines, cellar, tasting notes, gifts, recommendations, ' +
+      'journal, quotas), forgets the stored entitlement, drops the profile, and deletes the ' +
+      'Firebase Auth user. Does NOT cancel an active App Store subscription: Apple owns that ' +
+      'lifecycle, so a subscriber must cancel separately in the App Store. Always returns `true`.',
+    resolve: async (_root, _args, { userId }) => {
+      await UserUseCase.deleteAccount(userId)
+      return true
+    },
+  }),
+)
+
 const parseDimensions = (rows: number, cols: number, zones: number) => {
   try {
     return { rows: CellarRows(rows), cols: CellarCols(cols), zones: CellarZones(zones) }

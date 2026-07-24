@@ -42,3 +42,11 @@ export const save = async (entitlement: Entitlement): Promise<Entitlement> => {
   evictFromRequestCache(cacheKey(entitlement.userId))
   return entitlement
 }
+
+// Drop the account's stored entitlement (account deletion). This only forgets our
+// record of the purchase; Apple still owns the subscription's lifecycle, so an
+// active subscription keeps renewing until cancelled in the App Store. Idempotent.
+export const remove = async (userId: UserId): Promise<void> => {
+  await entitlements().doc(userId).delete()
+  evictFromRequestCache(cacheKey(userId))
+}

@@ -7,4 +7,15 @@ export namespace UserCommand {
   // written separately by UserUseCase.completeOnboarding, in the same batch.
   export const completeOnboarding = (userId: UserId, firstName: PersonName, batch?: WriteBatch) =>
     repository.saveProfile({ userId, firstName, onboardingCompletedAt: new Date() }, batch)
+
+  // Erase the account's profile (account deletion).
+  export const deleteProfile = async (userId: UserId) => {
+    await repository.removeProfile(userId)
+  }
+
+  // Delete the account's auth identity — the last step of an account deletion,
+  // after every trace of its data is gone.
+  export const deleteAuthAccount = async (userId: UserId) => {
+    await repository.removeAuthUser(userId)
+  }
 }

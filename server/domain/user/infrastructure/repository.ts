@@ -2,6 +2,7 @@ import type { WriteBatch } from 'firebase-admin/firestore'
 import type { UserId } from '~/domain/shared/types'
 import type { UserProfile } from '~/domain/user/types'
 import { db } from '~/system/firebase'
+import { deleteAuthUser } from '~/system/identity'
 import { memoizedPerRequest } from '~/system/request-cache'
 import { genericDataConverter } from '~/utils/firestore'
 
@@ -31,4 +32,16 @@ export const saveProfile = async (
   if (batch) batch.set(ref, profile)
   else await ref.set(profile)
   return profile
+}
+
+// Delete the account's profile (account deletion). Idempotent: an already-absent
+// profile is a no-op, so a retried deletion never errors.
+export const removeProfile = async (userId: UserId): Promise<void> => {
+  await profiles().doc(userId).delete()
+}
+
+// Delete the account's auth identity (account deletion). The one place the auth
+// provider is touched, keeping external access inside the storage layer.
+export const removeAuthUser = async (userId: UserId): Promise<void> => {
+  await deleteAuthUser(userId)
 }

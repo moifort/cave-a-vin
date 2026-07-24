@@ -1,10 +1,19 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import type { CellarCols, CellarRows, CellarZones } from '~/domain/cellar/types'
-import type { HouseholdId, HouseholdMember } from '~/domain/household/types'
+import type { HouseholdId, HouseholdMember, HouseholdRole } from '~/domain/household/types'
 import type { PersonName, UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
+
+// The account deletion deletes the Firebase Auth user through the identity module;
+// the mock records the calls instead of hitting Firebase.
+const deletedAuthUsers: string[] = []
+mock.module('~/system/identity', () => ({
+  deleteAuthUser: async (uid: string) => {
+    deletedAuthUsers.push(uid)
+  },
+}))
 
 const { UserUseCase } = await import('~/domain/user/use-case')
 const { UserQuery } = await import('~/domain/user/query')
@@ -12,18 +21,24 @@ const { CellarQuery } = await import('~/domain/cellar/query')
 
 const user = (id: string) => id as UserId
 
-const member = (id: string, householdId: string): HouseholdMember => ({
+const member = (
+  id: string,
+  householdId: string,
+  role: HouseholdRole = 'owner',
+  joinedAt = new Date('2026-01-01'),
+): HouseholdMember => ({
   userId: user(id),
   householdId: householdId as HouseholdId,
   displayName: id as PersonName,
-  role: 'owner',
-  joinedAt: new Date('2026-01-01'),
+  role,
+  joinedAt,
 })
 
 let fake = resetFakeFirestore()
 
 beforeEach(() => {
   fake = resetFakeFirestore()
+  deletedAuthUsers.length = 0
 })
 
 describe('UserUseCase.completeOnboarding', () => {
@@ -100,5 +115,83 @@ describe('UserUseCase.completeOnboarding', () => {
     expect(fake.batches).toHaveLength(1)
     expect(fake.batches[0].commits).toBe(1)
     expect(fake.batches[0].ops).toHaveLength(2)
+  })
+})
+
+describe('UserUseCase.deleteAccount', () => {
+  // Seed one document the account owns in every per-user collection, plus a solo
+  // cellar config, so the wipe has something to remove everywhere.
+  const seedOwnedData = (id: string) => {
+    fake.seed('beverages', `${id}_b`, { userId: user(id) })
+    fake.seed('cellar', `${id}_b`, { userId: user(id) })
+    fake.seed('tasting', `${id}_b`, { userId: user(id) })
+    fake.seed('gift', `${id}_b`, { userId: user(id) })
+    fake.seed('recommendation', `${id}_b`, { userId: user(id) })
+    fake.seed('journal', `${id}_j`, { userId: user(id) })
+    fake.seed('entitlements', id, { userId: user(id) })
+    fake.seed('ai-quotas', `${id}_2026-07`, { userId: user(id) })
+    fake.seed('user-profiles', id, { userId: user(id), firstName: id })
+    fake.seed('cellar-configs', `usr_${id}`, { rows: 8, cols: 6, zones: 1 })
+  }
+
+  const ownedCollections = [
+    'beverages',
+    'cellar',
+    'tasting',
+    'gift',
+    'recommendation',
+    'journal',
+    'entitlements',
+    'ai-quotas',
+    'user-profiles',
+    'cellar-configs',
+  ]
+
+  test('wipes every collection the account owns and deletes the auth user', async () => {
+    seedOwnedData('u1')
+    // A second account whose identical data must survive untouched.
+    seedOwnedData('u2')
+
+    await UserUseCase.deleteAccount(user('u1'))
+
+    for (const collection of ownedCollections) {
+      const remaining = [...fake.snapshot(collection).values()]
+      expect(remaining.every((doc) => (doc as { userId?: string }).userId !== 'u1')).toBe(true)
+    }
+    expect(fake.snapshot('cellar-configs').has('usr_u1')).toBe(false)
+    expect((await UserQuery.me(user('u1'))).firstName).toBeUndefined()
+    expect(deletedAuthUsers).toEqual(['u1'])
+
+    // The other account is fully intact.
+    expect(fake.snapshot('beverages').has('u2_b')).toBe(true)
+    expect(fake.snapshot('cellar-configs').has('usr_u2')).toBe(true)
+  })
+
+  test('a solo account with no data still deletes cleanly (idempotent wipe)', async () => {
+    await UserUseCase.deleteAccount(user('ghost'))
+    expect(deletedAuthUsers).toEqual(['ghost'])
+  })
+
+  test('an owner leaving a shared household passes ownership and keeps the shared grid', async () => {
+    fake.seed('households', 'h1', {
+      id: 'h1',
+      createdBy: user('u1'),
+      createdAt: new Date('2026-01-01'),
+    })
+    fake.seed('household-members', 'u1', member('u1', 'h1', 'owner', new Date('2026-01-01')))
+    fake.seed('household-members', 'u2', member('u2', 'h1', 'member', new Date('2026-02-01')))
+    fake.seed('cellar-configs', 'hh_h1', { rows: 12, cols: 7, zones: 2 })
+    seedOwnedData('u1')
+
+    await UserUseCase.deleteAccount(user('u1'))
+
+    // The leaver is gone, the remaining member inherits ownership.
+    expect(fake.snapshot('household-members').has('u1')).toBe(false)
+    expect(fake.snapshot('household-members').get('u2')).toMatchObject({ role: 'owner' })
+    // The shared grid belongs to the remaining member — never deleted.
+    expect(fake.snapshot('cellar-configs').get('hh_h1')).toMatchObject({ rows: 12 })
+    // The leaver's own data is still wiped.
+    expect(fake.snapshot('beverages').has('u1_b')).toBe(false)
+    expect(deletedAuthUsers).toEqual(['u1'])
   })
 })

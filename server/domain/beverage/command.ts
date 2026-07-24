@@ -82,10 +82,15 @@ export namespace BeverageCommand {
     return undefined
   }
 
+  // Erase the user's beverages — an account deletion wipes them outright.
+  export const deleteAllForUser = async (userId: UserId) => {
+    await repository.removeAllByUser(userId)
+  }
+
   // Wipe the user's beverages and restore the given set — the write half of an
   // account import (records are pre-stamped with the importing user).
   export const replaceAllForUser = async (userId: UserId, beverages: Beverage[]) => {
-    await repository.removeAllByUser(userId)
+    await deleteAllForUser(userId)
     await bulkSave(beverages, repository.save)
   }
 

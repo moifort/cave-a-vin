@@ -26,9 +26,14 @@ export namespace JournalCommand {
     await repository.removeByBeverageId(userId, beverageId, batch)
   }
 
+  // Erase the user's journal — an account deletion wipes it outright.
+  export const deleteAllForUser = async (userId: UserId) => {
+    await repository.removeAllByUser(userId)
+  }
+
   // Wipe the user's journal and restore the given entries (account import).
   export const replaceAllForUser = async (userId: UserId, entries: JournalEntry[]) => {
-    await repository.removeAllByUser(userId)
+    await deleteAllForUser(userId)
     await bulkSave(entries, repository.save)
   }
 }

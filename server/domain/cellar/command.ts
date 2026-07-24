@@ -15,11 +15,14 @@ import { JournalCommand } from '~/domain/journal/command'
 import type { UserId } from '~/domain/shared/types'
 import { atomically, bulkSave } from '~/utils/firestore'
 
+// A solo user's own cellar config doc id. Deterministic, no membership read.
+export const soloCellarConfigKey = (userId: UserId) => `usr_${userId}`
+
 // A cellar's config doc id: the whole household shares one grid, a solo user has
 // their own. Resolve this before opening a batch — it reads the membership doc.
 export const cellarConfigKey = async (userId: UserId) => {
   const membership = await HouseholdQuery.membershipOf(userId)
-  return membership ? `hh_${membership.householdId}` : `usr_${userId}`
+  return membership ? `hh_${membership.householdId}` : soloCellarConfigKey(userId)
 }
 
 export namespace CellarCommand {
@@ -200,6 +203,17 @@ export namespace CellarCommand {
     batch: WriteBatch,
   ) => {
     await repository.remove(userId, beverageId, batch)
+  }
+
+  // Erase every trace of the user's cellar: their bottles and their solo grid
+  // config. Only the deterministic solo `usr_<userId>` config is dropped, never a
+  // shared `hh_<householdId>` grid: that belongs to the remaining members, and the
+  // caller (account deletion) has already left the household. Resolving the key by
+  // membership would be wrong here anyway, the just-removed membership can still be
+  // memoized as present, pointing back at the shared grid.
+  export const deleteAllForUser = async (userId: UserId) => {
+    await repository.removeAllByUser(userId)
+    await repository.removeConfig(soloCellarConfigKey(userId))
   }
 
   // Wipe the user's cellar and restore the given bottles (account import).

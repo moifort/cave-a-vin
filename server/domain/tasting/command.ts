@@ -32,9 +32,14 @@ export namespace TastingCommand {
     await repository.remove(userId, beverageId, batch)
   }
 
+  // Erase the user's tasting notes — an account deletion wipes them outright.
+  export const deleteAllForUser = async (userId: UserId) => {
+    await repository.removeAllByUser(userId)
+  }
+
   // Wipe the user's tasting notes and restore the given records (account import).
   export const replaceAllForUser = async (userId: UserId, notes: TastingNote[]) => {
-    await repository.removeAllByUser(userId)
+    await deleteAllForUser(userId)
     await bulkSave(notes, repository.save)
   }
 }

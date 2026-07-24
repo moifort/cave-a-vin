@@ -3,7 +3,7 @@ import type { Quota, QuotaMonth } from '~/domain/quota/types'
 import type { UserId } from '~/domain/shared/types'
 import { db } from '~/system/firebase'
 import { evictFromRequestCache, memoizedPerRequest } from '~/system/request-cache'
-import { genericDataConverter, transactionally } from '~/utils/firestore'
+import { deleteInBatches, genericDataConverter, transactionally } from '~/utils/firestore'
 
 const quotas = () => db().collection('ai-quotas').withConverter(genericDataConverter<Quota>())
 
@@ -45,4 +45,11 @@ export const consume = async (
   // same request (the `me` query alongside a scan) sees what was just spent.
   evictFromRequestCache(cacheKey(userId, month))
   return spent
+}
+
+// Delete every monthly quota document the account has accrued (account deletion).
+// One doc per month, so this queries by userId rather than reconstructing keys.
+export const removeAllByUser = async (userId: UserId): Promise<void> => {
+  const snap = await quotas().where('userId', '==', userId).get()
+  await deleteInBatches(snap.docs.map((doc) => doc.ref))
 }

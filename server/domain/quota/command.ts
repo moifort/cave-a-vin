@@ -11,4 +11,9 @@ export namespace QuotaCommand {
   // read-then-set counted one.
   export const record = async (userId: UserId): Promise<Quota> =>
     repository.consume(userId, monthOf(new Date()), consumed)
+
+  // Erase the account's monthly scan counters (account deletion).
+  export const deleteAllForUser = async (userId: UserId) => {
+    await repository.removeAllByUser(userId)
+  }
 }

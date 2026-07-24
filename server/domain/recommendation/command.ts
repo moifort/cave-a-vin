@@ -16,9 +16,14 @@ export namespace RecommendationCommand {
     await repository.remove(userId, beverageId, batch)
   }
 
+  // Erase the user's recommendations — an account deletion wipes them outright.
+  export const deleteAllForUser = async (userId: UserId) => {
+    await repository.removeAllByUser(userId)
+  }
+
   // Wipe the user's recommendations and restore the given records (account import).
   export const replaceAllForUser = async (userId: UserId, recommendations: Recommendation[]) => {
-    await repository.removeAllByUser(userId)
+    await deleteAllForUser(userId)
     await bulkSave(recommendations, repository.save)
   }
 }

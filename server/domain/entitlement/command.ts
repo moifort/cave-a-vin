@@ -21,4 +21,11 @@ export namespace EntitlementCommand {
       ...(transaction.revokedAt ? { revokedAt: transaction.revokedAt } : {}),
       updatedAt: new Date(),
     })
+
+  // Forget the account's stored entitlement (account deletion). Removes only our
+  // record: the App Store subscription keeps its own lifecycle and must be
+  // cancelled in the App Store, which the app tells the user before deleting.
+  export const deleteForUser = async (userId: UserId) => {
+    await repository.remove(userId)
+  }
 }
