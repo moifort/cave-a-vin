@@ -15,16 +15,16 @@ Vinarium, c'est votre cave à vin dans votre poche.
 Photographiez l'étiquette d'une bouteille : l'intelligence artificielle reconnaît le vin et remplit automatiquement le domaine, le millésime, la région, l'appellation, et estime même son prix. Plus besoin de tout saisir à la main.
 
 FONCTIONNALITÉS
-• Scan IA — prenez une étiquette en photo, obtenez une fiche complète en quelques secondes
-• Cave en grille — rangez vos bouteilles par rangée et colonne, retrouvez-les d'un coup d'œil
-• Journal — historique des entrées et sorties, avec vos notes de dégustation et vos évaluations
-• Tableau de bord — valeur de votre cave, taux d'occupation, bouteilles à boire bientôt, activité récente
-• Recherche puissante — par nom, producteur, région, millésime ou personne, avec filtres combinables
-• Prêts à boire — Vinarium vous alerte quand une bouteille arrive à maturité
-• Cadeaux & recommandations — gardez la trace des vins offerts, reçus, ou conseillés par un ami
+• Scan IA : prenez une étiquette en photo, obtenez une fiche complète en quelques secondes
+• Cave en grille : rangez vos bouteilles par rangée et colonne, retrouvez-les d'un coup d'œil
+• Journal : historique des entrées et sorties, avec vos notes de dégustation et vos évaluations
+• Tableau de bord : valeur de votre cave, taux d'occupation, bouteilles à boire bientôt, activité récente
+• Recherche puissante : par nom, producteur, région, millésime ou personne, avec filtres combinables
+• Prêts à boire : Vinarium vous alerte quand une bouteille arrive à maturité
+• Cadeaux & recommandations : gardez la trace des vins offerts, reçus, ou conseillés par un ami
 
 PARTAGE EN FOYER
-Partagez une seule cave avec les personnes de votre foyer grâce à un code d'invitation. Chacun peut ranger, déplacer ou déguster n'importe quelle bouteille de la cave commune — tout en gardant sa propre bibliothèque, ses notes et son journal privés.
+Partagez une seule cave avec les personnes de votre foyer grâce à un code d'invitation. Chacun peut ranger, déplacer ou déguster n'importe quelle bouteille de la cave commune, tout en gardant sa propre bibliothèque, ses notes et son journal privés.
 
 RESPECT DE VOTRE VIE PRIVÉE
 Pas de publicité, pas de traçage. Vos données restent les vôtres et sont exportables à tout moment.
