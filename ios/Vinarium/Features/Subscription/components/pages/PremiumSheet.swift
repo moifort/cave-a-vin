@@ -160,10 +160,13 @@ struct PremiumSheet: View {
     }
 }
 
-/// The two pages App Review requires a paywall to link to.
+/// The two pages App Review requires a paywall to link to. Both must actually
+/// answer: guideline 3.1.2 asks for a *functional* link, and the privacy policy
+/// is the GitHub Pages site declared as the app's Privacy Policy URL in App Store
+/// Connect, not the Firebase host, which never served that path.
 enum SubscriptionLinks {
     static let terms = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
-    static let privacy = URL(string: "https://vinarium-prod.web.app/confidentialite")!
+    static let privacy = URL(string: "https://moifort.github.io/vinarium/")!
 }
 
 private struct BenefitRow: View {

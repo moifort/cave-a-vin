@@ -31,6 +31,9 @@ Pas de publicité, pas de traçage. Vos données restent les vôtres et sont exp
 
 Connectez-vous en un geste avec Sign in with Apple et commencez à bâtir votre cave.
 
+Conditions d'utilisation : https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Politique de confidentialité : https://moifort.github.io/vinarium/
+
 ## Mots-clés (≤ 100 caractères, séparés par des virgules)
 cave,vin,œnologie,dégustation,sommelier,millésime,bouteille,cellier,collection,scanner,cépage
 

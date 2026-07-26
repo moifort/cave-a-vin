@@ -41,6 +41,9 @@ No ads, no tracking. Your data stays yours and can be exported at any time.
 
 Sign in with a single tap using Sign in with Apple and start building your cellar.
 
+Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Privacy Policy: https://moifort.github.io/vinarium/
+
 ---
 
 ## Deutsch (de-DE)
@@ -72,6 +75,9 @@ ACHTUNG FÜR DEINE PRIVATSPHÄRE
 Keine Werbung, kein Tracking. Deine Daten bleiben deine und sind jederzeit exportierbar.
 
 Melde dich mit einem Fingertipp über „Mit Apple anmelden“ an und beginne, deinen Keller aufzubauen.
+
+Nutzungsbedingungen: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Datenschutzrichtlinie: https://moifort.github.io/vinarium/
 
 ---
 
@@ -105,6 +111,9 @@ Sin publicidad, sin seguimiento. Tus datos siguen siendo tuyos y puedes exportar
 
 Inicia sesión con un toque usando Iniciar sesión con Apple y empieza a construir tu bodega.
 
+Términos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidad: https://moifort.github.io/vinarium/
+
 ---
 
 ## Italiano (it-IT)
@@ -136,6 +145,9 @@ RISPETTO DELLA TUA PRIVACY
 Nessuna pubblicità, nessun tracciamento. I tuoi dati restano tuoi e sono esportabili in qualsiasi momento.
 
 Accedi con un tocco usando Accedi con Apple e inizia a costruire la tua cantina.
+
+Termini di utilizzo: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Informativa sulla privacy: https://moifort.github.io/vinarium/
 
 ---
 
@@ -169,6 +181,9 @@ Sem publicidade, sem rastreio. Os seus dados continuam a ser seus e podem ser ex
 
 Inicie sessão com um toque usando Iniciar sessão com a Apple e comece a construir a sua adega.
 
+Termos de utilização: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidade: https://moifort.github.io/vinarium/
+
 ---
 
 ## 日本語 (ja)
@@ -200,3 +215,6 @@ Vinariumは、ポケットの中のワインセラーです。
 広告なし、トラッキングなし。あなたのデータはあなたのもので、いつでもエクスポートできます。
 
 「Appleでサインイン」でワンタップでログインし、セラーづくりを始めましょう。
+
+利用規約: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+プライバシーポリシー: https://moifort.github.io/vinarium/

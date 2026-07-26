@@ -32,6 +32,17 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 
 - **Description / keywords / support URL** (your GitHub repo URL is fine).
 - **Privacy Policy URL**: `https://moifort.github.io/vinarium/`.
+- **Terms of Use (EULA) link in every description** — guideline 3.1.2 refuses any submission
+  selling auto-renewable subscriptions whose *metadata* carries no functional link to the terms,
+  and the check is automated: 1.4 was refused on it on 2026-07-22, with the subscription group
+  and both products left stuck behind the refused version. The listing files
+  ([APP_STORE_LISTING.md](./APP_STORE_LISTING.md) for French,
+  [APP_STORE_LISTING.localized.md](./APP_STORE_LISTING.localized.md) for the six other locales)
+  end every description with Apple's standard EULA and the privacy policy, in the locale's own
+  language. Paste them into each locale in App Store Connect: nothing pushes this listing
+  automatically. The same two links are shown on the paywall (`SubscriptionLinks` in
+  `PremiumSheet.swift`) — App Review wants them reachable from the purchase too, and both must
+  actually answer.
 - **App Privacy** questionnaire — answers to select:
   - Data collected & **linked to the user**:
     - *Contact info* → Name, Email (only if the user shares them via Sign in with Apple) — purpose **App Functionality**.
