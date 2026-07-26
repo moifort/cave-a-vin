@@ -31,7 +31,7 @@ struct WineGlassLoader: View {
     private static let footY: CGFloat = 99
     private static let wineLevelY: CGFloat = 44
     /// SF-like uniform stroke weight, in design units.
-    private static let strokeWidth: CGFloat = 5
+    private static let strokeWidth: CGFloat = 1.5
 
     var body: some View {
         TimelineView(.animation(paused: reduceMotion)) { context in
