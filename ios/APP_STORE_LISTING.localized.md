@@ -13,6 +13,11 @@ in en-US because another app holds it there, so the English stores list the app 
 Wine terminology in the translations should get a native review pass before
 submission.
 
+`en-GB`, `pt-BR` and `es-MX` are still undeclared and those stores fall back to
+the French listing. They are queued for 1.5, together with the rule that a locale
+can only be added while the version is not in review — see Phase 2 of
+[APP_STORE_SUBMISSION.md](./APP_STORE_SUBMISSION.md).
+
 ---
 
 ## English (en-US / en-GB)

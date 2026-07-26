@@ -43,6 +43,28 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
   automatically. The same two links are shown on the paywall (`SubscriptionLinks` in
   `PremiumSheet.swift`) — App Review wants them reachable from the purchase too, and both must
   actually answer.
+- **Locales** — seven are declared since 1.4: `fr-FR` (primary), `en-US`, `de-DE`, `es-ES`,
+  `it`, `pt-PT`, `ja`. Content lives in the two listing files above and matches what is
+  published byte for byte; re-check with a SHA-256 of the description on both sides rather
+  than by eye. Three rules learned the hard way on 2026-07-26:
+  - **A locale can only be added while the version is *not* in review.** Editing existing
+    metadata works in `WAITING_FOR_REVIEW`, creating a localization answers 409 `Cannot create
+    localization after the app version has been submitted for review`. Adding one means pulling
+    the version from review and resubmitting — plan locale work *before* submitting.
+  - **Creating the `appInfoLocalization` auto-creates the matching
+    `appStoreVersionLocalization`.** Create the first, then PATCH the second; a POST on it
+    answers 409 `already exists`.
+  - **Screenshots are shared across every language** (ASC says so on the version page), so a new
+    locale needs no upload of its own.
+- **App name in English is `Vinarium Wine Cellar`**, not `Vinarium`: Apple refuses the bare name
+  in `en-US` because another app holds it there (409 `the app name is already being used`).
+- **Pending for 1.5** — `en-GB`, `pt-BR` and `es-MX` are still undeclared, so those stores fall
+  back to the primary language and show the *French* listing. Add them at the start of the 1.5
+  cycle, before the build is submitted: `en-GB` from the English content (adjust `organize` →
+  `organise`, and the name conflict likely applies there too), `pt-BR` from the Portuguese one
+  (Brazilian wording: `você`, `tela`, `assinatura`), `es-MX` from the Spanish one. The
+  translations have never had a native review pass either — the note at the top of
+  [APP_STORE_LISTING.localized.md](./APP_STORE_LISTING.localized.md) still stands.
 - **App Privacy** questionnaire — answers to select:
   - Data collected & **linked to the user**:
     - *Contact info* → Name, Email (only if the user shares them via Sign in with Apple) — purpose **App Functionality**.
