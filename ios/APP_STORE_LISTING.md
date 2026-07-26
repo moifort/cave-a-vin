@@ -31,6 +31,11 @@ Pas de publicité, pas de traçage. Vos données restent les vôtres et sont exp
 
 Connectez-vous en un geste avec Sign in with Apple et commencez à bâtir votre cave.
 
+VINARIUM PREMIUM
+La cave, le journal et le partage en foyer sont gratuits et illimités. Seul le scan d'étiquette est compté : 5 scans par mois. Premium lève cette limite et ajoute sur chaque bouteille scannée l'estimation du prix, la période de garde et la région.
+
+Premium mensuel : 2,99 €/mois. Premium annuel : 24,99 €/an, après 7 jours d'essai gratuit. L'abonnement se renouvelle automatiquement sauf résiliation au moins 24 h avant la fin de la période en cours. La gestion et la résiliation se font dans les réglages du compte App Store.
+
 Conditions d'utilisation : https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Politique de confidentialité : https://moifort.github.io/vinarium/
 

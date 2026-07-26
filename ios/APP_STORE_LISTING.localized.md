@@ -41,6 +41,11 @@ No ads, no tracking. Your data stays yours and can be exported at any time.
 
 Sign in with a single tap using Sign in with Apple and start building your cellar.
 
+VINARIUM PREMIUM
+The cellar, the journal and household sharing are free and unlimited. Only the label scan is metered: five scans a month. Premium lifts that limit and adds the estimated price, the drinking window and the region to every scanned bottle.
+
+Premium comes as a monthly plan or a yearly plan that opens on a 7-day free trial; both prices are shown in the App Store. The subscription renews automatically unless it is cancelled at least 24 hours before the end of the current period. It is managed and cancelled from the App Store account settings.
+
 Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Privacy Policy: https://moifort.github.io/vinarium/
 
@@ -75,6 +80,11 @@ ACHTUNG FÜR DEINE PRIVATSPHÄRE
 Keine Werbung, kein Tracking. Deine Daten bleiben deine und sind jederzeit exportierbar.
 
 Melde dich mit einem Fingertipp über „Mit Apple anmelden“ an und beginne, deinen Keller aufzubauen.
+
+VINARIUM PREMIUM
+Keller, Journal und Haushaltsfreigabe sind kostenlos und unbegrenzt. Gezählt wird nur der Etikettenscan: fünf Scans pro Monat. Premium hebt diese Grenze auf und ergänzt jede gescannte Flasche um Preisschätzung, Trinkreife und Region.
+
+Premium monatlich: 2,99 €/Monat. Premium jährlich: 24,99 €/Jahr, nach 7 Tagen kostenloser Testphase. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende der laufenden Periode gekündigt wird. Verwaltung und Kündigung erfolgen in den Einstellungen des App-Store-Accounts.
 
 Nutzungsbedingungen: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Datenschutzrichtlinie: https://moifort.github.io/vinarium/
@@ -111,6 +121,11 @@ Sin publicidad, sin seguimiento. Tus datos siguen siendo tuyos y puedes exportar
 
 Inicia sesión con un toque usando Iniciar sesión con Apple y empieza a construir tu bodega.
 
+VINARIUM PREMIUM
+La bodega, el diario y el uso compartido en el hogar son gratuitos e ilimitados. Solo se cuenta el escaneo de etiquetas: cinco escaneos al mes. Premium elimina ese límite y añade a cada botella escaneada el precio estimado, la ventana de consumo y la región.
+
+Premium mensual: 2,99 €/mes. Premium anual: 24,99 €/año, tras 7 días de prueba gratuita. La suscripción se renueva automáticamente salvo cancelación al menos 24 horas antes del final del periodo en curso. Se gestiona y se cancela desde los ajustes de la cuenta de App Store.
+
 Términos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Política de privacidad: https://moifort.github.io/vinarium/
 
@@ -145,6 +160,11 @@ RISPETTO DELLA TUA PRIVACY
 Nessuna pubblicità, nessun tracciamento. I tuoi dati restano tuoi e sono esportabili in qualsiasi momento.
 
 Accedi con un tocco usando Accedi con Apple e inizia a costruire la tua cantina.
+
+VINARIUM PREMIUM
+La cantina, il diario e la condivisione in famiglia sono gratuiti e illimitati. Viene conteggiata solo la scansione delle etichette: cinque scansioni al mese. Premium elimina questo limite e aggiunge a ogni bottiglia scansionata il prezzo stimato, la finestra di consumo e la regione.
+
+Premium mensile: 2,99 €/mese. Premium annuale: 24,99 €/anno, dopo 7 giorni di prova gratuita. L'abbonamento si rinnova automaticamente salvo disdetta almeno 24 ore prima della fine del periodo in corso. Si gestisce e si disdice dalle impostazioni dell'account App Store.
 
 Termini di utilizzo: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Informativa sulla privacy: https://moifort.github.io/vinarium/
@@ -181,6 +201,11 @@ Sem publicidade, sem rastreio. Os seus dados continuam a ser seus e podem ser ex
 
 Inicie sessão com um toque usando Iniciar sessão com a Apple e comece a construir a sua adega.
 
+VINARIUM PREMIUM
+A adega, o diário e a partilha no agregado são gratuitos e ilimitados. Apenas a digitalização de rótulos é contabilizada: cinco digitalizações por mês. O Premium levanta esse limite e acrescenta a cada garrafa digitalizada o preço estimado, a janela de consumo e a região.
+
+Premium mensal: 2,99 €/mês. Premium anual: 24,99 €/ano, após 7 dias de teste gratuito. A subscrição renova-se automaticamente salvo cancelamento pelo menos 24 horas antes do fim do período em curso. É gerida e cancelada nas definições da conta App Store.
+
 Termos de utilização: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Política de privacidade: https://moifort.github.io/vinarium/
 
@@ -215,6 +240,11 @@ Vinariumは、ポケットの中のワインセラーです。
 広告なし、トラッキングなし。あなたのデータはあなたのもので、いつでもエクスポートできます。
 
 「Appleでサインイン」でワンタップでログインし、セラーづくりを始めましょう。
+
+VINARIUM PREMIUM
+セラー、履歴、世帯での共有は無料で無制限です。カウントされるのはラベルスキャンのみで、月に5回まで無料です。Premiumはこの上限をなくし、スキャンした各ボトルに推定価格、飲み頃、地域を追加します。
+
+Premiumには月額プランと、7日間の無料トライアルから始まる年額プランがあります。価格はApp Storeに表示されます。期間終了の24時間前までに解約しない限り、サブスクリプションは自動更新されます。管理と解約はApp Storeアカウントの設定から行えます。
 
 利用規約: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 プライバシーポリシー: https://moifort.github.io/vinarium/
