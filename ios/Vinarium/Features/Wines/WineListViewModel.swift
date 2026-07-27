@@ -245,7 +245,7 @@ final class WineListViewModel {
     }
 
     /// Groupe sans personne quand le tri « Par personne » est actif.
-    private static let unnamedPersonLabel = "Sans nom"
+    private static var unnamedPersonLabel: String { String(localized: "Sans nom") }
 
     private static func buildGroupedWines(
         wines: [Wine],
@@ -270,10 +270,10 @@ final class WineListViewModel {
                 let label = raw.prefix(1).uppercased() + raw.dropFirst()
                 return (Double(year * 100 + month), label, wine)
             case .vintage:
-                let label = wine.vintage.map { "\($0)" } ?? "Sans millésime"
+                let label = wine.vintage.map { "\($0)" } ?? String(localized: "Sans millésime")
                 return (Double(wine.vintage ?? 0), label, wine)
             case .region:
-                return (0, wine.region ?? "Sans région", wine)
+                return (0, wine.region ?? String(localized: "Sans région"), wine)
             case .color:
                 if let color = wine.color {
                     let order = WineColor.allCases.firstIndex(of: color) ?? 0

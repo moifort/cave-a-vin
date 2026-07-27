@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AsyncToolbarButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let systemImage: String
     var role: ButtonRole? = nil
     let action: () async -> Void

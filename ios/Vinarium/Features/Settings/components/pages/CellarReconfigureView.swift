@@ -84,8 +84,14 @@ struct CellarReconfigureView: View {
 
     private var blockedMessage: String {
         let count = viewModel.blockedCount ?? 0
-        let bottles = count == 1 ? "1 bouteille est placée" : "\(count) bouteilles sont placées"
-        return "\(bottles) au-delà des nouvelles dimensions. Déplacez-les ou retirez-les d'abord."
+        let bottles =
+            count == 1
+            ? String(localized: "1 bouteille est placée")
+            : String(localized: "\(count) bouteilles sont placées")
+        return String(
+            localized:
+                "\(bottles) au-delà des nouvelles dimensions. Déplacez-les ou retirez-les d'abord."
+        )
     }
 
     private func save() {

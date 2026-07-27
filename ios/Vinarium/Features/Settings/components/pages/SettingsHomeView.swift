@@ -122,11 +122,11 @@ struct SettingsHomeView: View {
     private var subscriptionSubtitle: String? {
         guard let quota = subscriptions.quota else { return nil }
         if quota.isPremium {
-            return "Scans illimités"
+            return String(localized: "Scans illimités")
         }
         return quota.remaining == 0
-            ? "Aucun scan restant ce mois-ci"
-            : "\(quota.remaining) scan\(quota.remaining > 1 ? "s" : "") restant\(quota.remaining > 1 ? "s" : "") ce mois-ci"
+            ? String(localized: "Aucun scan restant ce mois-ci")
+            : String(localized: "\(quota.remaining) scans restants ce mois-ci")
     }
 
     private var appVersion: String {

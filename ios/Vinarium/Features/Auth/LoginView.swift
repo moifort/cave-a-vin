@@ -53,7 +53,7 @@ struct LoginView: View {
                 let tokenData = credential.identityToken,
                 let token = String(data: tokenData, encoding: .utf8)
             else {
-                error = "Apple n'a pas renvoyé de jeton."
+                error = String(localized: "Apple n'a pas renvoyé de jeton.")
                 return
             }
             let oauth = OAuthProvider.appleCredential(

@@ -171,7 +171,7 @@ enum SubscriptionLinks {
 
 private struct BenefitRow: View {
     let icon: String
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         HStack(spacing: 12) {
@@ -245,7 +245,9 @@ private struct OfferButton: View {
     private var introductoryOffer: String? {
         guard let offer = product.subscription?.introductoryOffer, offer.paymentMode == .freeTrial
         else { return nil }
-        return "\(offer.period.value) \(offer.period.unit == .day ? "jours" : "mois") offerts"
+        return offer.period.unit == .day
+            ? String(localized: "\(offer.period.value) jours offerts")
+            : String(localized: "\(offer.period.value) mois offerts")
     }
 
     /// The saving as a tinted capsule next to the plan's name, `-30 %`.

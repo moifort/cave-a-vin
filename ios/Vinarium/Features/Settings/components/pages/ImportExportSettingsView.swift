@@ -58,7 +58,7 @@ struct ImportExportSettingsView: View {
             defaultFilename: defaultFilename
         ) { result in
             switch result {
-            case .success: status = "Export terminé."
+            case .success: status = String(localized: "Export terminé.")
             case .failure(let err): error = err.localizedDescription
             }
             pendingExport = nil
@@ -99,7 +99,7 @@ struct ImportExportSettingsView: View {
         do {
             let payload = try await SettingsAPI.exportData()
             guard let data = payload.data(using: .utf8) else {
-                error = "Encodage invalide."
+                error = String(localized: "Encodage invalide.")
                 return
             }
             pendingExport = ExportDocument(data: data)
@@ -119,11 +119,11 @@ struct ImportExportSettingsView: View {
         do {
             let raw = try Data(contentsOf: url)
             guard let payload = String(data: raw, encoding: .utf8) else {
-                error = "Fichier illisible."
+                error = String(localized: "Fichier illisible.")
                 return
             }
             let summary = try await SettingsAPI.importData(payload: payload)
-            status = "Import terminé : \(summary.totalRecords) éléments restaurés."
+            status = String(localized: "Import terminé : \(summary.totalRecords) éléments restaurés.")
             NotificationCenter.default.post(name: .vinariumDataDidReload, object: nil)
         } catch {
             self.error = error.localizedDescription

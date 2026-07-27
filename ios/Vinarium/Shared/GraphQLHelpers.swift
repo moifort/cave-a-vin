@@ -79,9 +79,9 @@ enum APIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Réponse invalide du serveur"
+            return String(localized: "Réponse invalide du serveur")
         case .httpError(let code):
-            return "Erreur serveur (\(code))"
+            return String(localized: "Erreur serveur (\(code))")
         case .graphQL(let messages), .domain(_, let messages):
             return messages.joined(separator: " — ")
         }

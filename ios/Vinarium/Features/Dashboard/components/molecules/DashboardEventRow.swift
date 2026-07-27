@@ -3,7 +3,7 @@ import SwiftUI
 struct DashboardEventRow: View {
     let isEntry: Bool
     let wineName: String
-    let label: String
+    let label: LocalizedStringKey
     let position: String
     /// Le membre qui a fait le mouvement, nil quand c'est soi-même.
     var memberName: String? = nil

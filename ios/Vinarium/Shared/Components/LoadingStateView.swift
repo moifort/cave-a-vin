@@ -5,7 +5,7 @@ import SwiftUI
 /// not ready yet, instead of a bare `ProgressView` pinned inside a list row;
 /// small inline waits (buttons, toolbar items, rows) keep the standard spinner.
 struct LoadingStateView: View {
-    var label: String = "Chargement..."
+    var label: LocalizedStringKey = "Chargement..."
 
     var body: some View {
         VStack(spacing: 20) {

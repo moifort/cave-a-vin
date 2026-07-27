@@ -4,7 +4,7 @@ struct DimensionsPage: View {
     @Binding var rows: Int
     @Binding var cols: Int
     @Binding var zones: Int
-    var nextTitle: String = "Continuer"
+    var nextTitle: LocalizedStringKey = "Continuer"
     var isBusy = false
     var onNext: () -> Void
     var onBack: () -> Void

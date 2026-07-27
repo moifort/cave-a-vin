@@ -5,7 +5,7 @@ import SwiftUI
 /// sinon le spinner tournerait pour toujours sans nouvelle tentative.
 struct LoadMoreRow: View {
     let failed: Bool
-    let loadingLabel: String
+    let loadingLabel: LocalizedStringKey
     let onLoadMore: () async -> Void
 
     var body: some View {

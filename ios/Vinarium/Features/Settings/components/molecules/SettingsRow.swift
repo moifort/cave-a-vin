@@ -2,7 +2,9 @@ import SwiftUI
 
 struct SettingsRow: View {
     let icon: String
-    let title: String
+    let title: LocalizedStringKey
+    /// Free text under the title: a value read at runtime (email, version, quota),
+    /// so it is localized by its caller rather than looked up here.
     let subtitle: String?
     let tint: Color
 
@@ -11,7 +13,12 @@ struct SettingsRow: View {
     @ScaledMetric(relativeTo: .body) private var iconBadgeSize: CGFloat = 28
     private var glyphSize: CGFloat { iconBadgeSize * 0.5 }
 
-    init(icon: String, title: String, subtitle: String? = nil, tint: Color = .accentColor) {
+    init(
+        icon: String,
+        title: LocalizedStringKey,
+        subtitle: String? = nil,
+        tint: Color = .accentColor
+    ) {
         self.icon = icon
         self.title = title
         self.subtitle = subtitle
@@ -23,7 +30,7 @@ struct SettingsRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                 if let subtitle {
-                    Text(subtitle)
+                    Text(verbatim: subtitle)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

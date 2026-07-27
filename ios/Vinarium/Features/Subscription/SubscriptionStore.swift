@@ -71,7 +71,7 @@ final class SubscriptionStore {
     @discardableResult
     func purchase(_ product: Product) async -> Bool {
         guard let appAccountToken else {
-            errorMessage = "Impossible de préparer l’achat. Réessayez dans un instant."
+            errorMessage = String(localized: "Impossible de préparer l’achat. Réessayez dans un instant.")
             return false
         }
         isPurchasing = true
@@ -87,14 +87,14 @@ final class SubscriptionStore {
                 // Premium, saying nothing is the one thing we must not do: the
                 // subscriber has paid and has nothing to show for it.
                 if !granted {
-                    errorMessage = "L’achat a bien été enregistré par Apple, mais nous n’avons pas pu l’activer. Rouvrez l’app dans un instant : il sera repris automatiquement. Si rien ne change, touchez « Restaurer mes achats »."
+                    errorMessage = String(localized: "L’achat a bien été enregistré par Apple, mais nous n’avons pas pu l’activer. Rouvrez l’app dans un instant : il sera repris automatiquement. Si rien ne change, touchez « Restaurer mes achats ».")
                 }
                 if granted { await refreshQuota() }
                 return granted
             case .pending:
                 // Ask-to-buy and other deferred approvals: nothing to do but wait
                 // for Transaction.updates to fire.
-                errorMessage = "L’achat est en attente d’approbation."
+                errorMessage = String(localized: "L’achat est en attente d’approbation.")
                 return false
             case .userCancelled:
                 return false
@@ -119,7 +119,7 @@ final class SubscriptionStore {
             if granted {
                 await refreshQuota()
             } else {
-                errorMessage = "Aucun abonnement à restaurer sur ce compte."
+                errorMessage = String(localized: "Aucun abonnement à restaurer sur ce compte.")
             }
         } catch {
             errorMessage = reportError(error)

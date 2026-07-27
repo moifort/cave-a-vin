@@ -21,18 +21,20 @@ enum InvitationLink {
         URL(string: "https://\(host)/rejoindre/\(code)")!
     }
 
-    static let mailSubject = "Rejoins ma cave sur Vinarium"
+    static var mailSubject: String { String(localized: "Rejoins ma cave sur Vinarium") }
 
     /// The invitation body used for the mail draft, carrying both the tap-to-join
     /// link and the raw code for anyone who prefers to type it in the app.
     static func mailBody(code: String) -> String {
-        """
-        Rejoins ma cave sur Vinarium.
+        String(
+            localized: """
+                Rejoins ma cave sur Vinarium.
 
-        Ouvre ce lien depuis ton iPhone :
-        \(url(code: code).absoluteString)
+                Ouvre ce lien depuis ton iPhone :
+                \(url(code: code).absoluteString)
 
-        Ou saisis ce code dans l'app : \(code)
-        """
+                Ou saisis ce code dans l'app : \(code)
+                """
+        )
     }
 }

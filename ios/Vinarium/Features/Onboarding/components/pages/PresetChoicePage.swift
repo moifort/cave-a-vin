@@ -8,7 +8,7 @@ struct PresetChoicePage: View {
     /// Leading button. Defaults to a "Retour" back-chevron (onboarding, where
     /// onBack navigates to the previous step); a sheet-first step passes a
     /// "Fermer" xmark so the icon matches its dismiss behavior.
-    var backTitle: String = "Retour"
+    var backTitle: LocalizedStringKey = "Retour"
     var backSystemImage: String = "chevron.left"
     var backRole: ButtonRole? = nil
 
@@ -147,8 +147,10 @@ struct PresetChoicePage: View {
     }
 
     private func subtitle(for preset: CellarPreset) -> String {
-        let zones = preset.zones == 1 ? "1 zone" : "\(preset.zones) zones"
-        return "\(preset.bottles) bouteilles · \(zones)"
+        let zones =
+            preset.zones == 1
+            ? String(localized: "1 zone") : String(localized: "\(preset.zones) zones")
+        return String(localized: "\(preset.bottles) bouteilles · \(zones)")
     }
 
     private func normalized(_ string: String) -> String {

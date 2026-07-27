@@ -64,25 +64,37 @@ final class SearchViewModel {
     /// Une section par nature de résultat. Un vin matché sur un de ses attributs
     /// (nom, producteur, région…) va dans sa section de statut (En cave / Déjà bus /
     /// Autres) ; un vin matché uniquement par une personne va dans la section de
-    /// cette relation (Cadeaux / Conseillés / Dégustés avec).
-    private static let sectionOrder = [
-        "En cave", "Déjà bus", "Autres vins", "Cadeaux", "Conseillés", "Dégustés avec",
-    ]
+    /// cette relation (Cadeaux / Conseillés / Dégustés avec). L'ordre de
+    /// déclaration est l'ordre d'affichage.
+    private enum Section: CaseIterable {
+        case inCellar, consumed, other, gifted, recommended, tastedWith
+
+        var label: String {
+            switch self {
+            case .inCellar: String(localized: "En cave")
+            case .consumed: String(localized: "Déjà bus")
+            case .other: String(localized: "Autres vins")
+            case .gifted: String(localized: "Cadeaux")
+            case .recommended: String(localized: "Conseillés")
+            case .tastedWith: String(localized: "Dégustés avec")
+            }
+        }
+    }
 
     private static func sections(from hits: [SearchHit]) -> [WineListContent.Group] {
-        var buckets: [String: [WineListContent.Item]] = [:]
+        var buckets: [Section: [WineListContent.Item]] = [:]
         for hit in hits {
             buckets[section(for: hit), default: []].append(item(for: hit))
         }
         // Ordre fixe des sections ; l'ordre de pertinence du serveur est préservé
         // à l'intérieur de chaque section.
-        return sectionOrder.compactMap { label in
-            guard let items = buckets[label], !items.isEmpty else { return nil }
-            return WineListContent.Group(label: label, items: items)
+        return Section.allCases.compactMap { section in
+            guard let items = buckets[section], !items.isEmpty else { return nil }
+            return WineListContent.Group(label: section.label, items: items)
         }
     }
 
-    private static func section(for hit: SearchHit) -> String {
+    private static func section(for hit: SearchHit) -> Section {
         let personFields: Set<SearchMatchedField> = [
             .giftedBy, .giftRecipient, .recommender, .tastingContact,
         ]
@@ -90,14 +102,14 @@ final class SearchViewModel {
             !hit.matchedFields.isEmpty && hit.matchedFields.allSatisfy { personFields.contains($0) }
         if matchedOnlyPerson {
             if hit.matchedFields.contains(.giftedBy) || hit.matchedFields.contains(.giftRecipient) {
-                return "Cadeaux"
+                return .gifted
             }
-            if hit.matchedFields.contains(.recommender) { return "Conseillés" }
-            return "Dégustés avec"
+            if hit.matchedFields.contains(.recommender) { return .recommended }
+            return .tastedWith
         }
-        if hit.wine.isInCellar { return "En cave" }
-        if hit.wine.consumedDate != nil { return "Déjà bus" }
-        return "Autres vins"
+        if hit.wine.isInCellar { return .inCellar }
+        if hit.wine.consumedDate != nil { return .consumed }
+        return .other
     }
 
     private static func item(for hit: SearchHit) -> WineListContent.Item {

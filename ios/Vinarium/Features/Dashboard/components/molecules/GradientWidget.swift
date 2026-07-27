@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct GradientWidget: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
     var denominator: String? = nil
-    let subtitle: String
+    let subtitle: LocalizedStringKey
     let gradient: [Color]
     var backgroundImage: String?
 
@@ -18,10 +18,10 @@ struct GradientWidget: View {
             Spacer()
 
             HStack(alignment: .firstTextBaseline, spacing: 0) {
-                Text(value)
+                Text(verbatim: value)
                     .font(.largeTitle.bold())
                 if let denominator {
-                    Text(denominator)
+                    Text(verbatim: denominator)
                         .font(.title3.bold())
                         .foregroundStyle(.white.opacity(0.85))
                 }

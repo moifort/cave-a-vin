@@ -20,7 +20,11 @@ struct ChangelogDetailView: View {
                         icon: "calendar"
                     )
                 } else {
-                    LabeledInfoRow(title: "Date", value: "Non publiée", icon: "calendar")
+                    LabeledInfoRow(
+                        title: "Date",
+                        value: String(localized: "Non publiée"),
+                        icon: "calendar"
+                    )
                 }
             }
 

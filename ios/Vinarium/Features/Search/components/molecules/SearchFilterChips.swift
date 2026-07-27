@@ -17,18 +17,22 @@ struct SearchFilterChips: View {
                     ) { toggle(color) }
                 }
 
-                FilterChip(label: "J'aime", systemImage: "heart.fill", isOn: filters.favorite) {
+                FilterChip(
+                    label: String(localized: "J'aime"), systemImage: "heart.fill",
+                    isOn: filters.favorite
+                ) {
                     filters.favorite.toggle()
                 }
-                FilterChip(label: "En cave", systemImage: "cabinet",
+                FilterChip(label: String(localized: "En cave"), systemImage: "cabinet",
                            isOn: filters.status == .inCellar) {
                     filters.status = filters.status == .inCellar ? .all : .inCellar
                 }
-                FilterChip(label: "Bu", systemImage: "wineglass",
+                FilterChip(label: String(localized: "Bu"), systemImage: "wineglass",
                            isOn: filters.status == .consumed) {
                     filters.status = filters.status == .consumed ? .all : .consumed
                 }
-                FilterChip(label: "Cadeaux", systemImage: "gift", isOn: filters.gifted) {
+                FilterChip(label: String(localized: "Cadeaux"), systemImage: "gift",
+                           isOn: filters.gifted) {
                     filters.gifted.toggle()
                 }
 
