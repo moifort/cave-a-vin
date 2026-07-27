@@ -2,13 +2,14 @@ import type { WriteBatch } from 'firebase-admin/firestore'
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId } from '~/domain/beverage/types'
 import * as repository from '~/domain/cellar/infrastructure/repository'
-import type {
-  CellarBottle,
-  CellarCol,
-  CellarCols,
-  CellarRow,
-  CellarRows,
-  CellarZones,
+import {
+  type CellarBottle,
+  type CellarCol,
+  type CellarCols,
+  type CellarRow,
+  type CellarRows,
+  type CellarZones,
+  DEFAULT_CELLAR_SIZE,
 } from '~/domain/cellar/types'
 import { HouseholdQuery } from '~/domain/household/query'
 import { JournalCommand } from '~/domain/journal/command'
@@ -23,6 +24,28 @@ export const soloCellarConfigKey = (userId: UserId) => `usr_${userId}`
 export const cellarConfigKey = async (userId: UserId) => {
   const membership = await HouseholdQuery.membershipOf(userId)
   return membership ? `hh_${membership.householdId}` : soloCellarConfigKey(userId)
+}
+
+// The grid the app draws for this cellar scope, falling back to the default size
+// until onboarding sets it. `zones` defaults to 1 for configs written before the
+// field existed. Lives here rather than in the query so the placement guards can
+// read it without importing back into CellarQuery.
+export const cellarGrid = async (userId: UserId) => {
+  const stored = await repository.findConfig(await cellarConfigKey(userId))
+  if (!stored) return DEFAULT_CELLAR_SIZE
+  return {
+    rows: stored.rows,
+    cols: stored.cols,
+    zones: stored.zones ?? DEFAULT_CELLAR_SIZE.zones,
+  }
+}
+
+// Positions are 0-based, so the last slot of a rows x cols grid is
+// (rows - 1, cols - 1). A bottle written past that is unreachable: no screen
+// draws the slot, and it would later block a resize as out of bounds.
+const outsideGrid = async (userId: UserId, row: CellarRow, col: CellarCol) => {
+  const { rows, cols } = await cellarGrid(userId)
+  return row >= rows || col >= cols
 }
 
 export namespace CellarCommand {
@@ -71,6 +94,8 @@ export namespace CellarCommand {
     // beverage would write a second, mis-attributed bottle for it.
     if ((await BeverageQuery.byId(userId, beverageId)) === 'not-found')
       return 'not-your-beverage' as const
+
+    if (await outsideGrid(userId, row, col)) return 'out-of-grid' as const
 
     // The grid is shared: a slot filled by any household member is taken. The
     // bottle's owner stays the caller (their own wine).
@@ -121,6 +146,8 @@ export namespace CellarCommand {
     targetRow: CellarRow,
     targetCol: CellarCol,
   ) => {
+    if (await outsideGrid(actorId, targetRow, targetCol)) return 'out-of-grid' as const
+
     // Both the moved bottle and the target's occupant may belong to a housemate,
     // so both are located across the household — never a scan of the whole cellar.
     const scope = await HouseholdQuery.cellarScope(actorId)

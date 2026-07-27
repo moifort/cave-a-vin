@@ -1,15 +1,14 @@
 import { keyBy, range } from 'lodash-es'
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId } from '~/domain/beverage/types'
-import { cellarConfigKey } from '~/domain/cellar/command'
+import { cellarGrid } from '~/domain/cellar/command'
 import * as repository from '~/domain/cellar/infrastructure/repository'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
-import {
-  type CellarBottle,
-  type CellarBottleOwner,
-  type CellarBottleView,
-  DEFAULT_CELLAR_SIZE,
-  type OwnedBeverage,
+import type {
+  CellarBottle,
+  CellarBottleOwner,
+  CellarBottleView,
+  OwnedBeverage,
 } from '~/domain/cellar/types'
 import { HouseholdQuery } from '~/domain/household/query'
 import type { CellarScope } from '~/domain/household/types'
@@ -36,19 +35,10 @@ const ownerOf = (bottle: CellarBottle, viewerId: UserId, scope: CellarScope): Ce
 
 export namespace CellarQuery {
   // The configured grid dimensions for the caller's cellar scope, falling back to
-  // the default size until onboarding sets them. `zones` defaults to 1 for configs
-  // written before the field existed.
+  // the default size until onboarding sets them.
   export const config = async (
     userId: UserId,
-  ): Promise<{ rows: number; cols: number; zones: number }> => {
-    const stored = await repository.findConfig(await cellarConfigKey(userId))
-    if (!stored) return DEFAULT_CELLAR_SIZE
-    return {
-      rows: stored.rows,
-      cols: stored.cols,
-      zones: stored.zones ?? DEFAULT_CELLAR_SIZE.zones,
-    }
-  }
+  ): Promise<{ rows: number; cols: number; zones: number }> => cellarGrid(userId)
 
   export const info = async (userId: UserId) => {
     const [scope, { rows, cols, zones }] = await Promise.all([

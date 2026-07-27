@@ -190,6 +190,17 @@ describe('CellarCommand.placeBeverage (household)', () => {
     expect(fake.snapshot('cellar').get(`${userId}_w1`)).toMatchObject({ row: 0, col: 1 })
   })
 
+  test('refuses a slot past the last column of the grid, writing nothing', async () => {
+    seedHousehold()
+    seedBeverage(userId, 'w1')
+
+    // The default grid is 6x8, so 0-based column 8 is one past its last slot.
+    const result = await CellarCommand.placeBeverage(userId, wine('w1'), row(0), col(8))
+
+    expect(result).toBe('out-of-grid')
+    expect(fake.snapshot('cellar').get(`${userId}_w1`)).toBeUndefined()
+  })
+
   test('refuses to place a housemate’s beverage, writing nothing', async () => {
     seedHousehold()
     seedBeverage('marie', 'w2')
@@ -235,6 +246,17 @@ describe('CellarCommand.moveBottle (household)', () => {
     const w2Entries = journal.filter((entry) => entry.beverageId === 'w2')
     expect(w1Entries.every((entry) => entry.userId === userId)).toBe(true)
     expect(w2Entries.every((entry) => entry.userId === 'marie')).toBe(true)
+  })
+
+  test('refuses a destination past the last row of the grid, leaving the bottle put', async () => {
+    fake.seed('cellar-configs', `usr_${userId}`, { rows: 6, cols: 8, zones: 1 })
+    fake.seed('cellar', `${userId}_w1`, bottle('w1', 0, 0))
+
+    const result = await CellarCommand.moveBottle(userId, wine('w1'), row(6), col(0))
+
+    expect(result).toBe('out-of-grid')
+    expect(fake.snapshot('cellar').get(`${userId}_w1`)).toMatchObject({ row: 0, col: 0 })
+    expect(fake.snapshot('journal').size).toBe(0)
   })
 })
 

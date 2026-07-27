@@ -40,6 +40,7 @@ builder.mutationField('placeBottle', (t) =>
         .with('position-occupied', () =>
           domainError('POSITION_OCCUPIED', 'Cellar position already occupied'),
         )
+        .with('out-of-grid', () => badUserInput('Cellar position outside the grid'))
         .with(P.not(P.string), bottleView)
         .exhaustive()
     },
@@ -64,6 +65,7 @@ builder.mutationField('moveBottle', (t) =>
       )
       return match(result)
         .with('not-in-cellar', () => notFound('Beverage not in cellar'))
+        .with('out-of-grid', () => badUserInput('Cellar position outside the grid'))
         .with(P.not(P.string), bottleView)
         .exhaustive()
     },
