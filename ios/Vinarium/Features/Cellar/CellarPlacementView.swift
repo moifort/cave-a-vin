@@ -87,7 +87,7 @@ struct CellarPlacementView: View {
 
         Task {
             do {
-                try await CellarAPI.place(wineId: wineId, row: rowStr, col: col)
+                try await CellarAPI.place(wineId: wineId, rowLabel: rowStr, colLabel: col)
                 onPlaced(position)
             } catch {
                 self.error = reportError(error)

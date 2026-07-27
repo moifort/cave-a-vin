@@ -105,19 +105,21 @@ enum CellarAPI {
         return CellarSuggestion(row: position.rowLabel, col: position.colLabel)
     }
 
-    static func place(wineId: String, row: String, col: Int) async throws {
-        let rowIndex = rowIndexFromLabel(row)
+    /// Place a bottle at a grid slot named the way the UI shows it: row "A", column 1.
+    static func place(wineId: String, rowLabel: String, colLabel: Int) async throws {
+        let (row, col) = gridIndices(rowLabel: rowLabel, colLabel: colLabel)
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.PlaceBottleMutation(beverageId: wineId, row: Int32(rowIndex), col: Int32(col))
+            mutation: VinariumGraphQL.PlaceBottleMutation(beverageId: wineId, row: row, col: col)
         )
     }
 
-    static func move(wineId: String, row: String, col: Int) async throws {
-        let rowIndex = rowIndexFromLabel(row)
+    /// Move a bottle to a grid slot named the way the UI shows it: row "A", column 1.
+    static func move(wineId: String, rowLabel: String, colLabel: Int) async throws {
+        let (row, col) = gridIndices(rowLabel: rowLabel, colLabel: colLabel)
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.MoveBottleMutation(beverageId: wineId, row: Int32(rowIndex), col: Int32(col))
+            mutation: VinariumGraphQL.MoveBottleMutation(beverageId: wineId, row: row, col: col)
         )
     }
 
@@ -157,10 +159,13 @@ enum CellarAPI {
     }
 }
 
-private func rowIndexFromLabel(_ label: String) -> Int {
-    // Server mirrors rowLabel = String.fromCharCode(65 + row), so "A" -> 0, "B" -> 1, ...
-    guard let scalar = label.unicodeScalars.first else { return 0 }
-    return Int(scalar.value) - 65
+/// The grid indices behind a slot's labels. Both axes are labelled for reading and
+/// stored 0-based: the server mirrors rowLabel = String.fromCharCode(65 + row) and
+/// colLabel = col + 1, so "A" -> 0 and column 1 -> 0. Converting the row alone would
+/// shift every bottle one column to the right of the slot that was picked.
+private func gridIndices(rowLabel: String, colLabel: Int) -> (row: Int32, col: Int32) {
+    let rowScalar = rowLabel.unicodeScalars.first.map { Int($0.value) - 65 } ?? 0
+    return (Int32(max(0, rowScalar)), Int32(max(0, colLabel - 1)))
 }
 
 private func mapEventType(_ graphql: GraphQLEnum<VinariumGraphQL.JournalEventType>) -> HistoryEventType {
