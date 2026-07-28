@@ -99,23 +99,27 @@ struct ScanReviewPage: View {
                 if isSaving {
                     ProgressView()
                 } else {
-                    Button("Ajouter", systemImage: "plus") { showChoices = true }
-                        .labelStyle(.iconOnly)
+                    // The dialog hangs off the button that opens it, not off the
+                    // page: that is what makes it pop out of the "+" icon the way
+                    // the detail page's removal dialog pops out of its own button.
+                    // Attached to the `Form`, it floats mid-screen instead, with a
+                    // beak pointing at nothing.
+                    ToolbarIconButton(title: "Ajouter", systemImage: "plus") { showChoices = true }
                         .accessibilityIdentifier("review-save-button")
+                        .confirmationDialog(
+                            "Ajouter cette bouteille",
+                            isPresented: $showChoices,
+                            titleVisibility: .visible
+                        ) {
+                            ForEach(ScanDestination.allCases) { choice in
+                                Button(choice.label) { Task { await submit(choice) } }
+                                    .accessibilityIdentifier(choice.accessibilityId)
+                            }
+                        } message: {
+                            Text("Que veux-tu en faire ?")
+                        }
                 }
             }
-        }
-        .confirmationDialog(
-            "Ajouter cette bouteille",
-            isPresented: $showChoices,
-            titleVisibility: .visible
-        ) {
-            ForEach(ScanDestination.allCases) { choice in
-                Button(choice.label) { Task { await submit(choice) } }
-                    .accessibilityIdentifier(choice.accessibilityId)
-            }
-        } message: {
-            Text("Que veux-tu en faire ?")
         }
         .sheet(isPresented: $showGiftedByPicker) {
             ContactPicker { name in

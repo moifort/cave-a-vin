@@ -42,8 +42,24 @@ struct ProfileSettingsView: View {
             }
 
             Section {
+                // The dialog hangs off the button that opens it, so it pops out of
+                // the row instead of floating mid-screen.
                 DeleteAccountButton(isDeleting: isDeletingAccount) {
                     showDeleteConfirmation = true
+                }
+                .confirmationDialog(
+                    "Supprimer définitivement le compte ?",
+                    isPresented: $showDeleteConfirmation,
+                    titleVisibility: .visible
+                ) {
+                    Button("Supprimer mon compte", role: .destructive) {
+                        Task { await deleteAccount() }
+                    }
+                    Button("Annuler", role: .cancel) {}
+                } message: {
+                    Text(
+                        "Toutes les données seront effacées sans possibilité de récupération. Un abonnement Premium éventuel n'est pas résilié et reste à annuler dans l'App Store."
+                    )
                 }
             } footer: {
                 if let deleteError {
@@ -58,20 +74,6 @@ struct ProfileSettingsView: View {
         .navigationTitle("Profil")
         .navigationBarTitleDisplayMode(.inline)
         .task { await loadFirstName() }
-        .confirmationDialog(
-            "Supprimer définitivement le compte ?",
-            isPresented: $showDeleteConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button("Supprimer mon compte", role: .destructive) {
-                Task { await deleteAccount() }
-            }
-            Button("Annuler", role: .cancel) {}
-        } message: {
-            Text(
-                "Toutes les données seront effacées sans possibilité de récupération. Un abonnement Premium éventuel n'est pas résilié et reste à annuler dans l'App Store."
-            )
-        }
     }
 
     @ViewBuilder
