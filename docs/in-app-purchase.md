@@ -96,9 +96,12 @@ Credential-gated; none of it is scriptable.
 6. Apply to the **Small Business Program** (App Store Connect → Business): 15 % commission instead
    of 30 % under 1 M$ a year. Every net figure in the economics doc assumes it, and enrolment is
    **not** automatic.
-7. **App Store Server Notifications V2** → set the production URL to
-   `https://<the deployed function host>/apple/notifications`, and the sandbox URL to the same.
-   Version **V2**, not V1.
+7. **App Store Server Notifications** (App Information → App Store Server Notifications) → set
+   the production URL to `https://<the deployed function host>/apple/notifications`, and the
+   sandbox URL to the same. App Store Connect no longer offers the V1/V2 choice for an app this
+   recent: the dialog takes a URL and nothing else, and what it sends is V2, which is what
+   `verifyAndDecodeNotification` reads. Both URLs were blank until 2026-07-28, so no renewal or
+   refund reached the backend on its own; the app resynced on launch and covered for it.
 8. Check the app's **numeric Apple id** (App Information → General → Apple ID) against
    `APP_STORE_ID` in `server/system/apple/types.ts`. Apple's verifier needs it to check a
    Production signature, so it lives in the code next to the bundle id: an id that had to be
