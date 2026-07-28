@@ -2,6 +2,13 @@
  *  Gemini model name, not an operational setting. */
 export const BUNDLE_ID = 'com.polyforms.vinarium.app'
 
+/** The app's numeric App Store id, which Apple's verifier needs to check a
+ *  Production signature. Printed on the store page, assigned once and never
+ *  changed, so it belongs next to the bundle id rather than in a deployment
+ *  setting: an unset setting would pin verification to Sandbox and turn away
+ *  every real purchase. */
+export const APP_STORE_ID = 6789688303
+
 /** A purchase, once Apple's signature has been checked and the payload decoded.
  *  Only the fields the subscription domain acts on; everything else in Apple's
  *  payload is dropped at this boundary. Absent dates mean "no such event": a

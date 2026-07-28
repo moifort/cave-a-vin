@@ -1,32 +1,39 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 
 // The real config reads Nitro's runtime config, which only exists in a request.
-let appleAppId: number | undefined
 let appleEnvironment: string | undefined
 mock.module('~/system/config/index', () => ({
-  config: () => ({ appleAppId, appleEnvironment }),
+  config: () => ({ appleEnvironment }),
 }))
 
-const { Apple } = await import('~/system/apple')
+const { Apple, verificationEnvironments } = await import('~/system/apple')
+const { Environment } = await import('@apple/app-store-server-library')
 
 beforeEach(() => {
-  appleAppId = undefined
   appleEnvironment = undefined
 })
 
-describe('verifying something Apple did not sign', () => {
-  // The App Store id only exists once App Store Connect has handed it over, and
-  // Apple's verifier refuses to be built for Production without it. That must
-  // read as "this did not verify" rather than take down the purchase path.
-  test('answers invalid-signature while the App Store id is still unknown', async () => {
-    expect(await Apple.verifyTransaction('not-a-jws')).toBe('invalid-signature')
-    expect(await Apple.verifyNotification('not-a-jws')).toBe('invalid-signature')
+describe('which App Store a signature may come from', () => {
+  // The bug this guards: while the numeric App Store id was an operational
+  // setting, forgetting to set it silently pinned verification to Sandbox, and
+  // every real App Store purchase came back unverifiable. The id is a published,
+  // permanent fact about the app, so Production is always among the environments
+  // tried — no deployment can be missing it.
+  test('tries Production with nothing configured at all', () => {
+    expect(verificationEnvironments()).toEqual([Environment.PRODUCTION, Environment.SANDBOX])
   })
 
-  test('answers invalid-signature once the App Store id is known', async () => {
-    appleAppId = 6789688303
+  test('honours a pinned environment', () => {
+    appleEnvironment = 'Sandbox'
 
+    expect(verificationEnvironments()).toEqual([Environment.SANDBOX])
+  })
+})
+
+describe('verifying something Apple did not sign', () => {
+  test('answers invalid-signature for a payload that is not a JWS at all', async () => {
     expect(await Apple.verifyTransaction('not-a-jws')).toBe('invalid-signature')
+    expect(await Apple.verifyNotification('not-a-jws')).toBe('invalid-signature')
   })
 
   test('answers invalid-signature with a pinned environment', async () => {

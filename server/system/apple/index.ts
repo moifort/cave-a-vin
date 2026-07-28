@@ -2,25 +2,31 @@ import {
   Environment,
   type JWSTransactionDecodedPayload,
   SignedDataVerifier,
+  VerificationException,
+  VerificationStatus,
 } from '@apple/app-store-server-library'
 import { appleRootCertificates } from '~/system/apple/root-certificates'
 import type { AppleNotification, AppleTransaction } from '~/system/apple/types'
-import { BUNDLE_ID } from '~/system/apple/types'
+import { APP_STORE_ID, BUNDLE_ID } from '~/system/apple/types'
 import { config } from '~/system/config/index'
+import { createLogger } from '~/system/logger'
+
+const logger = createLogger('apple')
 
 // Which App Store a signature may come from. A shipped app receives both at once
 // — TestFlight and review sign in Sandbox, the App Store in Production — so both
-// are tried unless a single environment is pinned (`NITRO_APPLE_ENVIRONMENT`, set
-// to `Xcode` for the local StoreKit configuration file, whose payloads are signed
-// by a throwaway local certificate and cannot chain to Apple's roots).
-const environments = (): Environment[] => {
-  const { appleEnvironment, appleAppId } = config()
+// are always tried, unless a single environment is pinned
+// (`NITRO_APPLE_ENVIRONMENT`, set to `Xcode` for the local StoreKit configuration
+// file, whose payloads are signed by a throwaway local certificate and cannot
+// chain to Apple's roots).
+//
+// Exported for the test that guards the Production path: Apple's verifier rejects
+// a Production signature outright when checked against Sandbox, so dropping
+// Production here means turning away every paying subscriber.
+export const verificationEnvironments = (): Environment[] => {
+  const { appleEnvironment } = config()
   if (appleEnvironment) return [appleEnvironment]
-  // Apple's verifier refuses to be built for Production without the app's
-  // numeric id, and it could not check a Production signature without it
-  // anyway. Until App Store Connect has handed it over, Sandbox is all there
-  // is — which is exactly what TestFlight and review sign in.
-  return appleAppId ? [Environment.PRODUCTION, Environment.SANDBOX] : [Environment.SANDBOX]
+  return [Environment.PRODUCTION, Environment.SANDBOX]
 }
 
 // One verifier per environment, rebuilt per call: they are cheap, and a cached
@@ -34,26 +40,42 @@ const verifierFor = (environment: Environment) =>
     false,
     environment,
     BUNDLE_ID,
-    config().appleAppId,
+    APP_STORE_ID,
   )
+
+// Apple's own refusal carries a status code and an empty message, so it is named
+// rather than printed: `INVALID_ENVIRONMENT` (the signature is for the other App
+// Store) reads nothing like `INVALID_CERTIFICATE`.
+const refusalOf = (error: unknown): string =>
+  error instanceof VerificationException
+    ? (VerificationStatus[error.status] ?? String(error.status))
+    : error instanceof Error
+      ? error.message
+      : String(error)
 
 // Apple's library throws on an unverifiable payload; the domain speaks in
 // sentinels, so the boundary converts. Every environment is tried before giving
 // up — a payload signed for Sandbox simply fails the Production verifier.
 //
-// Building the verifier is inside the try as well: it throws on a configuration
-// it cannot honour, and a misconfiguration must read as "this did not verify",
-// never as a crash on the purchase path.
+// Building the verifier is inside the try as well: it throws on anything it
+// cannot honour, and that must read as "this did not verify", never as a crash on
+// the purchase path.
+//
+// A payload nobody can verify is logged with the reason each environment gave:
+// without it, a refused purchase is indistinguishable from a misconfiguration,
+// and the subscriber's money is already gone.
 const verifyAcrossEnvironments = async <T>(
   verify: (verifier: SignedDataVerifier) => Promise<T>,
 ): Promise<T | 'invalid-signature'> => {
-  for (const environment of environments()) {
+  const refusals: string[] = []
+  for (const environment of verificationEnvironments()) {
     try {
       return await verify(verifierFor(environment))
-    } catch {
-      // Try the next environment.
+    } catch (error) {
+      refusals.push(`${environment}: ${refusalOf(error)}`)
     }
   }
+  logger.warn(`Apple signed data verified by no environment (${refusals.join(', ')})`)
   return 'invalid-signature'
 }
 

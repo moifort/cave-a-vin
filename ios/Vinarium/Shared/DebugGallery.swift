@@ -7,7 +7,6 @@ import SwiftUI
 /// `xcrun simctl launch booted com.polyforms.vinarium.app -debugGallery`.
 struct DebugGallery: View {
     @State private var paywallTrigger: PremiumTrigger?
-    @State private var scanFlow = false
 
     var body: some View {
         NavigationStack {
@@ -15,7 +14,6 @@ struct DebugGallery: View {
                 Section("Abonnement") {
                     Button("Paywall, découverte") { paywallTrigger = .discover }
                     Button("Paywall, scans épuisés") { paywallTrigger = .scanAllowanceSpent }
-                    Button("DEBUG-TEMP: flux de scan") { scanFlow = true }
                 }
                 Section("Chargement") {
                     NavigationLink("Verre de vin (premier chargement)") {
@@ -27,10 +25,6 @@ struct DebugGallery: View {
         }
         .sheet(item: $paywallTrigger) { trigger in
             PremiumSheet(trigger: trigger)
-                .environment(SubscriptionStore())
-        }
-        .fullScreenCover(isPresented: $scanFlow) {
-            ScanView { _ in scanFlow = false }
                 .environment(SubscriptionStore())
         }
     }

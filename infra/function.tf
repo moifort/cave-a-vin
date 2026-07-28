@@ -101,7 +101,6 @@ resource "google_cloudfunctions2_function" "server" {
       # Public, not credentials: the app's App Store id is printed on its store
       # page, and a Firebase uid names an account without opening it. Plain
       # environment variables, so Secret Manager holds only real secrets.
-      NITRO_APPLE_APP_ID     = var.apple_app_id
       NITRO_PREMIUM_USER_IDS = var.premium_user_ids
       # Admin metrics identifiers — the only real secret of the set, the .p8
       # key, rides the secret_environment_variables block below.

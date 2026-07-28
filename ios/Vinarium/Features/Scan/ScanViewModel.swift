@@ -71,7 +71,6 @@ final class ScanViewModel {
             } catch let apiError as APIError where apiError.domainCode == "QUOTA_EXHAUSTED" {
                 // Ce n'est pas une panne : c'est l'offre qui s'arrête là. La sheet
                 // du flux se ferme, puis le paywall se présente au `onDismiss`.
-                print("DEBUG-TEMP catch quota -> pendingPaywall = true")
                 self.pendingPaywall = true
                 self.isAnalyzing = false
             } catch {
@@ -204,13 +203,15 @@ final class ScanViewModel {
         )
     }
 
+    /// Back to the camera, flow state cleared. The pending outcome is not flow
+    /// state and deliberately survives: SwiftUI writes `false` into the flow
+    /// sheet's binding while it closes, which lands here *before* `onDismiss`, so
+    /// clearing the paywall here would erase the very thing that closed the sheet.
     func reset() {
         step = .camera
         error = nil
         isAnalyzing = false
         scanNotRecognized = false
-        paywallShown = false
-        pendingPaywall = false
         pendingLocation = nil
         createdWine = nil
     }

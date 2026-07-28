@@ -99,9 +99,10 @@ Credential-gated; none of it is scriptable.
 7. **App Store Server Notifications V2** → set the production URL to
    `https://<the deployed function host>/apple/notifications`, and the sandbox URL to the same.
    Version **V2**, not V1.
-8. Note the app's **numeric Apple id** (App Information → General → Apple ID) and set it as the
-   repository variable `APPLE_APP_ID`. Production signature verification needs it; while it is
-   blank, only Sandbox signatures verify.
+8. Check the app's **numeric Apple id** (App Information → General → Apple ID) against
+   `APP_STORE_ID` in `server/system/apple/types.ts`. Apple's verifier needs it to check a
+   Production signature, so it lives in the code next to the bundle id: an id that had to be
+   deployed was once left unset, and every real App Store purchase came back unverifiable.
 9. Set the repository variable `PREMIUM_USER_IDS` to the comped Firebase uids (the owner's, a
    reviewer's) before the backend deploy — see the rollout note below.
 10. Submit both products **with the app build** that contains the paywall: Apple reviews
@@ -111,14 +112,16 @@ Credential-gated; none of it is scriptable.
 
 | Variable | Purpose |
 |---|---|
-| `NITRO_APPLE_APP_ID` | The app's numeric App Store id, required to verify a Production signature. Public — a plain Cloud Function environment variable, not a Secret Manager entry (`infra/function.tf`) |
 | `NITRO_APPLE_ENVIRONMENT` | Pins verification to one environment. Blank tries Production then Sandbox, which is what a shipped app needs since TestFlight and review sign in Sandbox. `Xcode` for the local StoreKit file |
 | `NITRO_PREMIUM_USER_IDS` | Comped accounts, granted Premium without paying. An access list, not a credential — also a plain environment variable |
 
 Terraform is applied by CI, which writes `infra/terraform.tfvars` from GitHub secrets and
 variables on every push to `main`. A value that only exists in a local `terraform.tfvars` never
-reaches production: `apple_app_id` and `premium_user_ids` come from the repository variables
-`APPLE_APP_ID` and `PREMIUM_USER_IDS`.
+reaches production: `premium_user_ids` comes from the repository variable `PREMIUM_USER_IDS`.
+
+The app's numeric App Store id is deliberately **not** among them: it is a published, permanent
+fact about the app, so it is `APP_STORE_ID` in `server/system/apple/types.ts` and no deployment
+can be missing it.
 
 ## Rolling it out
 

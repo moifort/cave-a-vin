@@ -7,6 +7,10 @@ struct WineDetailContent: View {
 
     var body: some View {
         List {
+            if let currentCellarPosition {
+                WineCellarPositionSection(position: currentCellarPosition)
+            }
+
             WineDetailHeader(
                 beverageType: content.beverageType,
                 color: content.color,
@@ -15,8 +19,7 @@ struct WineDetailContent: View {
                 producerLabel: content.beverageType.producerLabel,
                 domain: content.domain,
                 vintage: content.vintage,
-                ownerName: content.ownerName,
-                cellarPosition: currentCellarPosition
+                ownerName: content.ownerName
             )
 
             if content.beverageType == .wine {
@@ -101,7 +104,7 @@ struct WineDetailContent: View {
     }
 
     /// The slot only makes sense while the bottle is still stored; once it is out,
-    /// the position belongs to the cellar history and stays in the cellar section.
+    /// the position is history and only the cellar section states it.
     private var currentCellarPosition: String? {
         guard let cellar = content.cellar, cellar.isInCellar else { return nil }
         return cellar.position

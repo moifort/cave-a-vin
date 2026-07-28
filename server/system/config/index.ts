@@ -1,7 +1,6 @@
 import {
   AdminToken,
   ApiToken,
-  AppleAppId,
   AppleEnvironment,
   AscIssuerId,
   AscKeyId,
@@ -21,7 +20,6 @@ export const config = () => {
     googleApiKey: GoogleApiKey(runtimeConfig.googleApiKey),
     sentryDsn: runtimeConfig.sentryDsn ? SentryDsn(runtimeConfig.sentryDsn) : undefined,
     devUserId: runtimeConfig.devUserId || undefined,
-    appleAppId: runtimeConfig.appleAppId ? AppleAppId(runtimeConfig.appleAppId) : undefined,
     appleEnvironment: runtimeConfig.appleEnvironment
       ? AppleEnvironment(runtimeConfig.appleEnvironment)
       : undefined,
