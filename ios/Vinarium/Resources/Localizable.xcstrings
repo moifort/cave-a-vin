@@ -88,6 +88,7 @@
     "%@, réflexion": {},
     "%@, sortie": {},
     "%lld": {},
+    "%lld / %lld": {},
     "%lld bouteilles": {
       "localizations": {
         "de": {
@@ -10616,6 +10617,46 @@
         }
       }
     },
+    "Renouvellement le %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erneuerung am %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renews on %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se renueva el %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rinnovo il %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新日: %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renovação a %@"
+          }
+        }
+      }
+    },
     "Restaurer mes achats": {
       "localizations": {
         "de": {
@@ -11618,6 +11659,46 @@
       }
     },
     "Scans Gemini": {},
+    "Scans ce mois-ci": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scans diesen Monat"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scans this month"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escaneos este mes"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scansioni questo mese"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今月のスキャン"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Digitalizações este mês"
+          }
+        }
+      }
+    },
     "Scans du mois": {},
     "Scans illimités": {
       "localizations": {
