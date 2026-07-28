@@ -15,7 +15,8 @@ struct WineDetailContent: View {
                 producerLabel: content.beverageType.producerLabel,
                 domain: content.domain,
                 vintage: content.vintage,
-                ownerName: content.ownerName
+                ownerName: content.ownerName,
+                cellarPosition: currentCellarPosition
             )
 
             if content.beverageType == .wine {
@@ -97,6 +98,13 @@ struct WineDetailContent: View {
                 }
             }
         }
+    }
+
+    /// The slot only makes sense while the bottle is still stored; once it is out,
+    /// the position belongs to the cellar history and stays in the cellar section.
+    private var currentCellarPosition: String? {
+        guard let cellar = content.cellar, cellar.isInCellar else { return nil }
+        return cellar.position
     }
 
     private var headerSubtitle: String {

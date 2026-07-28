@@ -9,13 +9,16 @@ struct WineCellarSection: View {
 
     var body: some View {
         Section("Cave") {
-            Label {
-                LabeledContent("Position") {
-                    PositionBadge(position: position)
+            // While the bottle is stored, the header already carries the slot on its first line.
+            if !isInCellar {
+                Label {
+                    LabeledContent("Position") {
+                        PositionBadge(position: position)
+                    }
+                } icon: {
+                    Image(systemName: "mappin.circle")
+                        .foregroundStyle(.secondary)
                 }
-            } icon: {
-                Image(systemName: "mappin.circle")
-                    .foregroundStyle(.secondary)
             }
             Label {
                 LabeledContent("Entr\u{00E9}e le", value: dateIn)

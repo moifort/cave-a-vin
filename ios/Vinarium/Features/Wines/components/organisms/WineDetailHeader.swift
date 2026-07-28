@@ -10,6 +10,8 @@ struct WineDetailHeader: View {
     let vintage: Int?
     /// The household member who owns this wine, shown only for a housemate's bottle.
     var ownerName: String? = nil
+    /// The slot the bottle currently occupies, shown only while it sits in the cellar.
+    var cellarPosition: String? = nil
 
     var body: some View {
         Section {
@@ -21,6 +23,13 @@ struct WineDetailHeader: View {
                     Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                if let cellarPosition {
+                    PositionBadge(position: cellarPosition)
+                        .accessibilityLabel(Text("Position"))
+                        .accessibilityValue(Text(cellarPosition))
+                        .accessibilityIdentifier("cellar-position-badge")
                 }
             }
 
@@ -44,7 +53,8 @@ struct WineDetailHeader: View {
             name: "Ch\u{00E2}teau Margaux",
             subtitle: "Rouge \u{2022} Ch\u{00E2}teau Margaux \u{2022} 2018",
             domain: "Ch\u{00E2}teau Margaux",
-            vintage: 2018
+            vintage: 2018,
+            cellarPosition: "A3"
         )
         WineDetailHeader(
             beverageType: .spirit,
