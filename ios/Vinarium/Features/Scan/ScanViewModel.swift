@@ -30,8 +30,8 @@ struct ScanSubmission {
 final class ScanViewModel {
     var step: ScanStep = .camera
     var error: String?
-    /// L'analyse IA est en cours : la sheet du flux affiche l'orbe par-dessus la
-    /// caméra restée vivante. Vraie tant que la photo se charge et que l'IA répond.
+    /// L'analyse IA est en cours : la sheet du flux affiche l'orbe, caméra coupée.
+    /// Vraie tant que la photo se charge et que l'IA répond.
     var isAnalyzing = false
     /// L'IA n'a rien reconnu sur la photo : la sheet du flux reste ouverte et
     /// affiche le message « aucune étiquette détectée » (phase interne, pas une
@@ -99,6 +99,12 @@ final class ScanViewModel {
         if isAnalyzing || scanNotRecognized { return true }
         if case .camera = step { return false }
         return true
+    }
+
+    /// The camera only streams on the camera step, outside of any flow: once a
+    /// photo is taken the stream is closed, and it opens again on the way back.
+    var isCameraLive: Bool {
+        !isFlowActive && !paywallShown
     }
 
     func attachLocation(_ draft: DiscoveryLocationDraft?) {

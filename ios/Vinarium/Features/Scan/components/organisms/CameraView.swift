@@ -17,6 +17,12 @@ struct CameraView: UIViewControllerRepresentable {
             DispatchQueue.main.async { shouldCapture = false }
         }
     }
+
+    /// The camera must not outlive the view: releasing the controller is not
+    /// enough to guarantee the hardware is freed, so the session is closed here.
+    static func dismantleUIViewController(_ uiViewController: CameraViewController, coordinator: ()) {
+        uiViewController.closeSession()
+    }
 }
 
 @MainActor
@@ -27,11 +33,19 @@ final class CameraViewController: UIViewController {
     private let photoOutput = AVCapturePhotoOutput()
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private let delegateHandler = PhotoCaptureDelegate()
+    /// Opening and closing a session blocks its caller, and both must stay
+    /// ordered: they run one after the other on this queue, never on the main one.
+    private let sessionQueue = DispatchQueue(label: "vinarium.camera.session", qos: .userInitiated)
 
     override func viewDidLoad() {
         super.viewDidLoad()
         delegateHandler.viewController = self
         setupCamera()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        openSession()
     }
 
     override func viewDidLayoutSubviews() {
@@ -55,10 +69,7 @@ final class CameraViewController: UIViewController {
         view.layer.addSublayer(preview)
         self.previewLayer = preview
 
-        let session = captureSession
-        DispatchQueue.global(qos: .userInitiated).async {
-            session.startRunning()
-        }
+        openSession()
     }
 
     func capturePhoto() {
@@ -67,7 +78,28 @@ final class CameraViewController: UIViewController {
     }
 
     func handleCapturedPhoto(_ data: Data) {
+        // The shot is in: the analysis that follows has no use for a live camera,
+        // so the stream is closed right away rather than at the end of the flow.
+        closeSession()
         onCapture?(data)
+    }
+
+    func openSession() {
+        let session = captureSession
+        sessionQueue.async {
+            // Nothing to open on a device without a usable camera: `setupCamera`
+            // bailed out before wiring an input, and running empty logs for nothing.
+            guard !session.isRunning, !session.inputs.isEmpty else { return }
+            session.startRunning()
+        }
+    }
+
+    func closeSession() {
+        let session = captureSession
+        sessionQueue.async {
+            guard session.isRunning else { return }
+            session.stopRunning()
+        }
     }
 }
 

@@ -94,6 +94,11 @@ enum WineAPI {
     }
 
     static func scan(imageData: Data) async throws -> ScanResult {
+        // DEBUG-TEMP: force the quota refusal to exercise the paywall path.
+        if true {
+            try await Task.sleep(for: .seconds(4))
+            throw APIError.domain(code: "QUOTA_EXHAUSTED", messages: ["Monthly scan allowance is used up"])
+        }
         let base64 = imageData.base64EncodedString()
         let data = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,

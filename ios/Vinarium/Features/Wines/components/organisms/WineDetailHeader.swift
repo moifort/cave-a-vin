@@ -15,6 +15,18 @@ struct WineDetailHeader: View {
 
     var body: some View {
         Section {
+            if let cellarPosition {
+                Label {
+                    LabeledContent("Position") {
+                        PositionBadge(position: cellarPosition)
+                    }
+                } icon: {
+                    Image(systemName: "cabinet")
+                        .foregroundStyle(.secondary)
+                }
+                .accessibilityIdentifier("cellar-position-row")
+            }
+
             HStack(spacing: 12) {
                 BeverageBadge(beverageType: beverageType, color: color)
                 VStack(alignment: .leading, spacing: 2) {
@@ -23,13 +35,6 @@ struct WineDetailHeader: View {
                     Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                if let cellarPosition {
-                    PositionBadge(position: cellarPosition)
-                        .accessibilityLabel(Text("Position"))
-                        .accessibilityValue(Text(cellarPosition))
-                        .accessibilityIdentifier("cellar-position-badge")
                 }
             }
 

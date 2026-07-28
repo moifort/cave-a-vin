@@ -65,14 +65,15 @@ struct ScanView: View {
 
     /// Base permanente du plein écran : l'aperçu caméra et ses contrôles. Le reste
     /// du flux (analyse, review, placement, confirmation) se présente en sheet
-    /// par-dessus, si bien que la caméra ne disparaît jamais du fond.
+    /// par-dessus.
     private var cameraScreen: some View {
         ZStack {
-            if case .camera = viewModel.step {
+            if viewModel.isCameraLive {
                 liveCamera
             } else {
-                // Caméra coupée dès qu'une proposition arrive : la review et la
-                // suite du flux s'affichent sur un fond neutre, plus sur l'aperçu.
+                // The camera is closed as soon as the shot leaves for analysis: the
+                // rest of the flow runs over a neutral background, not over a preview
+                // that would hold the hardware for nothing.
                 Color.black.ignoresSafeArea()
             }
         }
