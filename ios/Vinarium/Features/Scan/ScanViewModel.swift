@@ -71,6 +71,7 @@ final class ScanViewModel {
             } catch let apiError as APIError where apiError.domainCode == "QUOTA_EXHAUSTED" {
                 // Ce n'est pas une panne : c'est l'offre qui s'arrête là. La sheet
                 // du flux se ferme, puis le paywall se présente au `onDismiss`.
+                print("DEBUG-TEMP catch quota -> pendingPaywall = true")
                 self.pendingPaywall = true
                 self.isAnalyzing = false
             } catch {

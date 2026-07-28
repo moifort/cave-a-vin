@@ -73,6 +73,9 @@ final class CameraViewController: UIViewController {
     }
 
     func capturePhoto() {
+        // Shooting through a closed session raises: a tap landing after the stream
+        // was cut, or before it is up, is simply ignored.
+        guard captureSession.isRunning else { return }
         let settings = AVCapturePhotoSettings()
         photoOutput.capturePhoto(with: settings, delegate: delegateHandler)
     }
