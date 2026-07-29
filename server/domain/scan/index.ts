@@ -58,6 +58,16 @@ export namespace Scan {
     imageBuffer: Buffer,
     language: ScanLanguage,
   ): Promise<{ result: ScanResult; cacheHit: boolean; usage: ScanUsage }> => {
+    // End-to-end runs answer with a fixed label instead of calling Gemini: the
+    // models cost money, take seconds and never answer twice the same, none of
+    // which a release gate can rely on. Counted as a real scan (cacheHit false)
+    // so the quota path stays the one production takes.
+    //
+    // `import.meta.dev` is compile-time, so this whole branch is tree-shaken out
+    // of a built bundle: no environment variable can turn the stub on in
+    // production. Same gate as the dev auth bypass in middleware/auth.ts.
+    if (import.meta.dev && config().scanStub)
+      return { result: STUBBED_LABEL, cacheHit: false, usage: {} }
     const imageHash = hashImage(imageBuffer)
     // The cache is keyed by image AND language: the same label scanned in two
     // languages must not serve one language's text to the other.
@@ -73,6 +83,27 @@ export namespace Scan {
     // Best-effort cache: a failed write only costs a re-scan on the next hit.
     repository.save({ imageHash, language, result: enriched, cachedAt: new Date() }).catch(() => {})
     return { result: enriched, cacheHit: false, usage: { vision, enrichment } }
+  }
+
+  // What a stubbed scan returns. A complete wine — the review form shows every
+  // field, so a partial one would leave the end-to-end scenario blind to half
+  // of it.
+  const STUBBED_LABEL: ScanResult = {
+    recognized: true,
+    name: 'Château Vinarium',
+    beverageType: 'wine',
+    color: 'red',
+    alcoholContent: 13.5,
+    domain: 'Château Vinarium',
+    vintage: 2020,
+    appellation: 'Saint-Émilion Grand Cru',
+    region: 'Bordeaux',
+    country: 'France',
+    grapeVarieties: ['Merlot', 'Cabernet Franc'],
+    classification: 'Grand Cru',
+    drinkFrom: 2025,
+    drinkUntil: 2035,
+    estimatedPrice: 42,
   }
 
   // The language name is written into the (French) prompt so Gemini emits every

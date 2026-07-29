@@ -20,6 +20,7 @@ export const config = () => {
     googleApiKey: GoogleApiKey(runtimeConfig.googleApiKey),
     sentryDsn: runtimeConfig.sentryDsn ? SentryDsn(runtimeConfig.sentryDsn) : undefined,
     devUserId: runtimeConfig.devUserId || undefined,
+    scanStub: Boolean(runtimeConfig.scanStub),
     appleEnvironment: runtimeConfig.appleEnvironment
       ? AppleEnvironment(runtimeConfig.appleEnvironment)
       : undefined,
