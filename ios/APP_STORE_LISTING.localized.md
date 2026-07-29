@@ -63,7 +63,8 @@ Privacy Policy: https://moifort.github.io/vinarium/
 ## English — United Kingdom (en-GB)
 
 British spelling of the en-US listing; everything else is identical. The name
-conflict on `Vinarium` applies here too, so the store lists **Vinarium Wine Cellar**.
+conflict is per storefront and does not reach the UK, so the app is listed there
+under the plain **Vinarium**.
 
 **Subtitle (≤30):** Your smart wine cellar
 

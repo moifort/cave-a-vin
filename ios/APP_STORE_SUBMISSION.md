@@ -56,8 +56,9 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
     answers 409 `already exists`.
   - **Screenshots are shared across every language** (ASC says so on the version page), so a new
     locale needs no upload of its own.
-- **App name in English is `Vinarium Wine Cellar`**, not `Vinarium`: Apple refuses the bare name
-  in `en-US` because another app holds it there (409 `the app name is already being used`).
+- **App name in `en-US` is `Vinarium Wine Cellar`**, not `Vinarium`: Apple refuses the bare name
+  there because another app holds it (409 `the app name is already being used`). The conflict is
+  per storefront and **not** shared with `en-GB`, which took the plain `Vinarium` on 2026-07-29.
 - **`en-GB`, `pt-BR` and `es-MX` were declared on 2026-07-29**, in the 1.5 cycle, from the
   content in [APP_STORE_LISTING.localized.md](./APP_STORE_LISTING.localized.md). Those three
   stores showed the *French* listing until then. Ten locales are now declared, and the
