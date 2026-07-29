@@ -44,6 +44,7 @@ A purely functional approach to wine cellar management.
 | Metrics  | App Store Connect Sales Reports API + BigQuery billing export (admin economics) |
 | Infra    | Terraform (google + google-beta) — provisions everything from scratch    |
 | Observability | Sentry (backend namespace tracing + iOS crash/error reporting)       |
+| Testing  | `bun:test` for the backend, XCUITest against the Firebase emulators for the app ([docs/e2e.md](docs/e2e.md)) |
 
 ## One-shot bootstrap
 
