@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5 (2026.07.29)
+
+### Novidades
+- O ecrã Premium abre agora com os números da conta: as digitalizações usadas, as que restam e a data de renovação da quota.
+- A ficha de uma garrafa arrumada indica agora a sua posição na garrafeira.
+
+### Correções
+- Uma subscrição comprada na App Store é agora ativada assim que é paga.
+- Uma garrafa é agora arrumada na posição escolhida, e não na do lado.
+- A grelha mostrada para mover uma garrafa tem agora as dimensões da garrafeira.
+- Alguns textos não seguiam o idioma da aplicação e apareciam sempre em francês. Está corrigido no painel, nas mensagens de carregamento e nas definições.
+
 ## 1.4 (2026.07.22)
 
 ### Novidades

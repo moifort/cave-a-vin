@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5 (2026.07.29)
+
+### Neu
+- Der Premium-Bildschirm öffnet jetzt mit den Zahlen des Kontos: die verbrauchten Scans, die verbleibenden und das Datum, an dem das Kontingent erneuert wird.
+- Die Seite einer eingelagerten Flasche nennt jetzt ihren Platz im Weinkeller.
+
+### Korrekturen
+- Ein im App Store gekauftes Abonnement wird jetzt sofort nach der Zahlung aktiviert.
+- Eine Flasche wird jetzt auf dem gewählten Platz eingelagert und nicht auf dem daneben.
+- Das Raster zum Verschieben einer Flasche hat jetzt die Maße des Weinkellers.
+- Manche Texte folgten nicht der Sprache der App und erschienen immer auf Französisch. Das ist in der Übersicht, in den Lademeldungen und in den Einstellungen behoben.
+
 ## 1.4 (2026.07.22)
 
 ### Neu

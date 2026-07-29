@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5 (2026.07.29)
+
+### Nouveautés
+- L'écran Premium s'ouvre maintenant sur les chiffres du compte : les scans utilisés, ceux qui restent et la date de renouvellement du quota.
+- La fiche d'une bouteille rangée indique maintenant son emplacement dans la cave.
+
+### Corrections
+- Un abonnement souscrit sur l'App Store s'active maintenant dès le paiement.
+- Une bouteille se range maintenant dans l'emplacement choisi, et non dans celui d'à côté.
+- La grille affichée pour déplacer une bouteille reprend maintenant les dimensions de la cave.
+- Certains textes ne suivaient pas la langue de l'application et s'affichaient toujours en français. C'est corrigé sur le tableau de bord, dans les messages de chargement et dans les réglages.
+
 ## 1.4 (2026.07.22)
 
 ### Nouveautés

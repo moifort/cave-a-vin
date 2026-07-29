@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5 (2026.07.29)
+
+### Novedades
+- La pantalla Premium se abre ahora con las cifras de la cuenta: los escaneos usados, los que quedan y la fecha de renovación del cupo.
+- La ficha de una botella guardada indica ahora su ubicación en la bodega.
+
+### Correcciones
+- Una suscripción comprada en la App Store se activa ahora en cuanto se paga.
+- Una botella se guarda ahora en la posición elegida, y no en la de al lado.
+- La cuadrícula que se muestra al mover una botella tiene ahora las dimensiones de la bodega.
+- Algunos textos no seguían el idioma de la aplicación y aparecían siempre en francés. Queda corregido en el panel, en los mensajes de carga y en los ajustes.
+
 ## 1.4 (2026.07.22)
 
 ### Novedades

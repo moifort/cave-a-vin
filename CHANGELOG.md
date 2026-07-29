@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5 (2026.07.29)
+
+### New
+- The Premium screen now opens on the account's own figures: the scans used, the ones left, and the date the allowance renews.
+- The page of a stored bottle now states where it sits in the cellar.
+
+### Fixes
+- A subscription bought on the App Store now activates as soon as it is paid for.
+- A bottle is now stored in the slot that was picked, instead of the one beside it.
+- The grid shown when moving a bottle now has the cellar's own dimensions.
+- Some text did not follow the app's language and always appeared in French. This is fixed on the dashboard, in the loading messages and in the settings.
+
 ## 1.4 (2026.07.22)
 
 ### New

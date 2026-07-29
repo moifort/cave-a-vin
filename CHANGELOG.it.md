@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5 (2026.07.29)
+
+### Novità
+- La schermata Premium si apre ora sui numeri dell'account: le scansioni usate, quelle rimaste e la data di rinnovo della quota.
+- La scheda di una bottiglia riposta indica ora la sua posizione in cantina.
+
+### Correzioni
+- Un abbonamento acquistato su App Store si attiva ora non appena viene pagato.
+- Una bottiglia viene riposta ora nella posizione scelta, e non in quella accanto.
+- La griglia mostrata per spostare una bottiglia ha ora le dimensioni della cantina.
+- Alcuni testi non seguivano la lingua dell'app e apparivano sempre in francese. È corretto nel riepilogo, nei messaggi di caricamento e nelle impostazioni.
+
 ## 1.4 (2026.07.22)
 
 ### Novità
