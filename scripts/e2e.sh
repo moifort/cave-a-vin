@@ -26,9 +26,9 @@ FIRESTORE_PORT=8080
 # No OS pinned: xcodebuild picks the newest runtime installed, which keeps the
 # same command working on the dev Mac and on the CI image.
 DESTINATION="${E2E_DESTINATION:-platform=iOS Simulator,name=iPhone 17}"
-# The scenario that gates a release. Others exist under VinariumUITests/Tests
-# and can be run by overriding this.
-TESTS="${E2E_TESTS:-VinariumUITests/CellarFlowTest}"
+# The scenarios that gate a release, space-separated. They share one emulator
+# run: each test signs in with an account of its own, so they stay isolated.
+TESTS="${E2E_TESTS:-VinariumUITests/CellarFlowTest VinariumUITests/FavoriteFlowTest VinariumUITests/GiveAsGiftFlowTest VinariumUITests/RecommendationFlowTest}"
 
 # The Firestore emulator runs on the JVM. Homebrew's openjdk is keg-only, so it
 # is not on the PATH unless the shell profile puts it there — find it rather than
@@ -115,12 +115,15 @@ if [ "${1:-}" = "--inner" ]; then
   # Signing stays on, unlike the compile-only CI job: a simulator build signs
   # ad-hoc with no certificate, and without it the app gets no entitlements —
   # Firebase Auth then fails every keychain write with -34018 and never signs in.
+  ONLY_TESTING=()
+  for target in $TESTS; do ONLY_TESTING+=("-only-testing:$target"); done
+
   set +e
   xcodebuild test \
     -project ios/Vinarium.xcodeproj \
     -scheme Vinarium \
     -destination "$DESTINATION" \
-    -only-testing:"$TESTS" \
+    "${ONLY_TESTING[@]}" \
     -resultBundlePath build/e2e.xcresult \
     -retry-tests-on-failure -test-iterations 2
   STATUS=$?

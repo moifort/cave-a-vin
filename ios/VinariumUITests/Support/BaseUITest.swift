@@ -21,6 +21,20 @@ extension XCUIElement {
     }
 }
 
+extension XCUIApplication {
+    /// Scrolls down until `element` is reachable. A SwiftUI `Form` only
+    /// materializes the rows it renders, so a field further down the page does
+    /// not exist in the accessibility tree until it is scrolled into view.
+    @discardableResult
+    func scrollTo(_ element: XCUIElement, maxSwipes: Int = 6) -> Bool {
+        for _ in 0..<maxSwipes {
+            if element.exists && element.isHittable { return true }
+            swipeUp()
+        }
+        return element.exists && element.isHittable
+    }
+}
+
 /// Launches the app against the local end-to-end stack: the Nitro server on
 /// :3000, backed by the Firebase emulators (`scripts/e2e.sh` starts all of it).
 ///

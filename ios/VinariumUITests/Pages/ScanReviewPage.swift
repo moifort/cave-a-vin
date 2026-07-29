@@ -12,9 +12,30 @@ struct ScanReviewPage {
 
     func clearAndTypeName(_ name: String) throws -> Self {
         let nameField = try app.textFields["review-name-field"].waitOrFail()
-        // Triple-tap to select all text, then type to replace
-        nameField.tap(withNumberOfTaps: 3, numberOfTouches: 1)
-        nameField.typeText(name)
+        // Deleting character by character rather than triple-tapping to select:
+        // the selection sometimes does not take, and the new name then lands
+        // inside the scanned one ("Vin Test CadeaChâteau Vinarium") — a failure
+        // that only surfaces three steps later, when the bottle cannot be found.
+        for attempt in 1...2 {
+            // Tapping the field puts the caret wherever the tap landed, mid-word,
+            // and deletes only eat what is left of it. Tapping past the last
+            // character (the field is trailing-aligned) puts it at the end.
+            nameField.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
+            let current = (nameField.value as? String) ?? ""
+            if !current.isEmpty {
+                nameField.typeText(
+                    String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 5)
+                )
+            }
+            nameField.typeText(name)
+            if (nameField.value as? String) == name { return self }
+            if attempt == 2 {
+                let actual = (nameField.value as? String) ?? "<nil>"
+                let message = "Name field holds '\(actual)' instead of '\(name)'"
+                XCTFail(message)
+                throw UITestFailure(message: message)
+            }
+        }
         return self
     }
 
@@ -40,7 +61,9 @@ struct ScanReviewPage {
     }
 
     func typeRecommenderName(_ name: String) throws -> Self {
-        let field = try app.textFields["review-recommender-field"].waitOrFail()
+        let field = app.textFields["review-recommender-field"].firstMatch
+        app.scrollTo(field)
+        try field.waitOrFail(timeout: 4, "'Conseillé par' field not reachable")
         field.tap()
         field.typeText(name)
         return self
@@ -64,7 +87,9 @@ struct ScanReviewPage {
 
     /// Active le toggle « Favori » inline du formulaire (section Dégustation).
     func markAsFavorite() throws -> Self {
-        let toggle = try app.switches["review-favorite-toggle"].waitOrFail()
+        let toggle = app.switches["review-favorite-toggle"].firstMatch
+        app.scrollTo(toggle)
+        try toggle.waitOrFail(timeout: 4, "Favorite toggle not reachable")
         toggle.switches.firstMatch.tap()
         return self
     }

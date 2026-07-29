@@ -36,9 +36,11 @@ final class GiveAsGiftFlowTest: BaseUITest {
         // Should return to cellar
         try app.navigationBars["Ma Cave"].waitOrFail()
 
-        // 5. WINE LIST: go to Vins tab, switch to "Offerts", verify wine visible
+        // 5. WINE LIST: the bottle left the cellar, so look for it in the full
+        // list. Not under "Offerts": that filter holds bottles received as a gift
+        // (gift.received), not the ones given away.
         _ = try tabBar.goToWineList().verify()
-        let wineList = try WineListPage(app: app).switchToGifted()
+        let wineList = WineListPage(app: app)
         try wineList.verifyWineVisible(wineName)
 
         // 6. Tap wine, verify gift section in detail

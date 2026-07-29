@@ -18,11 +18,13 @@ Nothing reaches production. The emulators start empty and are discarded when the
 
 Requires `bun`, Xcode, and a JDK for the Firestore emulator (`brew install openjdk` — the script finds Homebrew's keg-only install on its own, no profile to edit).
 
-A run takes about 5 minutes, 3 of them in the scenario itself.
+A run takes about 9 minutes, 6 of them in the four scenarios. They share one emulator run — each test signs in with an account of its own, so none sees another's cellar.
 
-## What the scenario covers
+## What the scenarios cover
 
-`VinariumUITests/CellarFlowTest` walks a new account through the product end to end:
+### Cellar — `CellarFlowTest`
+
+The main journey, a new account taken through the product end to end:
 
 1. **Onboarding** — prénom, cellar dimensions, finish (`completeOnboarding` provisions the grid)
 2. **Scan** — the bundled label photo, the review form, add to cellar (`scanBeverage`, quota, `addBeverage`)
@@ -35,11 +37,23 @@ A run takes about 5 minutes, 3 of them in the scenario itself.
 9. **Favorites** — flag it from the detail menu, then find it under the favorites filter (`recordTasting`)
 10. **Deletion** — deleting it removes it from the list (`deleteBeverage` cascades)
 
-Seven domains in one run: user, beverage, cellar, journal, dashboard, tasting, quota.
+### Favorite — `FavoriteFlowTest`
+
+Scan, flag the bottle favorite from the form's inline toggle, save without placing it, then find it under the favorites filter and in the dashboard's favorites section.
+
+### Gift — `GiveAsGiftFlowTest`
+
+Scan, place, then give the bottle away with a recipient name. It leaves the cellar, stays in the full list, and its detail shows the "Offert" section. Note that the **Offerts** filter is not involved: it holds bottles *received* as a gift (`gift.received`), not given ones.
+
+### Recommendation — `RecommendationFlowTest`
+
+Scan, fill "Conseillé par", save, then find the bottle under the recommended filter with its recommendation section.
+
+Together they cover nine domains: user, beverage, cellar, journal, dashboard, tasting, quota, gift, recommendation.
 
 Out of scope, and still manual before a release: Sign in with Apple, in-app purchases, and the real Gemini scan.
 
-The other suites (`FavoriteFlowTest`, `GiveAsGiftFlowTest`, `RecommendationFlowTest`) share the same harness but are not part of the gate yet. Run one with:
+Run a single scenario with:
 
 ```bash
 E2E_TESTS=VinariumUITests/GiveAsGiftFlowTest ./scripts/e2e.sh
@@ -82,3 +96,5 @@ The gate fires on a tag that is already pushed, so a failure means fixing and re
 - A failure on the very first step ("Onboarding never appeared") is almost always sign-in: check the server log for a 401, and that the emulators came up under the right project. A keychain error (`-34018`) there means the app was built without signing — a simulator build must keep its ad-hoc signature, or Firebase Auth cannot write its session.
 - "Multiple matching elements found" is usually a `confirmationDialog`, which lists each button twice in the accessibility tree — query it through `firstMatch`. Conversely, items of a `Menu` carry no accessibility identifier at all and have to be matched by label.
 - Screen titles follow the segmented control (`Ma Cave` / `Journal`, `Mes Vins` / `Favoris`), so a page object waiting on a title must first put the segment back where it expects it.
+- Typing into a pre-filled field is the other classic: tapping it drops the caret mid-word, so deletes only eat what is left of it and the new value lands inside the old one. Tap past the last character, then assert what the field ends up holding — the failure otherwise surfaces three steps later as "bottle not found".
+- A field further down a `Form` does not exist in the accessibility tree until it is scrolled into view; `app.scrollTo(_:)` handles it.

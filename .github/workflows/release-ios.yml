@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Gate: replays a full user journey against the whole product — Firebase
+  # Gate: replays four user journeys against the whole product — Firebase
   # emulators, the real Nitro backend and the real app on a simulator — before
   # anything is built for the App Store. Nothing here touches production: the
   # emulators start empty and are thrown away (see scripts/e2e.sh).
