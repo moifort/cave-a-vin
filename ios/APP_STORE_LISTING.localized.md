@@ -13,14 +13,14 @@ in en-US because another app holds it there, so the English stores list the app 
 Wine terminology in the translations should get a native review pass before
 submission.
 
-`en-GB`, `pt-BR` and `es-MX` are still undeclared and those stores fall back to
-the French listing. They are queued for 1.5, together with the rule that a locale
-can only be added while the version is not in review — see Phase 2 of
+`en-GB`, `pt-BR` and `es-MX` are written below and are being declared in the 1.5
+cycle. A locale can only be added while the version is not in review, so they go in
+before the build is submitted — see Phase 2 of
 [APP_STORE_SUBMISSION.md](./APP_STORE_SUBMISSION.md).
 
 ---
 
-## English (en-US / en-GB)
+## English (en-US)
 
 **Subtitle (≤30):** Your smart wine cellar
 
@@ -32,6 +32,49 @@ can only be added while the version is not in review — see Phase 2 of
 Vinarium is your wine cellar in your pocket.
 
 Photograph a bottle's label: the AI recognizes the wine and automatically fills in the estate, vintage, region, appellation, and even estimates its price. No more typing everything by hand.
+
+FEATURES
+• AI scan: snap a label, get a complete record in seconds
+• Grid cellar: arrange your bottles by row and column, find them at a glance
+• Journal: a history of entries and exits, with your tasting notes and ratings
+• Dashboard: your cellar's value, occupancy rate, bottles to drink soon, recent activity
+• Powerful search: by name, producer, region, vintage or person, with combinable filters
+• Ready to drink: Vinarium alerts you when a bottle reaches maturity
+• Gifts & recommendations: keep track of wines given, received, or recommended by a friend
+
+HOUSEHOLD SHARING
+Share a single cellar with the people in your household through an invitation code. Everyone can store, move or drink any bottle in the common cellar, while keeping their own library, notes and journal private.
+
+RESPECT FOR YOUR PRIVACY
+No ads, no tracking. Your data stays yours and can be exported at any time.
+
+Sign in with a single tap using Sign in with Apple and start building your cellar.
+
+VINARIUM PREMIUM
+The cellar, the journal and household sharing are free and unlimited. Only the label scan is metered: five scans a month. Premium lifts that limit and adds the estimated price, the drinking window and the region to every scanned bottle.
+
+Premium comes as a monthly plan or a yearly plan that opens on a 7-day free trial; both prices are shown in the App Store. The subscription renews automatically unless it is cancelled at least 24 hours before the end of the current period. It is managed and cancelled from the App Store account settings.
+
+Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Privacy Policy: https://moifort.github.io/vinarium/
+
+---
+
+## English — United Kingdom (en-GB)
+
+British spelling of the en-US listing; everything else is identical. The name
+conflict on `Vinarium` applies here too, so the store lists **Vinarium Wine Cellar**.
+
+**Subtitle (≤30):** Your smart wine cellar
+
+**Promotional text (≤170):** Scan a label and AI fills it all in: estate, vintage, price. Organise your cellar, track your tastings and share it with your household.
+
+**Keywords (≤100):** cellar,wine,sommelier,vintage,tasting,bottle,collection,scanner,grape,winery,cave
+
+**Description:**
+Vinarium is your wine cellar in your pocket.
+
+Photograph a bottle's label: the AI recognises the wine and automatically fills in the estate, vintage, region, appellation, and even estimates its price. No more typing everything by hand.
 
 FEATURES
 • AI scan: snap a label, get a complete record in seconds
@@ -140,6 +183,50 @@ Política de privacidad: https://moifort.github.io/vinarium/
 
 ---
 
+## Español — México (es-MX)
+
+Mexican wording of the es-ES listing: a wine cellar is a **cava**, not a *bodega*
+(which reads as a warehouse), and the euro amounts are dropped since the App Store
+shows the local price.
+
+**Subtitle (≤30):** Tu cava inteligente
+
+**Promotional text (≤170):** Escanea una etiqueta y la IA lo llena todo: viñedo, añada, precio. Organiza tu cava, registra tus catas y compártela con tu familia.
+
+**Keywords (≤100):** cava,vino,enología,cata,sommelier,añada,botella,colección,escáner,uva,cosecha
+
+**Description:**
+Vinarium es tu cava de vino en el bolsillo.
+
+Fotografía la etiqueta de una botella: la IA reconoce el vino y llena automáticamente el viñedo, la añada, la región y la denominación, e incluso estima su precio. Se acabó escribirlo todo a mano.
+
+FUNCIONES
+• Escaneo con IA: fotografía una etiqueta y obtén una ficha completa en segundos
+• Cava en cuadrícula: acomoda tus botellas por fila y columna y encuéntralas de un vistazo
+• Diario: historial de entradas y salidas, con tus notas de cata y calificaciones
+• Panel: valor de tu cava, ocupación, botellas para beber pronto, actividad reciente
+• Búsqueda potente: por nombre, productor, región, añada o persona, con filtros combinables
+• Listas para beber: Vinarium te avisa cuando una botella alcanza su madurez
+• Regalos y recomendaciones: lleva la cuenta de los vinos regalados, recibidos o recomendados por un amigo
+
+COMPARTIR EN FAMILIA
+Comparte una sola cava con las personas de tu casa mediante un código de invitación. Cada quien puede acomodar, mover o beber cualquier botella de la cava común, manteniendo su propia biblioteca, notas y diario en privado.
+
+RESPETO POR TU PRIVACIDAD
+Sin publicidad, sin rastreo. Tus datos siguen siendo tuyos y puedes exportarlos cuando quieras.
+
+Inicia sesión con un toque usando Iniciar sesión con Apple y empieza a construir tu cava.
+
+VINARIUM PREMIUM
+La cava, el diario y el uso compartido en casa son gratuitos e ilimitados. Solo se cuenta el escaneo de etiquetas: cinco escaneos al mes. Premium elimina ese límite y añade a cada botella escaneada el precio estimado, la ventana de consumo y la región.
+
+Premium se ofrece en plan mensual o en plan anual que empieza con 7 días de prueba gratis; ambos precios se muestran en la App Store. La suscripción se renueva automáticamente salvo cancelación al menos 24 horas antes del final del periodo en curso. Se gestiona y se cancela desde los ajustes de la cuenta de App Store.
+
+Términos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidad: https://moifort.github.io/vinarium/
+
+---
+
 ## Italiano (it-IT)
 
 **Subtitle (≤30):** La tua cantina smart
@@ -180,7 +267,7 @@ Informativa sulla privacy: https://moifort.github.io/vinarium/
 
 ---
 
-## Português (pt-PT / pt-BR)
+## Português (pt-PT)
 
 **Subtitle (≤30):** A sua adega inteligente
 
@@ -216,6 +303,51 @@ A adega, o diário e a partilha no agregado são gratuitos e ilimitados. Apenas 
 Premium mensal: 2,99 €/mês. Premium anual: 24,99 €/ano, após 7 dias de teste gratuito. A subscrição renova-se automaticamente salvo cancelamento pelo menos 24 horas antes do fim do período em curso. É gerida e cancelada nas definições da conta App Store.
 
 Termos de utilização: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidade: https://moifort.github.io/vinarium/
+
+---
+
+## Português — Brasil (pt-BR)
+
+Brazilian wording of the pt-PT listing: *escaneie* rather than *digitalize*,
+*safra* rather than *colheita*, *assinatura* rather than *subscrição*, and second
+person *você* throughout. The euro amounts are dropped since the App Store shows
+the local price.
+
+**Subtitle (≤30):** Sua adega inteligente
+
+**Promotional text (≤170):** Escaneie um rótulo e a IA preenche tudo: vinícola, safra, preço. Organize sua adega, registre suas degustações e compartilhe com sua família.
+
+**Keywords (≤100):** adega,vinho,enologia,degustação,sommelier,safra,garrafa,coleção,scanner,uva,vinhos
+
+**Description:**
+O Vinarium é a sua adega no bolso.
+
+Fotografe o rótulo de uma garrafa: a IA reconhece o vinho e preenche automaticamente a vinícola, a safra, a região e a denominação, e ainda estima o preço. Chega de digitar tudo à mão.
+
+RECURSOS
+• Escaneamento com IA: fotografe um rótulo e receba uma ficha completa em segundos
+• Adega em grade: organize suas garrafas por fileira e coluna e encontre-as num piscar de olhos
+• Diário: histórico de entradas e saídas, com suas notas de degustação e avaliações
+• Painel: valor da sua adega, ocupação, garrafas para beber em breve, atividade recente
+• Busca poderosa: por nome, produtor, região, safra ou pessoa, com filtros combináveis
+• Prontas para beber: o Vinarium avisa quando uma garrafa atinge a maturidade
+• Presentes e recomendações: acompanhe os vinhos presenteados, recebidos ou recomendados por um amigo
+
+COMPARTILHAMENTO EM FAMÍLIA
+Compartilhe uma única adega com as pessoas da sua casa por meio de um código de convite. Cada um pode guardar, mover ou beber qualquer garrafa da adega comum, mantendo privados a própria biblioteca, notas e diário.
+
+RESPEITO À SUA PRIVACIDADE
+Sem publicidade, sem rastreamento. Seus dados continuam sendo seus e podem ser exportados quando você quiser.
+
+Entre com um toque usando Iniciar sessão com a Apple e comece a montar sua adega.
+
+VINARIUM PREMIUM
+A adega, o diário e o compartilhamento em família são gratuitos e ilimitados. Apenas o escaneamento de rótulos é contado: cinco escaneamentos por mês. O Premium tira esse limite e acrescenta a cada garrafa escaneada o preço estimado, a janela de consumo e a região.
+
+O Premium vem no plano mensal ou no plano anual, que começa com 7 dias de teste grátis; os dois preços aparecem na App Store. A assinatura é renovada automaticamente, salvo cancelamento pelo menos 24 horas antes do fim do período em curso. É gerenciada e cancelada nos ajustes da conta App Store.
+
+Termos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Política de privacidade: https://moifort.github.io/vinarium/
 
 ---
