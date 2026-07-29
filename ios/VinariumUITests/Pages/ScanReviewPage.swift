@@ -50,7 +50,10 @@ struct ScanReviewPage {
     private func chooseDestination(_ identifier: String) throws {
         app.swipeUp()
         try app.buttons["review-save-button"].tapOrFail()
-        try app.buttons[identifier].tapOrFail()
+        // A confirmationDialog surfaces each button twice in the accessibility
+        // tree, so an exact subscript query is ambiguous — same reason the
+        // detail page's dialogs go through firstMatch.
+        try app.buttons[identifier].firstMatch.tapOrFail()
     }
 
     /// Ajout vers la cave : enchaîne sur le placement.

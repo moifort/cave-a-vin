@@ -57,7 +57,10 @@ final class CellarFlowTest: BaseUITest {
         try dashboard.verifyJournalShowsEntry()
 
         // 6. CONSUMPTION: back to Cave, tap wine, remove, rate 5 stars + comment
-        _ = try tabBar.goToCellar().verify()
+        // The segment is still on Journal from step 3, and the title follows the
+        // segment — switch back before expecting "Ma Cave".
+        _ = try tabBar.goToCellar()
+        try cellar.switchToCave().verify()
         let detailForRemoval = try cellar.tapWine(named: wineName)
         try detailForRemoval.verify()
         let consumption = try detailForRemoval.tapRemoveFromCellar()
@@ -70,18 +73,28 @@ final class CellarFlowTest: BaseUITest {
         // Should return to cellar
         try app.navigationBars["Ma Cave"].waitOrFail()
 
-        // 7. FAVORITES: go to Vins tab, switch to "❤️ Favoris", verify wine visible
+        // 7. FAVORITES: flag the bottle from its detail menu, then check it shows
+        // under "❤️ Favoris". The flag is its own field — a 5-star rating alone
+        // does not make a favorite.
         _ = try tabBar.goToWineList().verify()
+        let detailForFavorite = try wineList.tapWine(named: wineName)
+        try detailForFavorite.verify()
+        try detailForFavorite.addToFavorites()
+        try detailForFavorite.close()
+
         let favorites = try WineListPage(app: app).switchToFavorites()
         try favorites.verifyWineVisible(wineName)
-        
+
+
         // 8. Open wine detail, delete and confirm
         let detail = try wineList.tapWine(named: wineName)
         try detail.verify()
         try detail.tapDelete()
 
-        // 9. Verify wine no longer appears in the list
-        try wineList.verify()
+        // 9. Verify wine no longer appears in the list. Back to "Tous" first: the
+        // filter is still on Favoris, the title follows it, and a wine gone from
+        // the whole list is the stronger check anyway.
+        try wineList.switchToAll().verify()
         wineList.verifyWineNotVisible(wineName)
     }
 }

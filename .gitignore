@@ -24,7 +24,6 @@ build/
 
 # iOS secrets (contains API tokens)
 ios/Vinarium/Shared/Secrets.swift
-ios/VinariumUITests/Support/TestSecrets.swift
 
 doc/
 # Version the architecture guides; the App Store privacy policy (index.html)

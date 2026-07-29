@@ -6,6 +6,11 @@ import SwiftUI
 struct VinariumApp: App {
     init() {
         FirebaseApp.configure()
+        #if DEBUG
+        // Points Auth at the local emulator and signs in, but only when the UI
+        // test launch arguments are there. A normal Debug run is untouched.
+        UITestEnvironment.bootstrapIfNeeded()
+        #endif
         startSentry()
     }
 
