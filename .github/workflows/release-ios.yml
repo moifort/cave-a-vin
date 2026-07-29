@@ -204,18 +204,42 @@ jobs:
             gh release create "$GITHUB_REF_NAME" --title "iOS $MARKETING" --notes-file "$NOTES"
           fi
 
-      - name: Build the "What's New" notes from CHANGELOG.fr.md
+      - name: Build the "What's New" notes for every App Store locale
         run: |
           set -euo pipefail
-          mkdir -p infra/fastlane/metadata/fr-FR
-          # French App Store listing → read the served French changelog (CHANGELOG.md is English).
-          # Bullets under the first "## " section become the release notes. App Store caps
-          # "What's New" at 4000 chars, so keep whole bullets until ~3900 (drop the rest).
-          awk '/^## /{n++; if (n==2) exit} n==1 && /^- /{print}' CHANGELOG.fr.md \
-            | awk 'BEGIN{max=3900; total=0} {len=length($0)+1; if (total+len>max) exit; total+=len; print}' \
-            > infra/fastlane/metadata/fr-FR/release_notes.txt
-          echo "---- What's New (fr-FR), $(wc -c < infra/fastlane/metadata/fr-FR/release_notes.txt) chars ----"
-          cat infra/fastlane/metadata/fr-FR/release_notes.txt
+          # One release_notes.txt per declared App Store locale. App Store Connect asks for
+          # "What's New" in each of them, and a locale deliver does not write keeps whatever
+          # it had — which on a new version is nothing. The regional stores read their
+          # parent language: en-GB the English notes, es-MX the Spanish ones, pt-BR the
+          # Portuguese ones.
+          #
+          # Bullets under the first "## " section become the notes. App Store caps them at
+          # 4000 chars, so keep whole bullets until ~3900 and drop the rest.
+          for pair in \
+            "fr-FR:CHANGELOG.fr.md" \
+            "en-US:CHANGELOG.md" \
+            "en-GB:CHANGELOG.md" \
+            "de-DE:CHANGELOG.de.md" \
+            "es-ES:CHANGELOG.es.md" \
+            "es-MX:CHANGELOG.es.md" \
+            "it:CHANGELOG.it.md" \
+            "ja:CHANGELOG.ja.md" \
+            "pt-PT:CHANGELOG.pt.md" \
+            "pt-BR:CHANGELOG.pt.md"
+          do
+            locale="${pair%%:*}"
+            source="${pair#*:}"
+            mkdir -p "infra/fastlane/metadata/$locale"
+            awk '/^## /{n++; if (n==2) exit} n==1 && /^- /{print}' "$source" \
+              | awk 'BEGIN{max=3900; total=0} {len=length($0)+1; if (total+len>max) exit; total+=len; print}' \
+              > "infra/fastlane/metadata/$locale/release_notes.txt"
+            if [ ! -s "infra/fastlane/metadata/$locale/release_notes.txt" ]; then
+              echo "::error::No release notes for $locale — $source has no bullet under its first ## heading"
+              exit 1
+            fi
+            echo "---- What's New ($locale from $source), $(wc -c < "infra/fastlane/metadata/$locale/release_notes.txt") chars ----"
+            cat "infra/fastlane/metadata/$locale/release_notes.txt"
+          done
 
       - name: Attach build and submit for review
         working-directory: infra

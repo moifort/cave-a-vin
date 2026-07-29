@@ -58,13 +58,12 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
     locale needs no upload of its own.
 - **App name in English is `Vinarium Wine Cellar`**, not `Vinarium`: Apple refuses the bare name
   in `en-US` because another app holds it there (409 `the app name is already being used`).
-- **Pending for 1.5** — `en-GB`, `pt-BR` and `es-MX` are still undeclared, so those stores fall
-  back to the primary language and show the *French* listing. Add them at the start of the 1.5
-  cycle, before the build is submitted: `en-GB` from the English content (adjust `organize` →
-  `organise`, and the name conflict likely applies there too), `pt-BR` from the Portuguese one
-  (Brazilian wording: `você`, `tela`, `assinatura`), `es-MX` from the Spanish one. The
-  translations have never had a native review pass either — the note at the top of
-  [APP_STORE_LISTING.localized.md](./APP_STORE_LISTING.localized.md) still stands.
+- **`en-GB`, `pt-BR` and `es-MX` were declared on 2026-07-29**, in the 1.5 cycle, from the
+  content in [APP_STORE_LISTING.localized.md](./APP_STORE_LISTING.localized.md). Those three
+  stores showed the *French* listing until then. Ten locales are now declared, and the
+  release workflow writes a `release_notes.txt` for each of them: a locale `deliver` does not
+  write keeps what it had, which on a new version is nothing. The translations have never had a
+  native review pass — the note at the top of that file still stands.
 - **App Privacy** questionnaire — answers to select:
   - Data collected & **linked to the user**:
     - *Contact info* → Name, Email (only if the user shares them via Sign in with Apple) — purpose **App Functionality**.
