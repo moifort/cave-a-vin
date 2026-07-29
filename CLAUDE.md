@@ -18,6 +18,7 @@ The changelog lives in one file per served language, each organized newest-versi
   ```
 - **Unit tests**: `bun test`
 - **Test coverage**: `bun test --coverage`
+- **End-to-end**: `./scripts/e2e.sh` (Firebase emulators + Nitro + iPhone simulator, nothing touches production — see [docs/e2e.md](docs/e2e.md)). Needs a JDK for the Firestore emulator.
 - **Linter**: `bunx biome check`
 - **Runtime**: always use `bun`/`bunx`, never `npm`/`npx`
 - **GraphQL codegen** (if the schema changed): `bun run generate:graphql` (regenerates `shared/schema.graphql`), then `cd ios && apollo-ios-cli generate` (config `ios/apollo-codegen-config.json`)
@@ -95,7 +96,9 @@ Full checklist in `ios/APP_STORE_SUBMISSION.md`. Build with the latest **final**
 **Automated release flow** (full procedure in `ios/APP_STORE_SUBMISSION.md`), in order:
 1. Write the release notes in English under `## Unreleased` in `CHANGELOG.md`, then the translation under `## Unreleased` in **each** served language (`CHANGELOG.fr.md`, `CHANGELOG.de.md`, `CHANGELOG.es.md`, `CHANGELOG.it.md`, `CHANGELOG.pt.md`, `CHANGELOG.ja.md`). Rename the `## Unreleased` heading in **every** file to `## <version> (<YYYY.MM.DD>)` (e.g. `## 1.2 (2026.08.01)`) — matching the version you are about to tag. There is no CI date-stamp; versioning is manual.
 2. **Push `main`** — `deploy.yml` deploys the backend and regenerates the served changelog asset from all the `CHANGELOG.*.md` files. This step is **required for the in-app changelog**: the notes only reach the app once a `main` deploy has rebuilt the asset. The app shows the version as the row title and the date on the right; a plain `## Unreleased` would display literally as "Unreleased", so make sure it was versioned in step 1.
-3. **Push a `ios-v<version>` tag** — runs `.github/workflows/release-ios.yml` (macOS runner, final Xcode): archive → export → upload to App Store Connect via the App Store Connect API key (automatic signing). Build number = `git rev-list --count HEAD` (no manual `CURRENT_PROJECT_VERSION` bump), marketing version from the tag.
+3. **Push a `ios-v<version>` tag** — runs `.github/workflows/release-ios.yml` (macOS runner, final Xcode). The `e2e` job replays the full user journey first (emulators + backend + simulator, see [docs/e2e.md](docs/e2e.md)) and **gates** the rest: archive → export → upload to App Store Connect via the App Store Connect API key (automatic signing). Build number = `git rev-list --count HEAD` (no manual `CURRENT_PROJECT_VERSION` bump), marketing version from the tag.
+
+Because the gate fires on a tag that is already pushed, a red scenario means fixing and re-tagging. To check it beforehand, run `release-ios.yml` manually with **e2e_only** checked: it runs the scenario and stops there.
 
 Because the CI runner is on a **final** macOS, the `BuildMachineOSBuild` patch below only concerns **local** archives made on the beta-macOS dev Mac.
 
