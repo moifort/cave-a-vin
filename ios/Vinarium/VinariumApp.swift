@@ -42,10 +42,16 @@ struct VinariumApp: App {
 
         SentrySDK.start { options in
             options.dsn = dsn
-            options.tracesSampleRate = 1.0
+            // Errors are never sampled, only performance traces are. A tenth is
+            // enough to watch latency without paying for a transaction per tap.
+            options.tracesSampleRate = 0.1
             options.enableAutoSessionTracking = true
             options.enableTimeToFullDisplayTracing = true
-            options.tracePropagationTargets = []
+            // Attaches the trace headers to our GraphQL calls, and only to those,
+            // so an error here and the backend error that caused it land in one
+            // trace instead of two unrelated issues. Sampling does not affect it:
+            // the trace id travels with every request.
+            options.tracePropagationTargets = [APIClient.shared.baseURL.absoluteString]
         }
         #endif
     }
