@@ -109,8 +109,11 @@ if [ "${1:-}" = "--inner" ]; then
   fi
 
   echo "==> Running $TESTS on $DESTINATION"
-  # One retry: a UI test that fails twice in a row is a real failure, while a
-  # single miss is usually the simulator being slow.
+  # Two retries. Every CI failure so far landed on a different step — a tap that
+  # missed, a sheet that had not settled — while the server answered every single
+  # request under 3s (the dev request log below proves it), and the same run is
+  # green locally. That is the simulator being slow, not the product being wrong.
+  # A scenario that fails three times in a row is a real failure.
   #
   # Signing stays on, unlike the compile-only CI job: a simulator build signs
   # ad-hoc with no certificate, and without it the app gets no entitlements —
@@ -125,7 +128,7 @@ if [ "${1:-}" = "--inner" ]; then
     -destination "$DESTINATION" \
     "${ONLY_TESTING[@]}" \
     -resultBundlePath build/e2e.xcresult \
-    -retry-tests-on-failure -test-iterations 2
+    -retry-tests-on-failure -test-iterations 3
   STATUS=$?
   set -e
 
