@@ -206,7 +206,10 @@ jobs:
             exit 0
           fi
           curl -sL https://sentry.io/get-cli/ | bash
-          sentry-cli debug-files upload build/Vinarium.xcarchive/dSYMs
+          # --include-sources bundles the Swift sources alongside the symbols, so
+          # an issue shows the code around the crashing line instead of just its
+          # number.
+          sentry-cli debug-files upload --include-sources build/Vinarium.xcarchive/dSYMs
 
       - name: Export a signed .ipa (manual signing)
         run: |
