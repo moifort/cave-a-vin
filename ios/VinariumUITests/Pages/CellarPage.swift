@@ -6,7 +6,7 @@ struct CellarPage {
 
     @discardableResult
     func verify() throws -> Self {
-        try app.navigationBars["Ma Cave"].waitOrFail()
+        try app.navigationBars["My Cellar"].waitOrFail()
         return self
     }
 
@@ -21,16 +21,16 @@ struct CellarPage {
     }
 
     func verifyRowHeader(_ row: String) throws {
-        let text = "Rangée \(row)"
+        let text = "Row \(row)"
         try app.staticTexts[text].waitOrFail(timeout: 4, "Row header '\(text)' not found")
     }
 
     func verifyJournalShowsEntry() throws {
-        try app.staticTexts["Entrée"].waitOrFail(timeout: 4, "'Entrée' not found")
+        try app.staticTexts["In"].waitOrFail(timeout: 4, "no entry row in the journal")
     }
 
     func verifyJournalShowsExit() throws {
-        try app.staticTexts["Sortie"].waitOrFail(timeout: 4, "'Sortie' not found")
+        try app.staticTexts["Out"].waitOrFail(timeout: 4, "no exit row in the journal")
     }
 
     func tapWine(named name: String) throws -> WineDetailPage {

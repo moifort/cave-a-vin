@@ -6,7 +6,7 @@ struct DashboardPage {
 
     @discardableResult
     func verify() throws -> Self {
-        try app.navigationBars["Accueil"].waitOrFail()
+        try app.navigationBars["Home"].waitOrFail()
         return self
     }
 
@@ -38,12 +38,12 @@ struct DashboardPage {
     }
 
     func verifyJournalShowsEntry() throws {
-        let predicate = NSPredicate(format: "label CONTAINS[c] %@", "entrée")
-        let element = app.staticTexts.matching(predicate).firstMatch
-        if !element.waitForExistence(timeout: 3) {
-            let button = app.buttons.matching(predicate).firstMatch
-            try button.waitOrFail(timeout: 2, "'Entrée' not found in journal")
-        }
+        // The direction badge is an image carrying it as its accessibility label,
+        // so match that exactly. The French version searched staticTexts for
+        // "entrée" and was really matching the "Dernière entrée le ..." caption,
+        // never the badge; in English, a CONTAINS on "in" would match "In cellar"
+        // and pass whatever the journal shows.
+        try app.images["In"].firstMatch.waitOrFail(timeout: 15, "no entry badge in the journal")
     }
 
     func verifyFavoritesContains(_ wineName: String) throws {

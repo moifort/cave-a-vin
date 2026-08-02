@@ -25,7 +25,7 @@ final class FavoriteFlowTest: BaseUITest {
         let wineList = try WineListPage(app: app).verify()
         try wineList.verifyWineVisible(wineName)
 
-        // 4. DASHBOARD: go to Accueil, verify section "Mes favoris" contains the wine
+        // 4. DASHBOARD: go to Home, verify the "My favorites" section contains the wine
         let dashboard = try tabBar.goToDashboard().verify()
         try dashboard.verifyFavoritesContains(wineName)
 

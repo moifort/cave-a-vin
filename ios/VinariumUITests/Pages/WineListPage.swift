@@ -6,7 +6,7 @@ struct WineListPage {
 
     @discardableResult
     func verify() throws -> Self {
-        try app.navigationBars["Mes Vins"].waitOrFail()
+        try app.navigationBars["My Wines"].waitOrFail()
         return self
     }
 

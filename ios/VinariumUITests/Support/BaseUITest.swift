@@ -59,12 +59,12 @@ class BaseUITest: XCTestCase {
         account = "e2e-\(UUID().uuidString.lowercased())@vinarium.test"
         app = XCUIApplication()
         app.launchArguments = [
-            // The scenarios assert on French copy ("Accueil", "Ma Cave", "Offrir"),
-            // so the run must not inherit the host's language. The dev Mac is
-            // French and the CI runner is English, which is exactly why the gate
-            // passed locally and failed on CI.
-            "-AppleLanguages", "(fr)",
-            "-AppleLocale", "fr_FR",
+            // The scenarios assert on English copy ("Home", "My Cellar", "Give"),
+            // so the run must not inherit the host's language: the dev Mac is
+            // French and a CI runner is English, and the gate was passing here
+            // and failing there while saying nothing about the app.
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US",
             // Read by APIClient through UserDefaults (NSArgumentDomain).
             "-serverURL", "http://127.0.0.1:3000",
             // Read by UITestEnvironment (DEBUG only): points Firebase Auth at the

@@ -12,24 +12,24 @@ struct TabBarPage {
 
     @discardableResult
     func goToDashboard() throws -> DashboardPage {
-        try app.tabBars.buttons["Accueil"].tapOrFail()
+        try app.tabBars.buttons["Home"].tapOrFail()
         return DashboardPage(app: app)
     }
 
     @discardableResult
     func goToCellar() throws -> CellarPage {
-        try app.tabBars.buttons["Cave"].tapOrFail()
+        try app.tabBars.buttons["Cellar"].tapOrFail()
         return CellarPage(app: app)
     }
 
     @discardableResult
     func goToWineList() throws -> WineListPage {
-        try app.tabBars.buttons["Vins"].tapOrFail()
+        try app.tabBars.buttons["Wines"].tapOrFail()
         return WineListPage(app: app)
     }
 
     func openScanner() throws -> ScanFlowPage {
-        try app.tabBars.buttons["Scanner"].tapOrFail()
+        try app.tabBars.buttons["Scan"].tapOrFail()
         return ScanFlowPage(app: app)
     }
 }

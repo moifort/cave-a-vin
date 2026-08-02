@@ -6,12 +6,12 @@ struct GiftPage {
 
     @discardableResult
     func verify() throws -> Self {
-        try app.navigationBars["Offrir"].waitOrFail()
+        try app.navigationBars["Give"].waitOrFail()
         return self
     }
 
     func typeRecipientName(_ name: String) -> Self {
-        let field = app.textFields["Nom du destinataire"]
+        let field = app.textFields["Name"]
         if field.waitForExistence(timeout: 3) {
             field.tap()
             field.typeText(name)

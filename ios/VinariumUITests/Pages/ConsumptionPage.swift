@@ -6,7 +6,7 @@ struct ConsumptionPage {
 
     @discardableResult
     func verify() throws -> Self {
-        try app.navigationBars["Consommation"].waitOrFail()
+        try app.navigationBars["Consumption"].waitOrFail()
         return self
     }
 

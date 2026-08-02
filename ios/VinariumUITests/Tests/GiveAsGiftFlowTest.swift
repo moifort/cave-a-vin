@@ -34,7 +34,7 @@ final class GiveAsGiftFlowTest: BaseUITest {
         try giftPage.tapConfirm()
 
         // Should return to cellar
-        try app.navigationBars["Ma Cave"].waitOrFail()
+        try app.navigationBars["My Cellar"].waitOrFail()
 
         // 5. WINE LIST: the bottle left the cellar, so look for it in the full
         // list. Not under "Offerts": that filter holds bottles received as a gift

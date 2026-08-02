@@ -6,7 +6,7 @@ struct ScanReviewPage {
 
     @discardableResult
     func verify() throws -> Self {
-        try app.navigationBars["Vérifier la bouteille"].waitOrFail()
+        try app.navigationBars["Check the bottle"].waitOrFail()
         return self
     }
 
@@ -40,13 +40,13 @@ struct ScanReviewPage {
     }
 
     func selectColor(_ color: String) throws -> Self {
-        try app.buttons["Couleur"].tapOrFail()
+        try app.buttons["Color"].tapOrFail()
         try app.buttons[color].tapOrFail()
         return self
     }
 
     func typeVintage(_ vintage: String) throws -> Self {
-        let vintageField = try app.textFields["Année"].waitOrFail()
+        let vintageField = try app.textFields["Year"].waitOrFail()
         vintageField.tap(withNumberOfTaps: 3, numberOfTouches: 1)
         vintageField.typeText(vintage)
         return self
@@ -63,13 +63,13 @@ struct ScanReviewPage {
     func typeRecommenderName(_ name: String) throws -> Self {
         let field = app.textFields["review-recommender-field"].firstMatch
         app.scrollTo(field)
-        try field.waitOrFail(timeout: 4, "'Conseillé par' field not reachable")
+        try field.waitOrFail(timeout: 4, "'Recommended by' field not reachable")
         field.tap()
         field.typeText(name)
         return self
     }
 
-    /// Ouvre la popup de choix (bouton +) puis tape le choix demandé.
+    /// Opens the destination popup (the plus button) then taps the requested choice.
     private func chooseDestination(_ identifier: String) throws {
         app.swipeUp()
         try app.buttons["review-save-button"].tapOrFail()
@@ -79,13 +79,13 @@ struct ScanReviewPage {
         try app.buttons[identifier].firstMatch.tapOrFail()
     }
 
-    /// Ajout vers la cave : enchaîne sur le placement.
+    /// Adds to the cellar, which chains into the placement step.
     func addToCellar() throws -> PlacementPage {
         try chooseDestination("choice-cellar")
         return PlacementPage(app: app)
     }
 
-    /// Active le toggle « Favori » inline du formulaire (section Dégustation).
+    /// Turns on the form's inline favorite toggle (tasting section).
     func markAsFavorite() throws -> Self {
         let toggle = app.switches["review-favorite-toggle"].firstMatch
         app.scrollTo(toggle)

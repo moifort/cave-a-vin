@@ -6,7 +6,7 @@ struct WineDetailPage {
 
     @discardableResult
     func verify() throws -> Self {
-        try app.buttons["Fermer"].waitOrFail()
+        try app.buttons["Close"].waitOrFail()
         return self
     }
 
@@ -17,12 +17,12 @@ struct WineDetailPage {
 
     func verifyCellarSection() throws {
         app.swipeUp()
-        try app.staticTexts["Cave"].waitOrFail(timeout: 4, "'Cave' section not found")
+        try app.staticTexts["Cellar"].waitOrFail(timeout: 4, "'Cave' section not found")
     }
 
     func verifyConsumptionSection() throws {
         app.swipeUp()
-        try app.staticTexts["Consommé"].waitOrFail(timeout: 4, "'Consommé' section not found")
+        try app.staticTexts["Consumed"].waitOrFail(timeout: 4, "'Consumed' section not found")
     }
 
     func tapRemoveFromCellar() throws -> ConsumptionPage {
@@ -52,23 +52,23 @@ struct WineDetailPage {
 
     func verifyGiftSection() throws {
         app.swipeUp()
-        try app.staticTexts["Offert"].waitOrFail(timeout: 4, "'Offert' section not found")
+        try app.staticTexts["Gifted"].waitOrFail(timeout: 4, "'Offert' section not found")
     }
 
     func verifyRecommendationSection() throws {
         app.swipeUp()
-        try app.staticTexts["Conseillé"].waitOrFail(timeout: 4, "'Conseillé' section not found")
+        try app.staticTexts["Recommended"].waitOrFail(timeout: 4, "'Recommended' section not found")
     }
 
     /// Flags the bottle as a favorite through the detail menu and its sheet. A
     /// rating does not make a favorite: the flag is its own field on the note.
     func addToFavorites() throws {
-        try tapMenuItem(identifier: "menu-favorite-button", label: "Ajouter aux favoris")
+        try tapMenuItem(identifier: "menu-favorite-button", label: "Add to favorites")
         try app.buttons["confirm-favorite-button"].tapOrFail(timeout: 10)
     }
 
     func tapDelete() throws {
-        try tapMenuItem(identifier: "delete-wine-button", label: "Supprimer")
+        try tapMenuItem(identifier: "delete-wine-button", label: "Delete")
         try app.buttons["choice-delete"].firstMatch.tapOrFail()
     }
 
@@ -87,6 +87,6 @@ struct WineDetailPage {
     }
 
     func close() throws {
-        try app.buttons["Fermer"].tapOrFail()
+        try app.buttons["Close"].tapOrFail()
     }
 }

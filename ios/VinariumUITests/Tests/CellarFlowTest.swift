@@ -32,7 +32,7 @@ final class CellarFlowTest: BaseUITest {
         try cellarDetail.verifyCellarSection()
         try cellarDetail.close()
 
-        // Cave Journal: switch to Journal, verify "Entrée"
+        // Cave Journal: switch to Journal, verify the entry row
         let journal = try cellar.switchToJournal()
         try journal.verifyJournalShowsEntry()
 
@@ -50,7 +50,7 @@ final class CellarFlowTest: BaseUITest {
         try listDetail.verifyWineName(wineName)
         try listDetail.close()
 
-        // 5. DASHBOARD: go to Accueil, verify stats and journal
+        // 5. DASHBOARD: go to Home, verify stats and journal
         let dashboard = try tabBar.goToDashboard().verify()
         try dashboard.verifyBottleCount("1")
         try dashboard.verifyJournalContains(wineName)
@@ -58,7 +58,7 @@ final class CellarFlowTest: BaseUITest {
 
         // 6. CONSUMPTION: back to Cave, tap wine, remove, rate 5 stars + comment
         // The segment is still on Journal from step 3, and the title follows the
-        // segment — switch back before expecting "Ma Cave".
+        // segment — switch back before expecting "My Cellar".
         _ = try tabBar.goToCellar()
         try cellar.switchToCave().verify()
         let detailForRemoval = try cellar.tapWine(named: wineName)
@@ -71,7 +71,7 @@ final class CellarFlowTest: BaseUITest {
             .tapConfirm()
 
         // Should return to cellar
-        try app.navigationBars["Ma Cave"].waitOrFail()
+        try app.navigationBars["My Cellar"].waitOrFail()
 
         // 7. FAVORITES: flag the bottle from its detail menu, then check it shows
         // under "❤️ Favoris". The flag is its own field — a 5-star rating alone

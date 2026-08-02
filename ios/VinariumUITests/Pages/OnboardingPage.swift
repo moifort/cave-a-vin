@@ -1,7 +1,7 @@
 import XCTest
 
 /// The first-launch wizard. Every end-to-end run signs in with a brand new
-/// account, so it always starts here: welcome → prénom → cellar choice →
+/// account, so it always starts here: welcome → first name → cellar choice →
 /// dimensions → summary.
 @MainActor
 struct OnboardingPage {
@@ -37,7 +37,7 @@ struct OnboardingPage {
 
         // completeOnboarding writes the profile and provisions the grid before
         // the app hands over, so this waits on a round-trip, not a transition.
-        try app.navigationBars["Accueil"].waitOrFail(timeout: 20, "Onboarding did not hand over to the app")
+        try app.navigationBars["Home"].waitOrFail(timeout: 20, "Onboarding did not hand over to the app")
         return DashboardPage(app: app)
     }
 }
