@@ -68,7 +68,7 @@ extension JournalSection {
     }
 }
 
-#Preview("Avec \u{00E9}v\u{00E9}nements") {
+#Preview("With events") {
     JournalSection(
         events: [
             .init(isEntry: true, wineName: "Château Margaux 2018", position: "A3", wineId: "1", date: Date()),
@@ -79,7 +79,7 @@ extension JournalSection {
     .padding()
 }
 
-#Preview("Vide") {
+#Preview("Empty") {
     JournalSection(events: [], onEventTapped: { _ in })
         .padding()
 }

@@ -68,7 +68,7 @@ extension ReadyToDrinkSection {
     }
 }
 
-#Preview("Avec vins") {
+#Preview("With wines") {
     ReadyToDrinkSection(
         items: [
             .init(id: "1", color: .red, name: "Ch\u{00E2}teau Margaux 2018", urgent: true, drinkUntil: 2026, position: "A3"),
@@ -79,7 +79,7 @@ extension ReadyToDrinkSection {
     .padding()
 }
 
-#Preview("Vide") {
+#Preview("Empty") {
     ReadyToDrinkSection(items: [], onWineTapped: { _ in })
         .padding()
 }

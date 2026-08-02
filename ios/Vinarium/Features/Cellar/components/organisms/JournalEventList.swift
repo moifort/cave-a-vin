@@ -72,7 +72,7 @@ extension JournalEventList {
     }
 }
 
-#Preview("Avec événements") {
+#Preview("With events") {
     JournalEventList(
         events: [
             .init(id: "1-in", date: .now, isEntry: true, wineId: "1", title: "Chateau Margaux 2018", position: "A1"),
@@ -83,6 +83,6 @@ extension JournalEventList {
     )
 }
 
-#Preview("Vide") {
+#Preview("Empty") {
     JournalEventList(events: [], onEventTapped: { _ in })
 }

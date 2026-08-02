@@ -30,7 +30,7 @@ struct ScanAnalyzingPage: View {
     }
 }
 
-#Preview("Clair") {
+#Preview("Light") {
     Color(.systemBackground)
         .ignoresSafeArea()
         .sheet(isPresented: .constant(true)) {
@@ -39,7 +39,7 @@ struct ScanAnalyzingPage: View {
         .preferredColorScheme(.light)
 }
 
-#Preview("Sombre") {
+#Preview("Dark") {
     Color(.systemBackground)
         .ignoresSafeArea()
         .sheet(isPresented: .constant(true)) {

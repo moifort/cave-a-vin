@@ -12,7 +12,7 @@ struct WineColorBadge: View {
     }
 }
 
-#Preview("Toutes les couleurs") {
+#Preview("All colors") {
     HStack(spacing: 12) {
         ForEach(WineColor.allCases) { color in
             VStack {

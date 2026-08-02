@@ -134,7 +134,7 @@ struct SiriLoader: View {
     }
 }
 
-#Preview("Sur fond clair") {
+#Preview("On a light background") {
     ZStack {
         Color(.systemBackground).ignoresSafeArea()
         SiriLoader()
@@ -142,7 +142,7 @@ struct SiriLoader: View {
     .preferredColorScheme(.light)
 }
 
-#Preview("Sur fond sombre") {
+#Preview("On a dark background") {
     ZStack {
         Color(.systemBackground).ignoresSafeArea()
         SiriLoader()

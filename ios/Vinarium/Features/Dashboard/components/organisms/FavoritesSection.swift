@@ -84,7 +84,7 @@ extension FavoritesSection {
     }
 }
 
-#Preview("Avec favoris") {
+#Preview("With favorites") {
     FavoritesSection(
         items: [
             .init(id: "1", color: .red, name: "Ch\u{00E2}teau Margaux 2018", vintage: 2018, tastingDate: Date(), estimatedPrice: 120, rating: 5),
@@ -95,7 +95,7 @@ extension FavoritesSection {
     .padding()
 }
 
-#Preview("Vide") {
+#Preview("Empty") {
     FavoritesSection(items: [], onWineTapped: { _ in })
         .padding()
 }

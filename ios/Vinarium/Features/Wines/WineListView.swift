@@ -95,7 +95,7 @@ struct WineListView: View {
     }
 }
 
-#Preview("Liste de vins") {
+#Preview("Wine list") {
     @Previewable @State var showFavorites = false
     @Previewable @State var showRecommended = false
     WineListView(showFavorites: $showFavorites, showRecommended: $showRecommended)

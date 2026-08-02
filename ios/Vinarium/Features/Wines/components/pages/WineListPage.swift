@@ -96,7 +96,7 @@ struct WineListPage: View {
     }
 }
 
-#Preview("Avec vins") {
+#Preview("With wines") {
     @Previewable @State var mode: WineListMode = .all
     @Previewable @State var sort: WineSort = .updatedAt
     @Previewable @State var sortDesc = true
@@ -123,7 +123,7 @@ struct WineListPage: View {
     }
 }
 
-#Preview("Vide") {
+#Preview("Empty") {
     @Previewable @State var mode: WineListMode = .favorites
     @Previewable @State var sort: WineSort = .updatedAt
     @Previewable @State var sortDesc = true

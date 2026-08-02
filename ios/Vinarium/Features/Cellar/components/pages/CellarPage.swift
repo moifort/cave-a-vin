@@ -65,7 +65,7 @@ struct CellarPage: View {
     }
 }
 
-#Preview("Cave avec bouteilles") {
+#Preview("Cellar with bottles") {
     @Previewable @State var mode: CellarDisplayMode = .cave
     NavigationStack {
         CellarPage(
@@ -106,7 +106,7 @@ struct CellarPage: View {
     }
 }
 
-#Preview("Cave vide") {
+#Preview("Empty cellar") {
     @Previewable @State var mode: CellarDisplayMode = .cave
     NavigationStack {
         CellarPage(

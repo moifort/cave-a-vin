@@ -282,21 +282,35 @@ and keep the `Label`'s text for accessibility.
 
 ### Previews as Storybook
 
-Every component from the page level down **must** be previewable without a running server — pages included, since they hold no ViewModel:
+**Every view has a `#Preview`** — pages, organisms, molecules, shared atoms, private
+sub-views of a file, and the feature-root coordinators. Preview names are dev-facing,
+so they are written in **English** like the rest of the repo, even though the on-screen
+copy inside them is French.
+
+Everything from the page level down previews **without a running server**, since none
+of it holds a ViewModel:
 
 ```swift
-// Good — the pure Page previews with inline data
-#Preview("En cave") {
+// The pure Page previews with inline data
+#Preview("In cellar") {
     WineDetailContent(detail: UserWineDetail(id: "1", name: "Margaux", /* … */), onRemoveRequested: {})
-}
-
-// Bad — preview that hits the API
-#Preview {
-    WineDetailView(wineId: "c2f5486a-…")  // the coordinator loads data — needs a server
 }
 ```
 
-The feature-root `{Feature}View` coordinator is the only exception — it owns the ViewModel and loads data, so it is not previewed. Its `Page` and every organism/molecule below must all preview with mock data.
+The feature-root `{Feature}View` coordinator owns the ViewModel, so its preview is a
+**smoke preview**: it renders the loading or empty state the canvas can reach on its own
+and never proves the data path. Keep it cheap and never make it the place where a screen
+is designed — that stays the `Page`'s job. Two coordinators need a nudge to get there:
+
+- `AuthRoot` calls `FirebaseApp.configure()` first, because the canvas does not run
+  `VinariumApp.init` and `AuthSession` traps on an unconfigured Firebase.
+- `ScanView` renders its controls over an empty preview layer: the canvas has no camera,
+  and `CameraView` wires no input in that case.
+
+One documented exception: `OfferButton` (in `PremiumSheet`) has no preview, because
+StoreKit's `Product` has no public initializer and cannot be built by hand. Anything else
+that resists previewing is a design smell — pull the presentational part out rather than
+skip the preview.
 
 ## GraphQL Client (Apollo iOS)
 

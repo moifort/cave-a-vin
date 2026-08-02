@@ -179,7 +179,7 @@ extension WineDetailContent {
     }
 }
 
-#Preview("En cave") {
+#Preview("In cellar") {
     WineDetailContent(
         content: .init(
             color: .red,
@@ -210,7 +210,7 @@ extension WineDetailContent {
     )
 }
 
-#Preview("Consommé") {
+#Preview("Consumed") {
     WineDetailContent(
         content: .init(
             color: .white,

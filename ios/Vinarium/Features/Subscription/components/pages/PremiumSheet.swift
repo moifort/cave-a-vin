@@ -297,12 +297,12 @@ private struct OfferButton: View {
     .padding()
 }
 
-#Preview("Allocation épuisée") {
+#Preview("Allowance spent") {
     PremiumSheet(trigger: .scanAllowanceSpent)
         .environment(SubscriptionStore())
 }
 
-#Preview("Découvrir") {
+#Preview("Discover") {
     PremiumSheet(trigger: .discover)
         .environment(SubscriptionStore())
 }

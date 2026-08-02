@@ -94,7 +94,7 @@ private struct Capsule2D: View {
         .padding(40)
 }
 
-#Preview("Sombre") {
+#Preview("Dark") {
     BrandLogo()
         .padding(40)
         .preferredColorScheme(.dark)

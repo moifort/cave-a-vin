@@ -105,7 +105,7 @@ extension WineListContent {
     }
 }
 
-#Preview("Avec vins") {
+#Preview("With wines") {
     WineListContent(
         mode: .all,
         groups: [
@@ -122,7 +122,7 @@ extension WineListContent {
     )
 }
 
-#Preview("Vide - All") {
+#Preview("Empty - all") {
     WineListContent(
         mode: .all,
         groups: [],
@@ -130,7 +130,7 @@ extension WineListContent {
     )
 }
 
-#Preview("Vide - Favoris") {
+#Preview("Empty - favorites") {
     WineListContent(
         mode: .favorites,
         groups: [],
@@ -138,7 +138,7 @@ extension WineListContent {
     )
 }
 
-#Preview("Vide - Offerts") {
+#Preview("Empty - gifted") {
     WineListContent(
         mode: .gifted,
         groups: [],
@@ -146,7 +146,7 @@ extension WineListContent {
     )
 }
 
-#Preview("Vide - Recommended") {
+#Preview("Empty - recommended") {
     WineListContent(
         mode: .recommended,
         groups: [],

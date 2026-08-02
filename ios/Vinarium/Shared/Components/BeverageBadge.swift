@@ -22,7 +22,7 @@ struct BeverageBadge: View {
     }
 }
 
-#Preview("Vin et autres boissons") {
+#Preview("Wine and other beverages") {
     HStack(spacing: 12) {
         BeverageBadge(beverageType: .wine, color: .red)
         ForEach([BeverageType.spirit, .beer, .sake, .cider, .other]) { type in

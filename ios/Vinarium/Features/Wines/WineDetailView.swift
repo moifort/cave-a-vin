@@ -472,14 +472,14 @@ struct WineDetailView: View {
     }
 }
 
-#Preview("Bouteille sortie") {
+#Preview("Bottle taken out") {
     WineDetailView(wineId: "5d288fc9-864d-4633-862a-b4410cf8b64a")
 }
 
-#Preview("En cave") {
+#Preview("In cellar") {
     WineDetailView(wineId: "c2f5486a-29d6-4a32-b3e9-323ab1bee3d1")
 }
 
-#Preview("Conseiller") {
+#Preview("Recommend") {
     WineDetailView(wineId: "19fe3138-e125-4df9-afe6-90e1505a0326")
 }

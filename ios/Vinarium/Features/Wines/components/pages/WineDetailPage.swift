@@ -16,7 +16,7 @@ struct WineDetailPage: View {
     }
 }
 
-#Preview("En cave") {
+#Preview("In cellar") {
     NavigationStack {
         WineDetailPage(
             content: .init(

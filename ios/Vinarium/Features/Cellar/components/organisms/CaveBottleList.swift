@@ -75,7 +75,7 @@ extension CaveBottleList {
     }
 }
 
-#Preview("Avec bouteilles") {
+#Preview("With bottles") {
     CaveBottleList(
 
         groups: [
@@ -92,7 +92,7 @@ extension CaveBottleList {
     )
 }
 
-#Preview("Vide") {
+#Preview("Empty") {
     CaveBottleList(
 
         groups: [],

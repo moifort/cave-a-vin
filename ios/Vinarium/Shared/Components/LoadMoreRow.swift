@@ -29,13 +29,13 @@ struct LoadMoreRow: View {
     }
 }
 
-#Preview("Chargement") {
+#Preview("Loading") {
     List {
         LoadMoreRow(failed: false, loadingLabel: "Chargement de plus de vins", onLoadMore: {})
     }
 }
 
-#Preview("Échec") {
+#Preview("Failed") {
     List {
         LoadMoreRow(failed: true, loadingLabel: "Chargement de plus de vins", onLoadMore: {})
     }

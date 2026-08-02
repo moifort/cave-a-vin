@@ -57,7 +57,7 @@ struct AdminBanner: View {
     }
 }
 
-#Preview("Chargé") {
+#Preview("Loaded") {
     VStack(spacing: 0) {
         AdminBanner(
             aiCost: "0,42 €",
@@ -70,7 +70,7 @@ struct AdminBanner: View {
     }
 }
 
-#Preview("Chargement") {
+#Preview("Loading") {
     VStack(spacing: 0) {
         AdminBanner(
             aiCost: "…",

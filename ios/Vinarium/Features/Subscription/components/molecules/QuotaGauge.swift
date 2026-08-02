@@ -55,12 +55,12 @@ struct QuotaGauge: View {
         .padding()
 }
 
-#Preview("Entamé") {
+#Preview("Partly used") {
     QuotaGauge(used: 3, limit: 5, renewsOn: Date().addingTimeInterval(9 * 86_400))
         .padding()
 }
 
-#Preview("Épuisé") {
+#Preview("Exhausted") {
     QuotaGauge(used: 5, limit: 5, renewsOn: Date().addingTimeInterval(9 * 86_400))
         .padding()
 }

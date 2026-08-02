@@ -51,14 +51,14 @@ struct SearchPage: View {
     SearchPage(filters: $filters, sections: [], hasActiveSearch: false, onWineTapped: { _ in })
 }
 
-#Preview("Chargement") {
+#Preview("Loading") {
     @Previewable @State var filters = SearchFilters()
     SearchPage(
         filters: $filters, sections: [], hasActiveSearch: true, isLoading: true, onWineTapped: { _ in }
     )
 }
 
-#Preview("Résultats") {
+#Preview("Results") {
     @Previewable @State var filters = SearchFilters()
     SearchPage(
         filters: $filters,
@@ -75,7 +75,7 @@ struct SearchPage: View {
     )
 }
 
-#Preview("Aucun résultat") {
+#Preview("No result") {
     @Previewable @State var filters = SearchFilters()
     SearchPage(filters: $filters, sections: [], hasActiveSearch: true, onWineTapped: { _ in })
 }

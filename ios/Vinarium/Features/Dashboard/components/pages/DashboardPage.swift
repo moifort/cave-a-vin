@@ -40,7 +40,7 @@ extension DashboardPage {
     }
 }
 
-#Preview("Avec données") {
+#Preview("With data") {
     NavigationStack {
         DashboardPage(
             content: .init(
@@ -63,7 +63,7 @@ extension DashboardPage {
     }
 }
 
-#Preview("Vide") {
+#Preview("Empty") {
     NavigationStack {
         DashboardPage(
             content: .init(

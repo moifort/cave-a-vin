@@ -519,7 +519,7 @@ private let mockImageData: Data = {
     return image.jpegData(compressionQuality: 0.8) ?? Data()
 }()
 
-#Preview("Vin") {
+#Preview("Wine") {
     let mockScanResult = ScanResult(
         recognized: true,
         name: "Château Margaux",
@@ -548,7 +548,7 @@ private let mockImageData: Data = {
     }
 }
 
-#Preview("Bière") {
+#Preview("Beer") {
     let mockScanResult = ScanResult(
         recognized: true,
         name: "La Chouffe",

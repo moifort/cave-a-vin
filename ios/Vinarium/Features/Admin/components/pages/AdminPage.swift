@@ -117,7 +117,7 @@ struct AdminPage: View {
     }
 }
 
-#Preview("Chargé") {
+#Preview("Loaded") {
     NavigationStack {
         AdminPage(
             metrics: AdminMetrics(
@@ -141,7 +141,7 @@ struct AdminPage: View {
     }
 }
 
-#Preview("Avant le premier rafraîchissement") {
+#Preview("Before the first refresh") {
     NavigationStack {
         AdminPage(
             metrics: AdminMetrics(
@@ -165,7 +165,7 @@ struct AdminPage: View {
     }
 }
 
-#Preview("Erreur") {
+#Preview("Error") {
     NavigationStack {
         AdminPage(
             metrics: nil,

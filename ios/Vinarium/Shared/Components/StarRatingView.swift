@@ -18,14 +18,14 @@ struct StarRatingView: View {
     }
 }
 
-#Preview("Aucune") {
+#Preview("None") {
     StarRatingView(rating: 0)
 }
 
-#Preview("3 sur 5") {
+#Preview("3 of 5") {
     StarRatingView(rating: 3)
 }
 
-#Preview("5 sur 5") {
+#Preview("5 of 5") {
     StarRatingView(rating: 5)
 }
