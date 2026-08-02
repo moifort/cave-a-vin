@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// First-launch setup wizard. Collects the user's prénom and cellar dimensions,
+/// First-launch setup wizard. Collects the user's first name and cellar dimensions,
 /// then persists them via `completeOnboarding`. Calls `onCompleted` on success so
 /// the auth gate can hand over to the main app without a network round-trip.
 struct OnboardingView: View {

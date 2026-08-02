@@ -5,12 +5,12 @@ struct DashboardEventRow: View {
     let wineName: String
     let label: LocalizedStringKey
     let position: String
-    /// Le membre qui a fait le mouvement, nil quand c'est soi-même.
+    /// The member behind the move, nil when it was you.
     var memberName: String? = nil
 
     var body: some View {
-        // Même recette que les autres rows : icône alignée en haut, colonne texte
-        // pleine largeur alignée à gauche, nom tronqué avec ellipsis.
+        // Same recipe as the other rows: icon aligned to the top, full-width text
+        // column aligned to the left, name truncated with an ellipsis.
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .foregroundStyle(isEntry ? .green : .red)

@@ -38,7 +38,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Le Picker Statut n'a de sens que sur les modes non déjà filtrés par statut.
+    /// The status picker only makes sense on views that are not already filtered by status.
     var supportsStatusFilter: Bool {
         switch self {
         case .all, .favorites: true
@@ -71,8 +71,8 @@ enum WineSort: String, CaseIterable, Identifiable {
         }
     }
 
-    /// « Par personne » n'a de sens que là où chaque vin porte une personne :
-    /// qui l'a offert (Offerts) ou qui l'a conseillé (Conseillés).
+    /// Sorting by person only makes sense where every wine carries one: whoever gave
+    /// the bottle (gifted view) or whoever recommended it (recommended view).
     static func available(for mode: WineListMode) -> [WineSort] {
         allCases.filter { $0 != .person || mode == .gifted || mode == .recommended }
     }
@@ -106,17 +106,17 @@ private let wineMonthYearFormatter: DateFormatter = {
 
 @MainActor @Observable
 final class WineListViewModel {
-    /// Pages accumulées depuis le serveur, dans l'ordre de tri courant.
+    /// Pages accumulated from the server, in the current sort order.
     private(set) var wines: [Wine] = []
-    /// Démarre à true pour éviter un flash « Aucun vin » avant le premier load().
+    /// Starts at true to avoid an "no wine" flash before the first load().
     var isLoading = true
     var isLoadingMore = false
     var hasMore = false
-    /// Dernier loadMore en échec : la sentinelle devient un bouton « Réessayer »
-    /// au lieu d'un spinner qui tournerait pour toujours sans nouvelle tentative.
+    /// Last loadMore failed: the sentinel turns into a retry button instead of a
+    /// spinner that would keep turning forever without a new attempt.
     private(set) var loadMoreFailed = false
     var error: String?
-    // Tout changement de vue/tri/filtre recharge la page 0 côté serveur.
+    // Any view/sort/filter change reloads page 0 from the server.
     var sort: WineSort = .updatedAt { didSet { if oldValue != sort { scheduleReload() } } }
     var sortDescending = true { didSet { if oldValue != sortDescending { scheduleReload() } } }
     var statusFilter: WineStatusFilter = .all {
@@ -129,55 +129,54 @@ final class WineListViewModel {
     var mode: WineListMode = .all {
         didSet {
             guard oldValue != mode else { return }
-            // Le tri « Par personne » n'existe pas hors Offerts/Conseillés : retomber
-            // sur le tri par défaut. Son didSet planifie un reload redondant avec le
-            // nôtre (même requête, l'un des deux aboutit) — bénin, pas de flash.
+            // Sorting by person does not exist outside the gifted/recommended views,
+            // so fall back to the default sort. Its didSet schedules a reload that is
+            // redundant with ours (same request, one of the two wins): harmless, no flash.
             if !WineSort.available(for: mode).contains(sort) { sort = .updatedAt }
             scheduleReload()
         }
     }
 
     private let pageSize = 15
-    // Bien en dessous de pageSize, sinon la page suivante se chargerait dès
-    // l'affichage de la première (chargement en chaîne involontaire).
+    // Well below pageSize, otherwise the next page would load as soon as the first
+    // one is displayed (unintended chain loading).
     private let prefetchThreshold = 5
     private var reloadTask: Task<Void, Never>?
-    // Jeton anti-résultats périmés : les fetch Apollo ne sont pas annulables, donc
-    // une réponse d'une vue précédente peut arriver APRÈS celle de la vue courante.
-    // Chaque scheduleReload invalide les réponses des générations antérieures.
+    // Stale-result token: Apollo fetches are not cancellable, so a response from a
+    // previous view can arrive AFTER the one for the current view. Every
+    // scheduleReload invalidates the responses of earlier generations.
     private var generation = 0
 
     private(set) var groupedWines: [(String, [Wine])] = []
 
-    /// Recharge la page 0, en annulant un rechargement précédent encore en cours
-    /// (changements de filtre rapides). Vide la liste et repasse en chargement pour
-    /// que la vue affiche le loader et reparte de zéro. Appelé par les `didSet` et
-    /// la navigation.
+    /// Reloads page 0, cancelling a previous reload still in flight (rapid filter
+    /// changes). Clears the list and goes back to the loading state so the view shows
+    /// the loader and starts over. Called from the `didSet` hooks and from navigation.
     func scheduleReload() {
         reloadTask?.cancel()
         generation += 1
         wines = []
         groupedWines = []
         hasMore = false
-        isLoadingMore = false // les loadMore périmés sortent sans toucher cet état
+        isLoadingMore = false // stale loadMore calls bail out without touching this state
         loadMoreFailed = false
         isLoading = true
         reloadTask = Task { await load() }
     }
 
-    /// Charge la première page (au changement de vue/tri/filtre, à l'apparition,
-    /// au pull-to-refresh et après une mutation).
+    /// Loads the first page (on a view/sort/filter change, on appear, on pull-to-refresh
+    /// and after a mutation).
     func load() async {
         let requested = generation
         isLoading = true
         error = nil
         do {
             let page = try await fetchPage(after: nil)
-            guard requested == generation else { return } // réponse d'une vue périmée
+            guard requested == generation else { return } // response from a stale view
             wines = page.items
             hasMore = page.hasMore
         } catch is CancellationError {
-            // Rechargement annulé par un changement de filtre plus récent — on ignore.
+            // Reload cancelled by a more recent filter change, so ignore it.
             return
         } catch {
             guard requested == generation else { return }
@@ -187,7 +186,7 @@ final class WineListViewModel {
         isLoading = false
     }
 
-    /// Charge la page suivante et l'ajoute aux vins déjà chargés.
+    /// Loads the next page and appends it to the wines already loaded.
     func loadMore() async {
         guard hasMore, !isLoadingMore, let last = wines.last else { return }
         let requested = generation
@@ -195,7 +194,7 @@ final class WineListViewModel {
         loadMoreFailed = false
         do {
             let page = try await fetchPage(after: last.id)
-            guard requested == generation else { return } // la vue a changé entre-temps
+            guard requested == generation else { return } // the view changed in the meantime
             wines.append(contentsOf: page.items)
             hasMore = page.hasMore
             rebuildPresentation()
@@ -209,8 +208,7 @@ final class WineListViewModel {
         isLoadingMore = false
     }
 
-    /// Déclenche le chargement de la page suivante quand une ligne proche de la
-    /// fin apparaît (infinite scroll).
+    /// Triggers the next page load when a row close to the end appears (infinite scroll).
     func prefetchIfNeeded(for wineId: String) {
         guard hasMore, !isLoadingMore else { return }
         guard let index = wines.firstIndex(where: { $0.id == wineId }) else { return }
@@ -232,8 +230,8 @@ final class WineListViewModel {
         )
     }
 
-    // MARK: - Presentation: le serveur filtre (vue, statut, couleur, type) et
-    // borne ; on regroupe seulement en sections localement.
+    // MARK: - Presentation: the server filters (view, status, color, type) and
+    // paginates; grouping into sections is the only thing done locally.
 
     private func rebuildPresentation() {
         groupedWines = Self.buildGroupedWines(
@@ -244,7 +242,7 @@ final class WineListViewModel {
         )
     }
 
-    /// Groupe sans personne quand le tri « Par personne » est actif.
+    /// Bucket for wines without a person when sorting by person is active.
     private static var unnamedPersonLabel: String { String(localized: "Sans nom") }
 
     private static func buildGroupedWines(
@@ -279,7 +277,7 @@ final class WineListViewModel {
                     let order = WineColor.allCases.firstIndex(of: color) ?? 0
                     return (Double(order), color.label, wine)
                 }
-                // Boissons sans couleur (bière, spiritueux...) : groupées par type, après les vins
+                // Beverages without a color (beer, spirits...) group by type, after the wines
                 let order = WineColor.allCases.count
                     + (BeverageType.allCases.firstIndex(of: wine.beverageType) ?? 0)
                 return (Double(order), wine.beverageType.label, wine)
@@ -287,8 +285,8 @@ final class WineListViewModel {
                 let (order, label) = priceRange(wine.purchasePrice)
                 return (Double(order), label, wine)
             case .person:
-                // Offerts = la personne qui a offert la bouteille ; Conseillés = celle
-                // qui l'a conseillée. (Tri absent des autres modes via available(for:).)
+                // Gifted view = whoever gave the bottle; recommended view = whoever
+                // recommended it. (available(for:) hides this sort in the other views.)
                 let name = mode == .gifted ? wine.giftedBy : wine.recommendedBy
                 return (0, name ?? unnamedPersonLabel, wine)
             }

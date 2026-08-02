@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Charge les métriques admin. Partagé entre le bandeau et l'écran Admin, pour
-/// qu'ouvrir la feuille ne relance pas un appel déjà affiché dans le bandeau.
+/// Loads the admin metrics. Shared between the banner and the Admin screen so that
+/// opening the sheet does not fire a call the banner already displays.
 @MainActor @Observable
 final class AdminViewModel {
     private(set) var metrics: AdminMetrics?

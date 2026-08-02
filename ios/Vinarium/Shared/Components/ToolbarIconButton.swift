@@ -15,3 +15,32 @@ struct ToolbarIconButton: View {
         .labelStyle(.iconOnly)
     }
 }
+
+#Preview("Close and confirm") {
+    NavigationStack {
+        Text("Contenu")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) {}
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    ToolbarIconButton(title: "Enregistrer", systemImage: "checkmark") {}
+                }
+            }
+    }
+}
+
+#Preview("Destructive") {
+    NavigationStack {
+        Text("Contenu")
+            .toolbar {
+                ToolbarItem(placement: .destructiveAction) {
+                    ToolbarIconButton(
+                        title: "Supprimer",
+                        systemImage: "trash",
+                        role: .destructive
+                    ) {}
+                }
+            }
+    }
+}

@@ -87,6 +87,24 @@ private struct LocationCard: View {
     }
 }
 
+#Preview("Card, place name") {
+    LocationCard(
+        coordinate: CLLocationCoordinate2D(latitude: 48.8769, longitude: 2.3370),
+        placeName: "Paris - 9e Arr.",
+        onTap: {}
+    )
+    .padding()
+}
+
+#Preview("Card, coordinates only") {
+    LocationCard(
+        coordinate: CLLocationCoordinate2D(latitude: 44.84, longitude: -0.58),
+        placeName: nil,
+        onTap: {}
+    )
+    .padding()
+}
+
 #Preview("With place name") {
     List {
         LocationSection(

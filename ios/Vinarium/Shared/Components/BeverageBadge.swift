@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Pastille d'identification d'une bouteille : couleur du vin quand elle existe,
-/// sinon icône du type de boisson (bière, spiritueux, saké ...).
+/// Identification badge for a bottle: the wine color when there is one, otherwise the
+/// beverage type icon (beer, spirit, sake...).
 struct BeverageBadge: View {
     let beverageType: BeverageType
     let color: WineColor?
@@ -10,7 +10,7 @@ struct BeverageBadge: View {
         if let color {
             WineColorBadge(color: color)
         } else {
-            // Boissons non-vin : première lettre du type plutôt qu'une icône.
+            // Non-wine beverages: the type's first letter rather than an icon.
             Text(beverageType.initial)
                 .font(.system(size: 9, weight: .bold))
                 .foregroundStyle(.white)

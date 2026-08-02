@@ -11,9 +11,9 @@ enum ScanStep {
     case saved
 }
 
-/// État complet de la fiche au moment de valider, plus le choix de la popup.
-/// Le vin porte les champs scalaires (dont `giftedBy`) ; la dégustation et le
-/// conseil sont persistés séparément selon ce qui est rempli.
+/// The full state of the form at submit time, plus the destination picked in the
+/// popup. The wine carries the scalar fields (`giftedBy` included); the tasting and
+/// the recommendation are persisted separately, depending on what was filled in.
 struct ScanSubmission {
     let request: CreateWineRequest
     let choice: ScanDestination
@@ -30,24 +30,24 @@ struct ScanSubmission {
 final class ScanViewModel {
     var step: ScanStep = .camera
     var error: String?
-    /// L'analyse IA est en cours : la sheet du flux affiche l'orbe, caméra coupée.
-    /// Vraie tant que la photo se charge et que l'IA répond.
+    /// The AI analysis is running: the flow sheet shows the orb and the camera is off.
+    /// True while the photo loads and until the AI answers.
     var isAnalyzing = false
-    /// L'IA n'a rien reconnu sur la photo : la sheet du flux reste ouverte et
-    /// affiche le message « aucune étiquette détectée » (phase interne, pas une
-    /// seconde sheet), pour éviter un fondu fermeture puis réouverture.
+    /// The AI recognized nothing on the photo: the flow sheet stays open and shows
+    /// the "no label detected" message (an inner phase, not a second sheet), which
+    /// avoids a close-then-reopen fade.
     var scanNotRecognized = false
-    /// L'allocation de scans du mois est épuisée : le flux retombe sur la caméra
-    /// et le paywall se présente par-dessus, plutôt qu'une alerte d'erreur.
+    /// The monthly scan allowance is exhausted: the flow falls back to the camera
+    /// and the paywall is presented on top, rather than an error alert.
     var paywallShown = false
-    /// Le paywall à présenter une fois la sheet du flux fermée. Présenter une
-    /// sheet pendant qu'une autre se ferme échoue, donc on diffère au `onDismiss`.
+    /// The paywall to present once the flow sheet is closed. Presenting a sheet
+    /// while another one is dismissing fails, so it is deferred to `onDismiss`.
     private var pendingPaywall = false
     var isSaving = false
     var pendingLocation: DiscoveryLocationDraft?
-    /// Vin déjà créé pendant cette session de review : si une écriture
-    /// post-création (dégustation / conseil) échoue, un nouveau clic ne recrée
-    /// pas un doublon — on réutilise le vin existant.
+    /// Wine already created during this review session: if a post-creation write
+    /// (tasting / recommendation) fails, tapping again does not create a duplicate,
+    /// the existing wine is reused.
     private var createdWine: Wine?
 
     func capturePhoto(_ imageData: Data) {
@@ -59,18 +59,18 @@ final class ScanViewModel {
             do {
                 let result = try await WineAPI.scan(imageData: imageData)
                 if result.recognized {
-                    // Dans la sheet du flux, l'overlay d'analyse se fond pour
-                    // révéler la review : la sheet reste ouverte (étape ≠ caméra).
+                    // Inside the flow sheet, the analysis overlay fades out to reveal
+                    // the review: the sheet stays open (step is no longer the camera).
                     self.step = .review(result, imageData)
                     self.isAnalyzing = false
                 } else {
-                    // La sheet reste ouverte et bascule sur le message d'erreur.
+                    // The sheet stays open and switches to the error message.
                     self.scanNotRecognized = true
                     self.isAnalyzing = false
                 }
             } catch let apiError as APIError where apiError.domainCode == "QUOTA_EXHAUSTED" {
-                // Ce n'est pas une panne : c'est l'offre qui s'arrête là. La sheet
-                // du flux se ferme, puis le paywall se présente au `onDismiss`.
+                // This is not a failure, it is where the plan stops. The flow sheet
+                // closes, then the paywall is presented from `onDismiss`.
                 self.pendingPaywall = true
                 self.isAnalyzing = false
             } catch {
@@ -80,21 +80,21 @@ final class ScanViewModel {
         }
     }
 
-    /// Quitte la phase « rien trouvé » : referme la sheet du flux et ramène sur la
-    /// caméra pour reprendre une photo.
+    /// Leaves the "nothing found" phase: closes the flow sheet and goes back to the
+    /// camera so another photo can be taken.
     func dismissNotRecognized() {
         scanNotRecognized = false
     }
 
-    /// Présente le paywall différé une fois la sheet du flux totalement fermée.
+    /// Presents the deferred paywall once the flow sheet is fully dismissed.
     func flushPendingOutcome() {
         guard pendingPaywall else { return }
         pendingPaywall = false
         paywallShown = true
     }
 
-    /// Vrai dès qu'on a dépassé la caméra : la sheet du flux (analyse, rien trouvé,
-    /// review, placement, confirmation) est alors présentée par-dessus la caméra.
+    /// True as soon as the camera step is left behind: the flow sheet (analysis,
+    /// nothing found, review, placement, confirmation) is then presented over the camera.
     var isFlowActive: Bool {
         if isAnalyzing || scanNotRecognized { return true }
         if case .camera = step { return false }
@@ -127,7 +127,7 @@ final class ScanViewModel {
         error = nil
         defer { isSaving = false }
         do {
-            // Réutilise le vin déjà créé si un retry suit un échec post-création.
+            // Reuse the wine already created when a retry follows a post-creation failure.
             let wine: Wine
             if let existing = createdWine {
                 wine = existing
@@ -148,8 +148,9 @@ final class ScanViewModel {
                     vintage: wine.vintage
                 )
             case .justSave:
-                // L'écran de fin reflète ce que la fiche portait (favori / conseil),
-                // plus un choix de popup : il oriente la liste vers la bonne vue.
+                // The closing screen reflects what the form carried (favorite /
+                // recommendation) rather than the popup choice: it points the list
+                // at the right view.
                 if submission.favorite {
                     step = .favoriteSaved
                 } else if hasRecommendation(submission) {
@@ -163,8 +164,8 @@ final class ScanViewModel {
         }
     }
 
-    /// Enregistre une note de dégustation si la fiche en porte une : coup de cœur
-    /// explicite, note en étoiles ou commentaires/contacts.
+    /// Records a tasting note when the form carries one: an explicit favorite, a star
+    /// rating, or notes/contacts.
     private func persistTasting(for wineId: String, _ s: ScanSubmission) async throws {
         let markFavorite = s.favorite
         let hasTastingDetails = s.rating > 0 || s.tastingNotes != nil || !s.contacts.isEmpty
@@ -181,21 +182,21 @@ final class ScanViewModel {
         )
     }
 
-    /// Enregistre un conseil si un « conseillé par » ou un commentaire est renseigné.
+    /// Records a recommendation when a recommender name or a comment was filled in.
     private func persistRecommendation(for wineId: String, _ s: ScanSubmission) async throws {
         let (name, comment) = recommendationFields(s)
         guard name != nil || comment != nil else { return }
         try await RecommendationAPI.create(wineId: wineId, recommenderName: name, comment: comment)
     }
 
-    /// La fiche porte-t-elle un conseil (nom ou commentaire) ?
+    /// Does the form carry a recommendation (a name or a comment)?
     private func hasRecommendation(_ s: ScanSubmission) -> Bool {
         let (name, comment) = recommendationFields(s)
         return name != nil || comment != nil
     }
 
-    /// Source unique des champs conseil normalisés : l'écran de fin et la
-    /// persistance doivent voir exactement la même chose.
+    /// Single source for the normalized recommendation fields: the closing screen and
+    /// the persistence step must see exactly the same thing.
     private func recommendationFields(_ s: ScanSubmission) -> (name: String?, comment: String?) {
         (
             s.recommenderName?.isEmpty == false ? s.recommenderName : nil,

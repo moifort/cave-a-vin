@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// L'écran Admin, pur et prévisualisable : les quatre chiffres clés en tuiles,
-/// puis le détail du mois (CA, scans, tokens) et la date d'actualisation.
+/// The Admin screen, pure and previewable: the four key figures as tiles, then the
+/// month's breakdown (revenue, scans, tokens) and the refresh date.
 struct AdminPage: View {
     let metrics: AdminMetrics?
     var isLoading = false

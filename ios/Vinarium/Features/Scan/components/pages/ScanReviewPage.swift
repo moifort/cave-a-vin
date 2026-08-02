@@ -28,7 +28,7 @@ struct ScanReviewPage: View {
     @State private var showGiftedByPicker = false
     @State private var location: DiscoveryLocationDraft?
 
-    // Champs optionnels de dégustation / conseil, tous saisissables inline.
+    // Optional tasting / recommendation fields, all editable inline.
     @State private var favorite = false
     @State private var rating = 0
     @State private var tastingDate = Date()
@@ -55,8 +55,9 @@ struct ScanReviewPage: View {
         _name = State(initialValue: scanResult.name)
         _beverageType = State(initialValue: scanResult.beverageType)
         _color = State(initialValue: scanResult.color ?? .red)
-        // Le serveur garantit déjà la cohérence type/sous-type du scan, mais on
-        // re-filtre : un sous-type inconnu du picker rendrait la sélection muette.
+        // The server already guarantees the scan's type/subtype consistency, but
+        // filtering again is cheap: a subtype the picker does not know would make the
+        // selection silently empty.
         _subtype = State(initialValue: scanResult.subtype.flatMap { s in
             BeverageSubtype.allowed(for: scanResult.beverageType).contains(s) ? s : nil
         })
@@ -200,7 +201,7 @@ struct ScanReviewPage: View {
                 Label("Sous-type", systemImage: "tag")
             }
             .onChange(of: beverageType) {
-                // Un sous-type hérité d'un autre type de boisson n'a plus de sens.
+                // A subtype inherited from another beverage type no longer makes sense.
                 if let current = subtype,
                    !BeverageSubtype.allowed(for: beverageType).contains(current) {
                     subtype = nil

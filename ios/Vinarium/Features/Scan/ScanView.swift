@@ -32,8 +32,8 @@ struct ScanView: View {
             .onChange(of: selectedPhoto) {
                 guard let item = selectedPhoto else { return }
                 selectedPhoto = nil
-                // Ouvre la sheet du flux tout de suite (sur l'étape d'analyse), le
-                // temps de charger et redimensionner l'image avant de lancer le scan.
+                // Open the flow sheet right away (on the analysis step) while the image
+                // is loaded and resized, before the scan is fired.
                 viewModel.isAnalyzing = true
                 Task {
                     guard let data = try? await item.loadTransferable(type: Data.self) else {
@@ -63,9 +63,9 @@ struct ScanView: View {
 
     // MARK: - Camera
 
-    /// Base permanente du plein écran : l'aperçu caméra et ses contrôles. Le reste
-    /// du flux (analyse, review, placement, confirmation) se présente en sheet
-    /// par-dessus.
+    /// The permanent full-screen base: the camera preview and its controls. The rest
+    /// of the flow (analysis, review, placement, confirmation) is presented as a sheet
+    /// on top of it.
     private var cameraScreen: some View {
         ZStack {
             if viewModel.isCameraLive {
@@ -159,11 +159,11 @@ struct ScanView: View {
 
     // MARK: - Flow sheet
 
-    /// La sheet présentée dès qu'un scan démarre. Un `NavigationStack` unique
-    /// enchaîne review → placement → confirmation par fondu, et l'étape d'analyse
-    /// est un overlay plein cadre par-dessus tant que l'IA travaille. Fermer /
-    /// annuler retombe sur la caméra ; la fermeture n'est jamais accidentelle
-    /// (swipe désactivé), seuls les boutons pilotent le flux.
+    /// The sheet presented as soon as a scan starts. A single `NavigationStack` chains
+    /// review → placement → confirmation with cross-fades, and the analysis step is a
+    /// full-frame overlay on top while the AI works. Closing or cancelling falls back to
+    /// the camera; dismissal is never accidental (swipe disabled), only the buttons
+    /// drive the flow.
     private var flowSheet: some View {
         ZStack {
             NavigationStack {
@@ -192,7 +192,7 @@ struct ScanView: View {
     private var stepContent: some View {
         switch viewModel.step {
         case .camera:
-            // Sous l'overlay d'analyse au démarrage du flux : rien à montrer.
+            // Under the analysis overlay when the flow starts: nothing to show.
             Color.clear
 
         case .review(let result, let imageData):
@@ -261,9 +261,9 @@ struct ScanView: View {
         }
     }
 
-    /// La sheet du flux est ouverte tant qu'on a dépassé la caméra (analyse en
-    /// cours ou étape review/placement/confirmation). Un dismiss programmatique
-    /// (retour à `.camera`) la referme ; le setter retombe proprement sur la caméra.
+    /// The flow sheet stays open as long as the camera step is left behind (analysis
+    /// running, or the review/placement/confirmation step). A programmatic dismiss
+    /// (back to `.camera`) closes it; the setter falls cleanly back to the camera.
     private var flowPresented: Binding<Bool> {
         Binding(
             get: { viewModel.isFlowActive },
@@ -308,4 +308,10 @@ struct ScanView: View {
             viewModel.capturePhoto(jpeg)
         }
     }
+}
+
+#Preview {
+    // The canvas has no camera: `CameraView` wires no input and the screen stays
+    // on its controls over an empty preview layer.
+    ScanView()
 }

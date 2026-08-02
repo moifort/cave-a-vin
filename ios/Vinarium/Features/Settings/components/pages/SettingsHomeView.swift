@@ -95,8 +95,8 @@ struct SettingsHomeView: View {
                     }
                 }
 
-                // Deuxième point d'entrée admin, avec le bandeau. Absent pour
-                // tout autre compte.
+                // Second admin entry point, next to the banner. Absent for every
+                // other account.
                 if isAdmin {
                     Section {
                         NavigationLink {
@@ -132,8 +132,8 @@ struct SettingsHomeView: View {
         authSession.user?.displayName ?? authSession.user?.email
     }
 
-    /// Ce que l'abonnement donne aujourd'hui : le nombre de scans restants pour
-    /// un compte gratuit, la date d'échéance pour un abonné.
+    /// What the subscription gives today: the number of scans left on a free account,
+    /// the renewal date for a subscriber.
     private var subscriptionSubtitle: String? {
         guard let quota = subscriptions.quota else { return nil }
         if quota.isPremium {

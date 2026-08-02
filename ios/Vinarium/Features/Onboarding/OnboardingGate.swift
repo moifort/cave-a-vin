@@ -16,7 +16,7 @@ final class OnboardingGate {
     private(set) var state: State = .loading
     /// Whether the signed-in account may see the admin surfaces. Rides the same
     /// launch `me` query, so non-admins cost no extra call: the banner and the
-    /// Réglages row are simply absent for them.
+    /// settings row are simply absent for them.
     private(set) var isAdmin = false
 
     func refresh() async {

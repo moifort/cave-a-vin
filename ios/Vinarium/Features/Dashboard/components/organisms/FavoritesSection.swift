@@ -26,8 +26,8 @@ struct FavoritesSection: View {
                         Button {
                             onWineTapped(item.id)
                         } label: {
-                            // Même recette que les autres rows : pastille alignée en
-                            // haut, colonne texte pleine largeur alignée à gauche.
+                            // Same recipe as the other rows: badge aligned to the top,
+                            // full-width text column aligned to the left.
                             HStack(alignment: .top, spacing: 10) {
                                 BeverageBadge(beverageType: item.beverageType, color: item.color)
                                 VStack(alignment: .leading, spacing: 2) {

@@ -291,6 +291,23 @@ extension MKLocalSearchCompletion {
     var id: String { "\(title)|\(subtitle)" }
 }
 
+#Preview("Suggestion rows") {
+    List {
+        SuggestionRow(
+            title: "Château Vinarium",
+            subtitle: "33250 Pauillac",
+            isResolving: false,
+            action: {}
+        )
+        SuggestionRow(
+            title: "Caviste du Marché",
+            subtitle: "",
+            isResolving: true,
+            action: {}
+        )
+    }
+}
+
 #Preview("Empty") {
     LocationEditorSheet(initial: nil) { _ in }
 }

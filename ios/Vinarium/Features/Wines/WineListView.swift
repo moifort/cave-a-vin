@@ -12,8 +12,8 @@ struct WineListView: View {
 
     var body: some View {
         NavigationStack {
-            // Toujours afficher la page (barre de vues/filtre en haut fixe) ; seul le
-            // corps liste passe en loader lors d'un changement de vue/tri/filtre.
+            // Always render the page (the pinned view/filter bar at the top); only the
+            // list body switches to a loader on a view/sort/filter change.
             WineListPage(
                 mode: $viewModel.mode,
                 sort: $viewModel.sort,
@@ -31,9 +31,9 @@ struct WineListView: View {
                 onPrefetch: { viewModel.prefetchIfNeeded(for: $0) },
                 onLoadMore: { await viewModel.loadMore() }
             )
-            // Chargement initial, et rechargement quand refreshTrigger change (après
-            // avoir rejoint un foyer) ; les changements de vue/tri/filtre passent par
-            // les didSet du ViewModel (scheduleReload).
+            // Initial load, plus a reload whenever refreshTrigger changes (after joining
+            // a household); view/sort/filter changes go through the ViewModel's didSet
+            // hooks (scheduleReload).
             .task(id: refreshTrigger) {
                 await viewModel.load()
             }
@@ -43,15 +43,14 @@ struct WineListView: View {
             )) { wrapper in
                 WineDetailView(
                     wineId: wrapper.id,
-                    // scheduleReload (et non load) : invalide les loadMore en vol
-                    // pour éviter d'append des données périmées après la mutation.
+                    // scheduleReload rather than load: it invalidates in-flight loadMore
+                    // calls so stale data is not appended after the mutation.
                     onRemoved: { viewModel.scheduleReload() },
                     onUpdated: { viewModel.scheduleReload() }
                 )
             }
-            // Ces triggers arrivent après un scan (mutation) : le refetch est
-            // nécessaire pour voir le vin fraîchement créé, pas un simple
-            // changement de filtre.
+            // These triggers fire after a scan (a mutation): the refetch is needed to
+            // see the freshly created wine, this is not a plain filter change.
             .onChange(of: showFavorites) {
                 if showFavorites {
                     switchTo(.favorites)
@@ -67,8 +66,8 @@ struct WineListView: View {
         }
     }
 
-    /// Bascule vers une vue après un scan : changer `mode` recharge via son didSet ;
-    /// si on y est déjà, forcer le refetch pour voir le vin fraîchement créé.
+    /// Switches to a view after a scan: changing `mode` reloads through its didSet;
+    /// when already on it, force the refetch so the freshly created wine shows up.
     private func switchTo(_ mode: WineListMode) {
         if viewModel.mode == mode {
             viewModel.scheduleReload()

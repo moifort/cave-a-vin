@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Pilote l'ouverture de la recherche globale. Partagé via l'environnement pour
-/// que la loupe de n'importe quelle page présente le même overlay au niveau racine.
+/// Drives the opening of the global search. Shared through the environment so the
+/// magnifier of any page presents the same overlay at the root level.
 @MainActor @Observable
 final class SearchPresenter {
     var isPresented = false
@@ -10,7 +10,7 @@ final class SearchPresenter {
 }
 
 private struct SearchToolbarButton: View {
-    // Optionnel : absent des previews de page, présent dans l'app via ContentView.
+    // Optional: absent from page previews, present in the app through ContentView.
     @Environment(SearchPresenter.self) private var presenter: SearchPresenter?
 
     var body: some View {
@@ -23,11 +23,31 @@ private struct SearchToolbarButton: View {
 }
 
 extension View {
-    /// Ajoute la loupe de recherche globale en tête de barre. À poser sur la page
-    /// racine de chaque onglet qui doit y donner accès.
+    /// Adds the global search magnifier at the head of the toolbar. Apply it to the
+    /// root page of every tab that should give access to the search.
     func searchToolbarButton() -> some View {
         toolbar {
             ToolbarItem(placement: .topBarTrailing) { SearchToolbarButton() }
         }
+    }
+}
+
+#Preview("With a presenter") {
+    @Previewable @State var presenter = SearchPresenter()
+    NavigationStack {
+        Text(presenter.isPresented ? "Recherche demandée" : "Contenu")
+            .navigationTitle("Ma Cave")
+            .searchToolbarButton()
+    }
+    .environment(presenter)
+}
+
+#Preview("Without a presenter") {
+    // The environment value is absent from page previews: the button renders and
+    // simply does nothing when tapped.
+    NavigationStack {
+        Text("Contenu")
+            .navigationTitle("Ma Cave")
+            .searchToolbarButton()
     }
 }

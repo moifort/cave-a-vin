@@ -1,3 +1,4 @@
+import FirebaseCore
 import SwiftUI
 
 /// Top-level gate: shows the blocking update screen when the backend no longer
@@ -92,4 +93,13 @@ struct AuthRoot: View {
         let code = parts[1].uppercased()
         return code.isEmpty ? nil : code
     }
+}
+
+#Preview {
+    // `AuthSession` reads `Auth.auth()` on init, which traps when Firebase was
+    // never configured: the canvas does not run `VinariumApp.init`, so the gate
+    // configures it here. With no session in the simulator this lands on the
+    // login screen, which is the only state the canvas can reach on its own.
+    if FirebaseApp.app() == nil { FirebaseApp.configure() }
+    return AuthRoot()
 }

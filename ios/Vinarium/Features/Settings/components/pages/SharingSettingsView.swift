@@ -138,7 +138,7 @@ struct SharingSettingsView: View {
 
     private func load() async {
         // Fetch both concurrently. The household drives the screen, so only its
-        // failure surfaces an error; the prénom is best-effort (an existing member
+        // failure surfaces an error; the first name is best-effort (an existing member
         // already carries a name, and the fallback covers a missing one).
         async let me = OnboardingAPI.loadMe()
         do {
@@ -181,7 +181,7 @@ struct SharingSettingsView: View {
 
     /// The name to attach to a new invitation or join: the viewer's existing name
     /// within the household if they are already a member, otherwise their account
-    /// prénom (`me.firstName`, guaranteed by onboarding).
+    /// first name (`me.firstName`, guaranteed by onboarding).
     private var currentName: String {
         if let me = household?.members.first(where: { $0.isMe }) { return me.displayName }
         let trimmed = (firstName ?? "").trimmingCharacters(in: .whitespaces)

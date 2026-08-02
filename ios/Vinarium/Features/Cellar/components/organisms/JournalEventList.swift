@@ -67,7 +67,7 @@ extension JournalEventList {
         let wineId: String
         let title: String
         let position: String
-        /// Le membre qui a fait le mouvement, nil quand c'est soi-même.
+        /// The member behind the move, nil when it was you.
         var memberName: String? = nil
     }
 }

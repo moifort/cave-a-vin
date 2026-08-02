@@ -56,7 +56,7 @@ struct DashboardHistoryEvent: Codable, Identifiable, Sendable {
     let wineColor: WineColor?
     let position: String
     let rating: Int?
-    /// Le membre du foyer qui a fait le mouvement, nil quand c'est soi-même.
+    /// The household member behind the move, nil when it was you.
     let memberName: String?
 
     var id: String { "\(type)-\(wineName)-\(date.timeIntervalSince1970)" }

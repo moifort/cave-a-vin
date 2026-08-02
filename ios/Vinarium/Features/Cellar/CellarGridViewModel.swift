@@ -51,9 +51,9 @@ final class CellarGridViewModel {
 
     private let pageSize = 15
     private let prefetchThreshold = 5
-    // Jeton anti-résultats périmés : un load() (pull-to-refresh, retour de scan)
-    // invalide les loadMore encore en vol, sinon leur réponse tardive ajouterait
-    // des doublons aux listes fraîchement rechargées.
+    // Stale-result token: a load() (pull-to-refresh, return from a scan) invalidates
+    // the loadMore calls still in flight, otherwise their late response would append
+    // duplicates to the freshly reloaded lists.
     private var generation = 0
 
     var groupedRows: [CellarRowGroup] {
@@ -90,7 +90,7 @@ final class CellarGridViewModel {
             async let bottlesData = CellarAPI.getBottles(limit: pageSize, after: nil)
             async let historyData = CellarAPI.getHistory(limit: pageSize, offset: 0)
             let (b, h) = try await (bottlesData, historyData)
-            guard requested == generation else { return } // un reload plus récent a pris la main
+            guard requested == generation else { return } // a more recent reload took over
             bottles = b.bottles
             bottlesHasMore = b.hasMore
             history = h.events
@@ -102,7 +102,7 @@ final class CellarGridViewModel {
         isLoading = false
     }
 
-    /// Charge la page suivante de bouteilles et l'ajoute à la grille.
+    /// Loads the next page of bottles and appends it to the grid.
     func loadMoreBottles() async {
         guard bottlesHasMore, !isLoadingMoreBottles, let last = bottles.last else { return }
         let requested = generation
@@ -110,7 +110,7 @@ final class CellarGridViewModel {
         bottlesLoadMoreFailed = false
         do {
             let page = try await CellarAPI.getBottles(limit: pageSize, after: last.wineId)
-            guard requested == generation else { return } // la liste a été rechargée entre-temps
+            guard requested == generation else { return } // the list was reloaded in the meantime
             bottles.append(contentsOf: page.bottles)
             bottlesHasMore = page.hasMore
         } catch {
@@ -121,7 +121,7 @@ final class CellarGridViewModel {
         isLoadingMoreBottles = false
     }
 
-    /// Déclenche le chargement quand une bouteille proche de la fin apparaît.
+    /// Triggers the next load when a bottle close to the end appears.
     func prefetchBottlesIfNeeded(for wineId: String) {
         guard bottlesHasMore, !isLoadingMoreBottles else { return }
         guard let index = bottles.firstIndex(where: { $0.wineId == wineId }) else { return }
@@ -130,7 +130,7 @@ final class CellarGridViewModel {
         }
     }
 
-    /// Charge la page suivante du journal et l'ajoute à l'historique.
+    /// Loads the next page of the journal and appends it to the history.
     func loadMoreHistory() async {
         guard historyHasMore, !isLoadingMoreHistory else { return }
         let requested = generation
@@ -138,7 +138,7 @@ final class CellarGridViewModel {
         historyLoadMoreFailed = false
         do {
             let page = try await CellarAPI.getHistory(limit: pageSize, offset: history.count)
-            guard requested == generation else { return } // la liste a été rechargée entre-temps
+            guard requested == generation else { return } // the list was reloaded in the meantime
             history.append(contentsOf: page.events)
             historyHasMore = page.hasMore
         } catch {
@@ -149,7 +149,7 @@ final class CellarGridViewModel {
         isLoadingMoreHistory = false
     }
 
-    /// Déclenche le chargement quand un événement proche de la fin apparaît.
+    /// Triggers the next load when an event close to the end appears.
     func prefetchHistoryIfNeeded(for eventId: String) {
         guard historyHasMore, !isLoadingMoreHistory else { return }
         guard let index = history.firstIndex(where: { $0.id == eventId }) else { return }

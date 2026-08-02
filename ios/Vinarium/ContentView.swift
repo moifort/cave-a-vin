@@ -192,7 +192,7 @@ struct ContentView: View {
         if selectedTab == .scan { selectedTab = lastContentTab }
     }
 
-    /// Un montant du bandeau : « … » tant que rien n'est chargé, sinon la valeur.
+    /// One amount of the banner: an ellipsis while nothing is loaded, the value otherwise.
     private func bannerEuro(_ value: Double?) -> String {
         value.map(euroString) ?? "…"
     }
@@ -201,8 +201,8 @@ struct ContentView: View {
         value.map(String.init) ?? "…"
     }
 
-    /// L'infra du bandeau distingue le chargement (« … ») de la mesure encore
-    /// indisponible (« — », export de facturation pas branché).
+    /// The banner's infra figure tells loading (an ellipsis) apart from a measure that
+    /// is still unavailable (a dash, when the billing export is not wired up).
     private var bannerInfra: String {
         guard let metrics = adminViewModel.metrics else { return "…" }
         return metrics.infraEur.map(euroString) ?? "—"

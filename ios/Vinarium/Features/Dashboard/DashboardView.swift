@@ -27,8 +27,8 @@ struct DashboardView: View {
             .task {
                 await viewModel.load()
             }
-            // La vue reste vivante dans le TabView : sans ça, revenir sur Accueil
-            // après un scan/une mutation montrerait des stats périmées.
+            // The view stays alive inside the TabView: without this, coming back to the
+            // home tab after a scan or a mutation would show stale stats.
             .onChange(of: selectedTab) {
                 if selectedTab == .home {
                     Task { await viewModel.load() }

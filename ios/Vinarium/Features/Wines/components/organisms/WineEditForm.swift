@@ -265,7 +265,7 @@ struct WineEditForm: View {
         .sheet(isPresented: $showGiftedByPicker) {
             ContactPicker { giftedBy = $0 }
         }
-        // Un sous-type hérité d'un autre type de boisson n'a plus de sens.
+        // A subtype inherited from another beverage type no longer makes sense.
         .onChange(of: beverageType) {
             if let current = subtype, !BeverageSubtype.allowed(for: beverageType).contains(current) {
                 subtype = nil

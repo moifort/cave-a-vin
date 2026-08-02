@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Le bandeau admin épinglé au-dessus de toute l'app : les quatre chiffres clés
-/// en une ligne, un chargement discret pendant la requête, et un appui qui
-/// ouvre l'écran Admin complet.
+/// The admin banner pinned above the whole app: the four key figures on one line, a
+/// discreet loading state while the request runs, and a tap that opens the full Admin
+/// screen.
 struct AdminBanner: View {
     let aiCost: String
     let infra: String

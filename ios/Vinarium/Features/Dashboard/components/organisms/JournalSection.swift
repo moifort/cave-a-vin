@@ -63,7 +63,7 @@ extension JournalSection {
         let position: String
         let wineId: String
         let date: Date
-        /// Le membre qui a fait le mouvement, nil quand c'est soi-même.
+        /// The member behind the move, nil when it was you.
         var memberName: String? = nil
     }
 }

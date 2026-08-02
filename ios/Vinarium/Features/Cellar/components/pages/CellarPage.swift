@@ -54,7 +54,7 @@ struct CellarPage: View {
                     .accessibilityIdentifier("cellar-mode-\(mode.rawValue)")
                 }
             }
-            // Détache la loupe des bascules de mode dans sa propre capsule.
+            // Detaches the magnifier from the mode toggles into its own capsule.
             ToolbarSpacer(.fixed, placement: .topBarTrailing)
         }
         .searchToolbarButton()

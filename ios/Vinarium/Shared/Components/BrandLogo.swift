@@ -80,6 +80,15 @@ private struct Capsule2D: View {
     }
 }
 
+#Preview("Capsules") {
+    HStack(spacing: 24) {
+        Capsule2D(color: Color(red: 0.5, green: 0.05, blue: 0.1), size: 40)
+        Capsule2D(color: Color(red: 0.72, green: 0.45, blue: 0.2), size: 64)
+        Capsule2D(color: Color(red: 0.93, green: 0.72, blue: 0.23), size: 96)
+    }
+    .padding(40)
+}
+
 #Preview("Logo") {
     BrandLogo()
         .padding(40)

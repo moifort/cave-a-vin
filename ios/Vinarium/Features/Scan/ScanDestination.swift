@@ -1,8 +1,8 @@
 import Foundation
 
-/// Ce que l'utilisateur veut faire de la bouteille identifiée — choisi via la
-/// popup (`confirmationDialog`) déclenchée par le bouton + de la fiche, une fois
-/// tous les champs saisis.
+/// What to do with the identified bottle, picked from the popup
+/// (`confirmationDialog`) that the form's plus button opens once every field is
+/// filled in.
 enum ScanDestination: String, CaseIterable, Identifiable, Sendable {
     case cellar
     case justSave

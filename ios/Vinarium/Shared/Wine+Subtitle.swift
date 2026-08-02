@@ -1,8 +1,8 @@
 import Foundation
 
 extension Wine {
-    /// Row subtitle shared by the wine list and the global search: millésime,
-    /// région, prix, puis la personne liée (offert par/à, conseillé par).
+    /// Row subtitle shared by the wine list and the global search: vintage, region,
+    /// price, then the related person (gifted by/to, recommended by).
     var listSubtitle: String? {
         let parts: [String] = [
             vintage.map { "\($0)" },
@@ -15,7 +15,7 @@ extension Wine {
         return parts.isEmpty ? nil : parts.joined(separator: " • ")
     }
 
-    /// « Marie Dupont » → « Marie D. » — garde le sous-titre compact.
+    /// "Marie Dupont" becomes "Marie D.", which keeps the subtitle compact.
     static func abbreviated(_ fullName: String) -> String {
         let components = fullName.split(separator: " ")
         if components.count >= 2, let lastInitial = components.last?.first {

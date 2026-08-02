@@ -44,7 +44,7 @@ struct CellarView: View {
             .task(id: refreshTrigger) {
                 await viewModel.load()
             }
-            // Choix déclenché par le swipe « Sortir » : consommer ou offrir.
+            // Choice raised by the "take out" swipe: drink it or give it away.
             .confirmationDialog(
                 "Sortir de la cave",
                 isPresented: Binding(
@@ -71,8 +71,8 @@ struct CellarView: View {
                     onUpdated: { Task { await viewModel.load() } }
                 )
             }
-            // Recharge uniquement après une mutation réussie — annuler un sheet ne
-            // doit pas déclencher un refetch complet de la cave.
+            // Reload only after a successful mutation: cancelling a sheet must not
+            // trigger a full refetch of the cellar.
             .sheet(item: $wineForConsumption) { item in
                 ConsumptionSheet { date, rating, notes, contacts in
                     let formatter = ISO8601DateFormatter()

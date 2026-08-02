@@ -1,14 +1,14 @@
 import SwiftUI
 
-/// Recherche globale plein écran, présentée en overlay depuis la loupe de la
-/// toolbar. « Annuler » referme l'overlay et ramène à la page d'origine.
+/// Full-screen global search, presented as an overlay from the toolbar magnifier.
+/// Cancelling closes the overlay and goes back to the originating page.
 struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = SearchViewModel()
     @State private var selectedWineId: String?
     @State private var searchActive = false
-    // Le champ se ferme uniquement après avoir été ouvert : évite un dismiss
-    // prématuré au tout premier rendu avant l'activation.
+    // The field only closes after it has been opened: this avoids a premature dismiss
+    // on the very first render, before activation.
     @State private var didActivate = false
 
     var body: some View {
@@ -47,8 +47,8 @@ struct SearchView: View {
             )) { wrapper in
                 WineDetailView(
                     wineId: wrapper.id,
-                    // Après une mutation dans le détail, relancer la recherche pour
-                    // refléter le changement (favori, cave, suppression).
+                    // After a mutation in the detail view, run the search again so the
+                    // change shows up (favorite, cellar, deletion).
                     onRemoved: { viewModel.scheduleSearch() },
                     onUpdated: { viewModel.scheduleSearch() }
                 )
@@ -59,11 +59,17 @@ struct SearchView: View {
             if active {
                 didActivate = true
             } else if didActivate && selectedWineId == nil {
-                // Le champ se désactive sur « Cancel » natif → on ferme l'overlay.
-                // Garde : ne pas fermer quand la désactivation vient de la
-                // présentation de la fiche détail (retour à la recherche attendu).
+                // The field deactivates on the native Cancel, so close the overlay.
+                // Guard: do not close when the deactivation comes from presenting the
+                // detail sheet (coming back to the search is expected there).
                 dismiss()
             }
         }
     }
+}
+
+#Preview {
+    // No query, no filter: the coordinator shows the suggestions of its page
+    // without calling the server.
+    SearchView()
 }

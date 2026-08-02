@@ -66,8 +66,8 @@ struct CellarPlacementPage: View {
         }
         .navigationTitle("Placement")
         .navigationBarTitleDisplayMode(.inline)
-        // Voile + spinner pendant l'écriture ; Annuler est neutralisé pour ne pas
-        // fermer la page au milieu de la mutation.
+        // Scrim and spinner while the write runs; cancelling is disabled so the page
+        // cannot close in the middle of the mutation.
         .overlay {
             if isPlacing {
                 ZStack {

@@ -59,9 +59,8 @@ enum CellarAPI {
         return BottlesPage(bottles: bottles, hasMore: data.cellarBottles.hasMore)
     }
 
-    /// Toutes les bouteilles de la cave (grille complète pour placer/déplacer une
-    /// bouteille). La cave est bornée par sa capacité physique : une grande page
-    /// la couvre entièrement.
+    /// Every bottle of the cellar (the full grid, to place or move a bottle). The
+    /// cellar is bounded by its physical capacity, so one large page covers it all.
     static func getAllBottles() async throws -> [CellarBottle] {
         try await getBottles(limit: 1000, after: nil).bottles
     }

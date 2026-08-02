@@ -9,20 +9,20 @@ final class SearchViewModel {
     private(set) var isLoading = false
     private(set) var error: String?
 
-    /// Rien n'est cherché tant qu'il n'y a ni texte ni filtre : la page montre
-    /// alors ses suggestions plutôt qu'une liste vide.
+    /// Nothing is searched while there is neither text nor filter: the page then shows
+    /// its suggestions rather than an empty list.
     var hasActiveSearch: Bool {
         !query.trimmingCharacters(in: .whitespaces).isEmpty || filters.isActive
     }
 
     private var searchTask: Task<Void, Never>?
-    // Jeton anti-résultats périmés : les fetch Apollo ne sont pas annulables, donc
-    // une réponse d'une frappe précédente peut arriver après une plus récente.
+    // Stale-result token: Apollo fetches are not cancellable, so a response for an
+    // earlier keystroke can arrive after a more recent one.
     private var generation = 0
     private let debounce = Duration.milliseconds(300)
 
-    /// Annule la recherche en vol et en reprogramme une après le debounce. Une
-    /// requête vide (ni texte ni filtre) vide les résultats sans appel réseau.
+    /// Cancels the in-flight search and schedules another one after the debounce. An
+    /// empty query (no text, no filter) clears the results without a network call.
     func scheduleSearch() {
         searchTask?.cancel()
         generation += 1
@@ -47,7 +47,7 @@ final class SearchViewModel {
         let currentFilters = filters
         do {
             let results = try await SearchAPI.search(query: currentQuery, filters: currentFilters)
-            guard requested == generation else { return } // frappe plus récente arrivée
+            guard requested == generation else { return } // a more recent keystroke landed
             sections = Self.sections(from: results.hits)
         } catch is CancellationError {
             return
@@ -59,13 +59,13 @@ final class SearchViewModel {
         isLoading = false
     }
 
-    // MARK: - Sectionnement
+    // MARK: - Sectioning
 
-    /// Une section par nature de résultat. Un vin matché sur un de ses attributs
-    /// (nom, producteur, région…) va dans sa section de statut (En cave / Déjà bus /
-    /// Autres) ; un vin matché uniquement par une personne va dans la section de
-    /// cette relation (Cadeaux / Conseillés / Dégustés avec). L'ordre de
-    /// déclaration est l'ordre d'affichage.
+    /// One section per kind of result. A wine matched on one of its own attributes
+    /// (name, producer, region…) lands in its status section (in cellar / already
+    /// drunk / others); a wine matched only through a person lands in that
+    /// relationship's section (gifts / recommended / tasted with). Declaration order
+    /// is display order.
     private enum Section: CaseIterable {
         case inCellar, consumed, other, gifted, recommended, tastedWith
 
@@ -86,8 +86,8 @@ final class SearchViewModel {
         for hit in hits {
             buckets[section(for: hit), default: []].append(item(for: hit))
         }
-        // Ordre fixe des sections ; l'ordre de pertinence du serveur est préservé
-        // à l'intérieur de chaque section.
+        // Fixed section order; the server's relevance order is preserved inside each
+        // section.
         return Section.allCases.compactMap { section in
             guard let items = buckets[section], !items.isEmpty else { return nil }
             return WineListContent.Group(label: section.label, items: items)

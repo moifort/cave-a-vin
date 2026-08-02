@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Phase « rien trouvé » de la sheet du flux : l'IA n'a rien reconnu sur la photo.
-/// Rendue dans le `NavigationStack` de la sheet (pas de pile propre) ; fermer ou
-/// réessayer retombe sur la caméra pour reprendre une photo.
+/// The "nothing found" phase of the flow sheet: the AI recognized nothing on the
+/// photo. Rendered inside the sheet's `NavigationStack` (no stack of its own); closing
+/// or retrying falls back to the camera to take another photo.
 struct ScanNoResultPage: View {
     let onClose: () -> Void
 

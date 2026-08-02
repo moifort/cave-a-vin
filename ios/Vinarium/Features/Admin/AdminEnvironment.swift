@@ -1,9 +1,8 @@
 import SwiftUI
 
 extension EnvironmentValues {
-    /// Le compte connecté a accès aux surfaces admin (bandeau, ligne des
-    /// Réglages, écran Admin). Posé à la racine (`AuthRoot`) depuis la requête
-    /// `me` du lancement ; false partout ailleurs, donc les surfaces sont
-    /// simplement absentes pour tout le monde.
+    /// The signed-in account has access to the admin surfaces (banner, settings row,
+    /// Admin screen). Set at the root (`AuthRoot`) from the launch `me` query; false
+    /// everywhere else, so those surfaces are simply absent for everyone else.
     @Entry var isAdmin: Bool = false
 }

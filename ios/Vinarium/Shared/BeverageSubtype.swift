@@ -1,18 +1,17 @@
 import Foundation
 
-/// Sous-type structuré d'une boisson (rhum, porto, blonde, junmai…). Un seul
-/// enum plat pour tous les types : quelles valeurs un type accepte est porté
-/// par `allowed(for:)` — miroir de SUBTYPES_BY_BEVERAGE côté serveur, à garder
-/// en phase.
+/// Structured subtype of a beverage (rum, porto, blonde, junmai…). A single flat
+/// enum covers every type: which values a type accepts is carried by `allowed(for:)`,
+/// which mirrors the server's SUBTYPES_BY_BEVERAGE and must be kept in sync.
 enum BeverageSubtype: String, Codable, CaseIterable, Identifiable, Sendable {
-    // vin
+    // wine
     case sparkling
     case sweet
     case lateHarvest = "late-harvest"
     case vinJaune = "vin-jaune"
     case porto
     case fortified
-    // spiritueux
+    // spirit
     case rum
     case whisky
     case gin
@@ -22,7 +21,7 @@ enum BeverageSubtype: String, Codable, CaseIterable, Identifiable, Sendable {
     case tequila
     case liqueur
     case eauDeVie = "eau-de-vie"
-    // bière
+    // beer
     case blonde
     case blanche
     case amber
@@ -31,18 +30,18 @@ enum BeverageSubtype: String, Codable, CaseIterable, Identifiable, Sendable {
     case stout
     case pils
     case triple
-    // saké
+    // sake
     case junmai
     case ginjo
     case daiginjo
     case honjozo
     case nigori
-    // cidre
+    // cider
     case brut
     case doux
     case demiSec = "demi-sec"
     case poire
-    // tous types
+    // every type
     case other
 
     var id: String { rawValue }
@@ -85,13 +84,13 @@ enum BeverageSubtype: String, Codable, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// Le label du saké pétillant diffère du pétillant vin — la valeur est partagée.
+    /// Sparkling sake reads differently from sparkling wine, though the value is shared.
     func label(for beverageType: BeverageType) -> String {
         if self == .sparkling && beverageType == .sake { return String(localized: "Saké pétillant") }
         return label
     }
 
-    /// Sous-types proposables pour un type de boisson donné.
+    /// Subtypes that can be offered for a given beverage type.
     static func allowed(for beverageType: BeverageType) -> [BeverageSubtype] {
         switch beverageType {
         case .wine: [.sparkling, .sweet, .lateHarvest, .vinJaune, .porto, .fortified, .other]

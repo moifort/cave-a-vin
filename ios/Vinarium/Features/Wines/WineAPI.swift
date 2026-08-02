@@ -181,9 +181,9 @@ private func gqlSort(_ sort: WineSort) -> VinariumGraphQL.BeverageSort {
     case .region: .region
     case .color: .color
     case .price: .price
-    // « Par personne » est un groupement purement client, réservé aux modes
-    // Offerts/Conseillés où le serveur renvoie le subset complet : le tri
-    // serveur demandé est alors sans effet sur les sections.
+    // Sorting by person is a purely client-side grouping, reserved for the
+    // gifted/recommended views where the server returns the complete subset: the sort
+    // asked of the server then has no effect on the sections.
     case .person: .updatedAt
     }
 }
@@ -229,8 +229,8 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Beverage) -> Us
                 favorite: $0.favorite
             )
         },
-        // GiftInfo représente la facette « donné » (given) ; la provenance
-        // « reçu de » vit dans giftedBy ci-dessus.
+        // GiftInfo carries the "given" facet; the "received from" provenance lives in
+        // giftedBy above.
         gift: w.gift?.given.map {
             GiftInfo(
                 giftedDate: GraphQLHelpers.parseISO8601($0.date) ?? Date(),

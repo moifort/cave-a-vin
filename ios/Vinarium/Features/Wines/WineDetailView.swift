@@ -62,9 +62,9 @@ struct WineDetailView: View {
                     readToolbar
                 }
             }
-            // Les actions du menu (favori, suppression …) ferment le menu avant que
-            // la mutation parte, et les refetch post-mutation gardent le contenu :
-            // dans les deux cas on matérialise l'appel réseau par un voile + spinner.
+            // Menu actions (favorite, deletion, …) close the menu before the mutation
+            // leaves, and post-mutation refetches keep the content on screen: in both
+            // cases the network call is made visible by a scrim and a spinner.
             .overlay {
                 if actionError.isRunning || isRefreshing {
                     ZStack {
@@ -372,8 +372,8 @@ struct WineDetailView: View {
     // MARK: - Helpers
 
     private func loadData() async {
-        // Rafraîchissement post-mutation : garder le contenu affiché, montrer le
-        // voile plutôt que de remplacer toute la page par un spinner.
+        // Post-mutation refresh: keep the content on screen and show the scrim rather
+        // than replacing the whole page with a spinner.
         if detail != nil { isRefreshing = true }
         defer { isRefreshing = false }
         do {

@@ -37,8 +37,8 @@ extension Wine {
             placeName: w.place?.name,
             isInCellar: w.cellar != nil,
             consumedDate: w.consumption?.consumedDate.flatMap { GraphQLHelpers.parseISO8601($0) },
-            // « Offerts » = cadeaux reçus, portés par la facette received du gift
-            // (la facette given, elle, représente un vin donné à quelqu'un).
+            // The gifted view means gifts received, carried by the gift's received
+            // facet (the given facet stands for a wine handed to someone else).
             isGifted: w.gift?.received != nil,
             isRecommended: w.recommendation != nil,
             ownerName: w.ownerName,

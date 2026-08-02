@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Le membre du foyer derrière une bouteille ou un mouvement de cave. N'apparaît
-/// que pour les autres : ce que l'on fait soi-même n'a pas besoin d'être nommé.
+/// The household member behind a bottle or a cellar move. It only shows up for the
+/// others: what you did yourself needs no name.
 struct MemberBadge: View {
     let name: String
 

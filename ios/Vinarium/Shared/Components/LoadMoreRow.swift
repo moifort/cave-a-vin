@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Ligne sentinelle de pagination : déclenche le chargement de la page suivante
-/// à son apparition, et devient un bouton « Réessayer » si la page a échoué —
-/// sinon le spinner tournerait pour toujours sans nouvelle tentative.
+/// Pagination sentinel row: it triggers the next page load when it appears, and turns
+/// into a retry button when the page failed, otherwise the spinner would keep turning
+/// forever without a new attempt.
 struct LoadMoreRow: View {
     let failed: Bool
     let loadingLabel: LocalizedStringKey

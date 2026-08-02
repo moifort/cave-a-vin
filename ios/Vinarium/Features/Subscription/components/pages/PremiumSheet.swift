@@ -2,7 +2,7 @@ import StoreKit
 import SwiftUI
 
 /// Why the sheet came up. Only the headline changes: the offer is the same
-/// whether it was reached from Réglages or by running out of scans.
+/// whether it was reached from the settings or by running out of scans.
 enum PremiumTrigger {
     case scanAllowanceSpent
     case discover
@@ -208,6 +208,9 @@ private struct BenefitRow: View {
 /// One offer. The price and the period come from the `Product`, never from a
 /// string in the app: Apple shows the storefront's own currency and amount.
 /// The optional savings ratio is computed by the sheet from the loaded prices.
+///
+/// It has no preview of its own: StoreKit's `Product` cannot be built by hand, so
+/// the button only renders through `PremiumSheet` once the store answered.
 private struct OfferButton: View {
     let product: Product
     var savings: Decimal?
@@ -283,6 +286,15 @@ private struct OfferButton: View {
         formatter.maximumFractionDigits = 0
         return formatter
     }()
+}
+
+#Preview("Benefit rows") {
+    VStack(alignment: .leading, spacing: 14) {
+        BenefitRow(icon: "infinity", text: "Scans illimités")
+        BenefitRow(icon: "sparkles", text: "Fiches enrichies par l'IA")
+        BenefitRow(icon: "person.2", text: "Cave partagée avec le foyer")
+    }
+    .padding()
 }
 
 #Preview("Allocation épuisée") {

@@ -111,9 +111,9 @@ struct WineDetailContent: View {
     }
 
     private var headerSubtitle: String {
-        // Uniquement le sous-type (« Porto », « Blonde »). À défaut de sous-type,
-        // on affiche la couleur pour un vin, le type pour les autres boissons.
-        // La maison et le millésime restent affichés plus bas (LabeledInfoRow) — inutile de les répéter ici.
+        // The subtype only ("Porto", "Blonde"). Without a subtype, show the color for a
+        // wine and the type for every other beverage. The producer and the vintage are
+        // still displayed further down (LabeledInfoRow), no need to repeat them here.
         if let subtypeLabel = content.subtype?.label(for: content.beverageType) {
             return subtypeLabel
         }

@@ -17,7 +17,7 @@ struct WineListContent: View {
         if isEmpty && isLoading {
             LoadingStateView()
         } else if isEmpty, let errorMessage {
-            // Un échec réseau ne doit pas se déguiser en « Aucun vin ».
+            // A network failure must not disguise itself as an empty list.
             ContentUnavailableView(
                 "Erreur",
                 systemImage: "exclamationmark.triangle",

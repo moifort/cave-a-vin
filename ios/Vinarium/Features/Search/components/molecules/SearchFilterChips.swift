@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Chips de filtres combinables, proposées au-dessus des résultats. Couleurs et
-/// types sont multi-sélection ; « En cave »/« Bu » sont exclusifs (un statut).
+/// Combinable filter chips offered above the results. Colors and types are
+/// multi-select; in-cellar and consumed are exclusive (a single status).
 struct SearchFilterChips: View {
     @Binding var filters: SearchFilters
 
@@ -85,7 +85,17 @@ private struct FilterChip: View {
     }
 }
 
-#Preview {
+#Preview("Chip states") {
+    VStack(alignment: .leading, spacing: 12) {
+        FilterChip(label: "Rouge", systemImage: "circle.fill", tint: .red, isOn: true) {}
+        FilterChip(label: "Rouge", systemImage: "circle.fill", tint: .red, isOn: false) {}
+        FilterChip(label: "En cave", systemImage: "cabinet", isOn: true) {}
+        FilterChip(label: "En cave", systemImage: "cabinet", isOn: false) {}
+    }
+    .padding()
+}
+
+#Preview("All chips") {
     @Previewable @State var filters = SearchFilters()
     return VStack(alignment: .leading, spacing: 16) {
         SearchFilterChips(filters: $filters)

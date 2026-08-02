@@ -77,7 +77,7 @@ protocol DashboardJournalEvent {
     var wineBeverageTypeValue: BeverageType { get }
     var wineColorValue: WineColor? { get }
     var positionString: String { get }
-    /// Le membre du foyer qui a fait le mouvement, nil quand c'est soi-même.
+    /// The household member behind the move, nil when it was you.
     var memberNameValue: String? { get }
 }
 

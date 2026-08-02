@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// Coordinateur de l'écran Admin : possède (ou reçoit) le ViewModel, charge à
-/// l'apparition et délègue tout le rendu à `AdminPage`. Le bandeau passe son
-/// propre ViewModel pour que la feuille affiche les chiffres déjà chargés ;
-/// la ligne des Réglages laisse le coordinateur créer le sien.
+/// Coordinator for the Admin screen: it owns (or receives) the ViewModel, loads on
+/// appear and delegates all rendering to `AdminPage`. The banner passes its own
+/// ViewModel so the sheet shows the figures already loaded; the settings row lets the
+/// coordinator create its own.
 struct AdminView: View {
     @State private var viewModel: AdminViewModel
 

@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// L'étape d'attente de l'analyse IA, présentée en sheet par-dessus la caméra :
-/// l'orbe `SiriLoader` posé sur un scrim `.ultraThinMaterial` avec son message. Le
-/// matériau suit l'apparence système au lieu de forcer le noir, et l'orbe (qui porte
-/// sa propre scène sombre) y flotte sans traîner de disque. Purement présentationnel.
+/// The waiting step of the AI analysis, presented as a sheet over the camera: the
+/// `SiriLoader` orb on an `.ultraThinMaterial` scrim with its message. The material
+/// follows the system appearance instead of forcing black, and the orb (which carries
+/// its own dark scene) floats on it without dragging a disc along. Purely
+/// presentational.
 struct ScanAnalyzingPage: View {
     var body: some View {
         ZStack {

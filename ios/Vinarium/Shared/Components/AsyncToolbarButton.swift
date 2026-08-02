@@ -27,3 +27,43 @@ struct AsyncToolbarButton: View {
         .disabled(isInProgress)
     }
 }
+
+#Preview("Idle") {
+    NavigationStack {
+        Text("Contenu")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    AsyncToolbarButton(title: "Enregistrer", systemImage: "checkmark") {}
+                }
+            }
+    }
+}
+
+#Preview("In progress") {
+    NavigationStack {
+        Text("Contenu")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    // A long action keeps the spinner on screen in the canvas.
+                    AsyncToolbarButton(title: "Enregistrer", systemImage: "checkmark") {
+                        try? await Task.sleep(for: .seconds(60))
+                    }
+                }
+            }
+    }
+}
+
+#Preview("Destructive") {
+    NavigationStack {
+        Text("Contenu")
+            .toolbar {
+                ToolbarItem(placement: .destructiveAction) {
+                    AsyncToolbarButton(
+                        title: "Supprimer",
+                        systemImage: "trash",
+                        role: .destructive
+                    ) {}
+                }
+            }
+    }
+}
