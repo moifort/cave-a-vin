@@ -6,6 +6,7 @@ struct SettingsHomeView: View {
     @Environment(\.isAdmin) private var isAdmin
     @Environment(\.dismiss) private var dismiss
     @State private var premiumShown = false
+    @State private var feedbackShown = false
 
     var body: some View {
         NavigationStack {
@@ -48,6 +49,17 @@ struct SettingsHomeView: View {
                             tint: .indigo
                         )
                     }
+                    Button {
+                        feedbackShown = true
+                    } label: {
+                        SettingsRow(
+                            icon: "envelope.fill",
+                            title: "Nous écrire",
+                            subtitle: "Signaler un problème ou proposer une idée",
+                            tint: .pink
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 Section("Cave") {
@@ -104,6 +116,9 @@ struct SettingsHomeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $premiumShown) {
                 PremiumSheet(trigger: .discover)
+            }
+            .sheet(isPresented: $feedbackShown) {
+                FeedbackSheet()
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

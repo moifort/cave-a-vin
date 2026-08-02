@@ -7,6 +7,7 @@ import SwiftUI
 /// `xcrun simctl launch booted com.polyforms.vinarium.app -debugGallery`.
 struct DebugGallery: View {
     @State private var paywallTrigger: PremiumTrigger?
+    @State private var feedbackShown = false
 
     var body: some View {
         NavigationStack {
@@ -20,12 +21,18 @@ struct DebugGallery: View {
                         LoadingStateView()
                     }
                 }
+                Section("Retours") {
+                    Button("Nous écrire") { feedbackShown = true }
+                }
             }
             .navigationTitle("Debug")
         }
         .sheet(item: $paywallTrigger) { trigger in
             PremiumSheet(trigger: trigger)
                 .environment(SubscriptionStore())
+        }
+        .sheet(isPresented: $feedbackShown) {
+            FeedbackSheet()
         }
     }
 }
