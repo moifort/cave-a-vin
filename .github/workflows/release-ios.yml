@@ -191,6 +191,23 @@ jobs:
             CURRENT_PROJECT_VERSION="$BUILD" \
             archive
 
+      - name: Upload the debug symbols to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: polyforms
+          SENTRY_PROJECT: vinarium-ios
+        run: |
+          set -euo pipefail
+          # A crash report only names functions and lines if the dSYMs of that exact
+          # build reached Sentry. They live in the archive and nowhere else, so this
+          # has to happen here — an unsymbolicated crash cannot be fixed afterwards.
+          if [ -z "$SENTRY_AUTH_TOKEN" ]; then
+            echo "::warning::SENTRY_AUTH_TOKEN is unset — shipping a build Sentry cannot symbolicate"
+            exit 0
+          fi
+          curl -sL https://sentry.io/get-cli/ | bash
+          sentry-cli debug-files upload build/Vinarium.xcarchive/dSYMs
+
       - name: Export a signed .ipa (manual signing)
         run: |
           set -euo pipefail
