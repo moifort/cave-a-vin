@@ -16,6 +16,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # sentry-cli reads the commit history to attach it to the release
       - uses: oven-sh/setup-bun@v2
       - uses: hashicorp/setup-terraform@v4
         with:
@@ -58,6 +60,10 @@ jobs:
             sentry-cli releases new "$SENTRY_RELEASE"
             sentry-cli sourcemaps inject .output/server
             sentry-cli sourcemaps upload --release "$SENTRY_RELEASE" .output/server
+            # Attaches the commits this deploy carries, which is what turns an
+            # issue into "introduced by <commit>". --local reads the git history
+            # rather than requiring the Sentry-GitHub integration.
+            sentry-cli releases set-commits "$SENTRY_RELEASE" --local --ignore-missing
             sentry-cli releases finalize "$SENTRY_RELEASE"
           else
             echo "::warning::SENTRY_AUTH_TOKEN is unset — deploying without source maps"

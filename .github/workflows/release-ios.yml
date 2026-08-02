@@ -210,6 +210,14 @@ jobs:
           # an issue shows the code around the crashing line instead of just its
           # number.
           sentry-cli debug-files upload --include-sources build/Vinarium.xcarchive/dSYMs
+          # The Cocoa SDK stamps this exact release on every event it sends, so
+          # declaring it here with its commits is what lets an issue name the
+          # change that introduced it. --local reads the git history directly:
+          # no Sentry-GitHub integration to configure.
+          RELEASE="com.polyforms.vinarium.app@$MARKETING+$BUILD"
+          sentry-cli releases new "$RELEASE"
+          sentry-cli releases set-commits "$RELEASE" --local --ignore-missing
+          sentry-cli releases finalize "$RELEASE"
 
       - name: Export a signed .ipa (manual signing)
         run: |
