@@ -5,8 +5,13 @@ struct UITestFailure: Error {
 }
 
 extension XCUIElement {
+    /// The default has to cover a screen that fills itself from the backend, not
+    /// just a view transition: every list here shows a loading state while it
+    /// waits on Nitro and the emulators. At 4s the suite passed on an idle Mac
+    /// and failed on a busy one or on CI, each time on a different screen. The
+    /// wait is condition-based, so a fast run never pays for the larger bound.
     @discardableResult
-    func waitOrFail(timeout: TimeInterval = 4, _ message: String? = nil, file: StaticString = #file, line: UInt = #line) throws -> XCUIElement {
+    func waitOrFail(timeout: TimeInterval = 15, _ message: String? = nil, file: StaticString = #file, line: UInt = #line) throws -> XCUIElement {
         guard self.waitForExistence(timeout: timeout) else {
             let msg = message ?? "Element \(self) not found"
             XCTFail(msg, file: file, line: line)
@@ -15,7 +20,7 @@ extension XCUIElement {
         return self
     }
 
-    func tapOrFail(timeout: TimeInterval = 4, file: StaticString = #file, line: UInt = #line) throws {
+    func tapOrFail(timeout: TimeInterval = 15, file: StaticString = #file, line: UInt = #line) throws {
         try waitOrFail(timeout: timeout, file: file, line: line)
         self.tap()
     }
@@ -54,6 +59,12 @@ class BaseUITest: XCTestCase {
         account = "e2e-\(UUID().uuidString.lowercased())@vinarium.test"
         app = XCUIApplication()
         app.launchArguments = [
+            // The scenarios assert on French copy ("Accueil", "Ma Cave", "Offrir"),
+            // so the run must not inherit the host's language. The dev Mac is
+            // French and the CI runner is English, which is exactly why the gate
+            // passed locally and failed on CI.
+            "-AppleLanguages", "(fr)",
+            "-AppleLocale", "fr_FR",
             // Read by APIClient through UserDefaults (NSArgumentDomain).
             "-serverURL", "http://127.0.0.1:3000",
             // Read by UITestEnvironment (DEBUG only): points Firebase Auth at the

@@ -11,7 +11,11 @@ struct OnboardingPage {
     func verify() throws -> Self {
         // The account is created and signed in while the app launches, so the
         // first screen takes a round-trip longer than a plain view transition.
-        try app.buttons["onboarding-start"].waitOrFail(timeout: 30, "Onboarding never appeared — sign-in probably failed")
+        // The very first scenario of a run pays for cold emulators on top: the
+        // Firestore one boots a JVM that CI has just downloaded, and 30s was not
+        // enough there — the app sat on its loading state and the whole gate
+        // failed. Waiting is condition-based, so a warm run is not slowed down.
+        try app.buttons["onboarding-start"].waitOrFail(timeout: 90, "Onboarding never appeared — sign-in probably failed")
         return self
     }
 

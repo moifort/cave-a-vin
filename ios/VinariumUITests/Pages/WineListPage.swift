@@ -13,7 +13,9 @@ struct WineListPage {
     func verifyWineVisible(_ name: String) throws {
         let predicate = NSPredicate(format: "label CONTAINS %@", name)
         let element = app.staticTexts.matching(predicate).firstMatch
-        if !element.waitForExistence(timeout: 4) {
+        // The list is fetched, so this waits on a round-trip. The shorter fallback
+        // below only picks a different element type for something already there.
+        if !element.waitForExistence(timeout: 15) {
             let button = app.buttons.matching(predicate).firstMatch
             try button.waitOrFail(timeout: 2, "Wine '\(name)' not visible")
         }
