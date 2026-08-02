@@ -10,8 +10,10 @@ extension XCUIElement {
     /// waits on Nitro and the emulators. At 4s the suite passed on an idle Mac
     /// and failed on a busy one or on CI, each time on a different screen. The
     /// wait is condition-based, so a fast run never pays for the larger bound.
+    /// Measured against CI rather than this Mac: the same round-trips there run
+    /// several times slower, and every bound picked locally has had to be raised.
     @discardableResult
-    func waitOrFail(timeout: TimeInterval = 15, _ message: String? = nil, file: StaticString = #file, line: UInt = #line) throws -> XCUIElement {
+    func waitOrFail(timeout: TimeInterval = 30, _ message: String? = nil, file: StaticString = #file, line: UInt = #line) throws -> XCUIElement {
         guard self.waitForExistence(timeout: timeout) else {
             let msg = message ?? "Element \(self) not found"
             XCTFail(msg, file: file, line: line)
@@ -20,7 +22,7 @@ extension XCUIElement {
         return self
     }
 
-    func tapOrFail(timeout: TimeInterval = 15, file: StaticString = #file, line: UInt = #line) throws {
+    func tapOrFail(timeout: TimeInterval = 30, file: StaticString = #file, line: UInt = #line) throws {
         try waitOrFail(timeout: timeout, file: file, line: line)
         self.tap()
     }
