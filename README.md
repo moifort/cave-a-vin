@@ -43,7 +43,7 @@ A purely functional approach to wine cellar management.
 | AI       | Gemini 2.5 Flash (vision + Google Search grounding)                       |
 | Metrics  | App Store Connect Sales Reports API + BigQuery billing export (admin economics) |
 | Infra    | Terraform (google + google-beta) — provisions everything from scratch    |
-| Observability | Sentry (backend namespace tracing + iOS crash/error reporting)       |
+| Observability | Sentry (one trace from the tap to the resolver, symbolicated iOS crashes, per-release source maps) |
 | Testing  | `bun:test` for the backend, XCUITest against the Firebase emulators for the app ([docs/e2e.md](docs/e2e.md)) |
 
 ## One-shot bootstrap
