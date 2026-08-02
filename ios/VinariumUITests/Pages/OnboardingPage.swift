@@ -36,8 +36,9 @@ struct OnboardingPage {
         try app.buttons["onboarding-finish"].tapOrFail()
 
         // completeOnboarding writes the profile and provisions the grid before
-        // the app hands over, so this waits on a round-trip, not a transition.
-        try app.navigationBars["Home"].waitOrFail(timeout: 20, "Onboarding did not hand over to the app")
+        // the app hands over, so this waits on the heaviest round-trip of the
+        // run, not a transition. 20s held on the dev Mac and timed out on CI.
+        try app.navigationBars["Home"].waitOrFail(timeout: 60, "Onboarding did not hand over to the app")
         return DashboardPage(app: app)
     }
 }

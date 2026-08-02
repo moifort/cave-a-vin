@@ -12,7 +12,7 @@ struct GiftPage {
 
     func typeRecipientName(_ name: String) -> Self {
         let field = app.textFields["Name"]
-        if field.waitForExistence(timeout: 3) {
+        if field.waitForExistence(timeout: 15) {
             field.tap()
             field.typeText(name)
         }

@@ -22,15 +22,15 @@ struct CellarPage {
 
     func verifyRowHeader(_ row: String) throws {
         let text = "Row \(row)"
-        try app.staticTexts[text].waitOrFail(timeout: 4, "Row header '\(text)' not found")
+        try app.staticTexts[text].waitOrFail("Row header '\(text)' not found")
     }
 
     func verifyJournalShowsEntry() throws {
-        try app.staticTexts["In"].waitOrFail(timeout: 4, "no entry row in the journal")
+        try app.staticTexts["In"].waitOrFail("no entry row in the journal")
     }
 
     func verifyJournalShowsExit() throws {
-        try app.staticTexts["Out"].waitOrFail(timeout: 4, "no exit row in the journal")
+        try app.staticTexts["Out"].waitOrFail("no exit row in the journal")
     }
 
     func tapWine(named name: String) throws -> WineDetailPage {

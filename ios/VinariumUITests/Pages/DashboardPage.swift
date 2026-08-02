@@ -31,7 +31,7 @@ struct DashboardPage {
     func verifyJournalContains(_ wineName: String) throws {
         let predicate = NSPredicate(format: "label CONTAINS %@", wineName)
         let element = app.staticTexts.matching(predicate).firstMatch
-        if !element.waitForExistence(timeout: 3) {
+        if !element.waitForExistence(timeout: 15) {
             let button = app.buttons.matching(predicate).firstMatch
             try button.waitOrFail(timeout: 2, "'\(wineName)' not found in journal")
         }
@@ -49,7 +49,7 @@ struct DashboardPage {
     func verifyFavoritesContains(_ wineName: String) throws {
         let predicate = NSPredicate(format: "label CONTAINS %@", wineName)
         let element = app.staticTexts.matching(predicate).firstMatch
-        if !element.waitForExistence(timeout: 4) {
+        if !element.waitForExistence(timeout: 15) {
             let button = app.buttons.matching(predicate).firstMatch
             try button.waitOrFail(timeout: 2, "'\(wineName)' not found in favorites")
         }

@@ -12,17 +12,17 @@ struct WineDetailPage {
 
     func verifyWineName(_ name: String) throws {
         let predicate = NSPredicate(format: "label CONTAINS %@", name)
-        try app.staticTexts.matching(predicate).firstMatch.waitOrFail(timeout: 4, "Wine name '\(name)' not found")
+        try app.staticTexts.matching(predicate).firstMatch.waitOrFail("Wine name '\(name)' not found")
     }
 
     func verifyCellarSection() throws {
         app.swipeUp()
-        try app.staticTexts["Cellar"].waitOrFail(timeout: 4, "'Cave' section not found")
+        try app.staticTexts["Cellar"].waitOrFail("'Cellar' section not found")
     }
 
     func verifyConsumptionSection() throws {
         app.swipeUp()
-        try app.staticTexts["Consumed"].waitOrFail(timeout: 4, "'Consumed' section not found")
+        try app.staticTexts["Consumed"].waitOrFail("'Consumed' section not found")
     }
 
     func tapRemoveFromCellar() throws -> ConsumptionPage {
@@ -43,7 +43,7 @@ struct WineDetailPage {
     private func openRemovalDialog() throws {
         app.swipeUp()
         let inToolbar = app.navigationBars.buttons["remove-from-cellar-button"].firstMatch
-        if inToolbar.waitForExistence(timeout: 4) {
+        if inToolbar.waitForExistence(timeout: 15) {
             inToolbar.tap()
             return
         }
@@ -52,12 +52,12 @@ struct WineDetailPage {
 
     func verifyGiftSection() throws {
         app.swipeUp()
-        try app.staticTexts["Gifted"].waitOrFail(timeout: 4, "'Offert' section not found")
+        try app.staticTexts["Gifted"].waitOrFail("'Gifted' section not found")
     }
 
     func verifyRecommendationSection() throws {
         app.swipeUp()
-        try app.staticTexts["Recommended"].waitOrFail(timeout: 4, "'Recommended' section not found")
+        try app.staticTexts["Recommended"].waitOrFail("'Recommended' section not found")
     }
 
     /// Flags the bottle as a favorite through the detail menu and its sheet. A

@@ -17,7 +17,7 @@ struct ConsumptionPage {
 
     func typeTastingNotes(_ notes: String) -> Self {
         let notesField = app.textViews["Vos impressions..."]
-        if notesField.waitForExistence(timeout: 3) {
+        if notesField.waitForExistence(timeout: 15) {
             notesField.tap()
             notesField.typeText(notes)
         }

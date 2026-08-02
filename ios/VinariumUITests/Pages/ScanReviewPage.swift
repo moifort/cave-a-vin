@@ -63,7 +63,7 @@ struct ScanReviewPage {
     func typeRecommenderName(_ name: String) throws -> Self {
         let field = app.textFields["review-recommender-field"].firstMatch
         app.scrollTo(field)
-        try field.waitOrFail(timeout: 4, "'Recommended by' field not reachable")
+        try field.waitOrFail("'Recommended by' field not reachable")
         field.tap()
         field.typeText(name)
         return self
@@ -89,7 +89,7 @@ struct ScanReviewPage {
     func markAsFavorite() throws -> Self {
         let toggle = app.switches["review-favorite-toggle"].firstMatch
         app.scrollTo(toggle)
-        try toggle.waitOrFail(timeout: 4, "Favorite toggle not reachable")
+        try toggle.waitOrFail("Favorite toggle not reachable")
         toggle.switches.firstMatch.tap()
         return self
     }
