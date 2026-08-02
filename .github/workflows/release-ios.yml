@@ -14,6 +14,11 @@ on:
         required: false
         type: boolean
         default: false
+      skip_upload:
+        description: 'Archive and push the symbols to Sentry, but stop before App Store Connect'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -227,7 +232,10 @@ jobs:
             -exportOptionsPlist ios/ExportOptions.plist \
             -exportPath build/export
 
+      # Lets a manual run prove the archive and the Sentry symbol upload without
+      # spending a build number on App Store Connect. A tag push never sets this.
       - name: Upload to App Store Connect
+        if: ${{ inputs.skip_upload != true }}
         run: |
           set -euo pipefail
           xcrun altool --upload-app --type ios \
