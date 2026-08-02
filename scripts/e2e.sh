@@ -130,8 +130,10 @@ if [ "${1:-}" = "--inner" ]; then
   set -e
 
   if [ $STATUS -ne 0 ]; then
-    echo "==> Tests failed — last 50 lines of the server log:" >&2
-    tail -50 "$SERVER_LOG" >&2
+    echo "==> Tests failed — last 200 lines of the server log:" >&2
+    # The server logs one line per request in dev, so this is the record of what
+    # the app actually asked for and how long each answer took.
+    tail -200 "$SERVER_LOG" >&2
   fi
   exit $STATUS
 fi
