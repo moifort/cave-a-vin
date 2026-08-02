@@ -16,6 +16,10 @@ export default defineNitroConfig({
       concurrency: 80,
     },
   },
+  // Rollup minifies the whole backend into one file, so an unmapped stack trace
+  // points at a column of index.mjs. The maps are uploaded to Sentry at deploy
+  // time and stay out of the deployed bundle.
+  sourceMap: true,
   rollupConfig: {
     treeshake: {
       moduleSideEffects: (id) => id.includes('/graphql/') || id.includes('node_modules'),
@@ -28,6 +32,9 @@ export default defineNitroConfig({
     googleApiKey: '',
     adminToken: '',
     sentryDsn: '',
+    // Baked in at build time by the deploy workflow (the git SHA), so Sentry can
+    // tell which deploy an error comes from and pick the matching source maps.
+    sentryRelease: process.env.SENTRY_RELEASE ?? '',
     devUserId: '',
     scanStub: '',
     appleEnvironment: '',

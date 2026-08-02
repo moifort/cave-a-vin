@@ -31,12 +31,39 @@ jobs:
       # with a "## <version> (YYYY.MM.DD)" heading in CHANGELOG.md / CHANGELOG.fr.md.
 
       - name: Build the Nitro bundle (firebase preset)
+        env:
+          # Baked into the bundle, so every error Sentry receives says which
+          # deploy produced it and which source maps decode it.
+          SENTRY_RELEASE: vinarium-node@${{ github.sha }}
         run: |
           bun install --frozen-lockfile
           bun run generate:assets
           bunx nitro prepare
           bun run generate:graphql
           bun run build
+
+      - name: Upload the source maps to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: polyforms
+          SENTRY_PROJECT: vinarium-node
+          SENTRY_RELEASE: vinarium-node@${{ github.sha }}
+        run: |
+          set -euo pipefail
+          # Rollup bundles the backend into one minified file, so without these a
+          # stack trace reads "index.mjs:1:84210". Runs before the deploy because
+          # `sourcemaps inject` stamps debug ids into the very files being shipped.
+          if [ -n "$SENTRY_AUTH_TOKEN" ]; then
+            curl -sL https://sentry.io/get-cli/ | bash
+            sentry-cli releases new "$SENTRY_RELEASE"
+            sentry-cli sourcemaps inject .output/server
+            sentry-cli sourcemaps upload --release "$SENTRY_RELEASE" .output/server
+            sentry-cli releases finalize "$SENTRY_RELEASE"
+          else
+            echo "::warning::SENTRY_AUTH_TOKEN is unset — deploying without source maps"
+          fi
+          # The maps themselves never ship: Terraform zips this directory as-is.
+          find .output/server -name '*.map' -delete
 
       - name: Materialize terraform.tfvars from GitHub secrets
         run: |

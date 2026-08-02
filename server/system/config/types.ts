@@ -4,6 +4,8 @@ export type ApiToken = Brand<string, 'ApiToken'>
 export type AdminToken = Brand<string, 'AdminToken'>
 export type GoogleApiKey = Brand<string, 'GoogleApiKey'>
 export type SentryDsn = Brand<string, 'SentryDsn'>
+/** The deployed revision, as `vinarium-node@<git sha>` — ties errors to source maps. */
+export type SentryRelease = Brand<string, 'SentryRelease'>
 /** App Store Connect API key issuer id (a UUID from the Users and Access page). */
 export type AscIssuerId = Brand<string, 'AscIssuerId'>
 /** App Store Connect API key id (10-char alphanum, matches the .p8 filename). */

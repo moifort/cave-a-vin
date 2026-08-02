@@ -13,6 +13,7 @@ import type {
   GcpBillingTable as GcpBillingTableType,
   GoogleApiKey as GoogleApiKeyType,
   SentryDsn as SentryDsnType,
+  SentryRelease as SentryReleaseType,
 } from '~/system/config/types'
 
 export const ApiToken = (value: unknown) => {
@@ -36,6 +37,11 @@ export const SentryDsn = (value: unknown) => {
   // so a malformed value can't take down config() — which auth and scan also call.
   const v = z.string().min(1).parse(value)
   return make<SentryDsnType>()(v)
+}
+
+export const SentryRelease = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<SentryReleaseType>()(v)
 }
 
 // Pins signature verification to one App Store environment. Blank means both

@@ -10,6 +10,7 @@ import {
   GoogleApiKey,
   PremiumUserIds,
   SentryDsn,
+  SentryRelease,
 } from '~/system/config/primitives'
 
 export const config = () => {
@@ -19,6 +20,9 @@ export const config = () => {
     adminToken: runtimeConfig.adminToken ? AdminToken(runtimeConfig.adminToken) : undefined,
     googleApiKey: GoogleApiKey(runtimeConfig.googleApiKey),
     sentryDsn: runtimeConfig.sentryDsn ? SentryDsn(runtimeConfig.sentryDsn) : undefined,
+    sentryRelease: runtimeConfig.sentryRelease
+      ? SentryRelease(runtimeConfig.sentryRelease)
+      : undefined,
     devUserId: runtimeConfig.devUserId || undefined,
     scanStub: Boolean(runtimeConfig.scanStub),
     appleEnvironment: runtimeConfig.appleEnvironment
