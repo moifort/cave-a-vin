@@ -50,7 +50,8 @@ describe('mutations keep the search index in step', () => {
       }
     `)
     expect(result.errors).toBeUndefined()
-    const id = (result.data?.addBeverage as { id: string }).id
+    const added = result.data?.addBeverage as { id: string } | undefined
+    const id = added?.id ?? ''
 
     expect(indexOf(id)).toContain('margau')
     expect(indexOf(id)).toContain('bordeau')
@@ -73,7 +74,9 @@ describe('mutations keep the search index in step', () => {
   test('marking a favorite indexes it for that viewer only', async () => {
     seedWine()
 
-    const result = await execute(`mutation { markFavorite(beverageId: "${wineId}", favorite: true) }`)
+    const result = await execute(
+      `mutation { markFavorite(beverageId: "${wineId}", favorite: true) }`,
+    )
 
     expect(result.errors).toBeUndefined()
     expect(indexOf(wineId)).toContain(`fav:${userId}`)
