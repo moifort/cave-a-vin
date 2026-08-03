@@ -42,7 +42,7 @@ struct CellarPage: View {
             }
         }
         .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
+            ToolbarItemGroup {
                 ForEach(CellarDisplayMode.allCases) { mode in
                     Button {
                         displayMode = mode
@@ -55,7 +55,9 @@ struct CellarPage: View {
                 }
             }
             // Detaches the magnifier from the mode toggles into its own capsule.
-            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+            // The mode toggles keep the default placement so the magnifier, pinned to
+            // the trailing edge, lands last — same order as the wine list.
+            ToolbarSpacer(.fixed)
         }
         .searchToolbarButton()
         .navigationTitle(displayMode.title)
