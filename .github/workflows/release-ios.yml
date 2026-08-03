@@ -74,6 +74,11 @@ jobs:
           (cd ios && "$CLI_DIR/apollo-ios-cli" generate)
 
       - name: Run the end-to-end scenario
+        # The script pins the dev Mac to iOS 26.2, the one runtime that replays
+        # the scenarios there. This image carries a single runtime, the one of
+        # its own Xcode, so it names no version and takes whatever ships.
+        env:
+          E2E_DESTINATION: platform=iOS Simulator,name=iPhone 17
         run: ./scripts/e2e.sh
 
       - name: Archive the test results

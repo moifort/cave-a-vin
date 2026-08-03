@@ -23,9 +23,16 @@ cd "$(dirname "$SELF")/.."
 NITRO_PORT=3000
 AUTH_PORT=9099
 FIRESTORE_PORT=8080
-# No OS pinned: xcodebuild picks the newest runtime installed, which keeps the
-# same command working on the dev Mac and on the CI image.
-DESTINATION="${E2E_DESTINATION:-platform=iOS Simulator,name=iPhone 17}"
+# The simulator the scenarios run on. Pinned to the runtime the project targets:
+# left to itself xcodebuild takes the newest one installed, which on this Mac
+# means an iOS 26.5 or a 27.0 beta, and there the scenarios fail on a different
+# symptom every run (testmanagerd never returns the accessibility hierarchy, the
+# app loses its connection, sign-in never completes) where 26.2 replays all four
+# cleanly. CI overrides this with E2E_DESTINATION, its image carrying only the
+# runtime of its own Xcode.
+SIMULATOR="${E2E_SIMULATOR:-iPhone 17}"
+SIMULATOR_OS="${E2E_SIMULATOR_OS:-26.2}"
+DESTINATION="${E2E_DESTINATION:-platform=iOS Simulator,name=${SIMULATOR},OS=${SIMULATOR_OS}}"
 # The scenarios that gate a release, space-separated. They share one emulator
 # run: each test signs in with an account of its own, so they stay isolated.
 TESTS="${E2E_TESTS:-VinariumUITests/CellarFlowTest VinariumUITests/FavoriteFlowTest VinariumUITests/GiveAsGiftFlowTest VinariumUITests/RecommendationFlowTest}"
