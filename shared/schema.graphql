@@ -1690,17 +1690,17 @@ type Query {
   """
   Relevance-ranked faceted search across the whole collection.
   
-  Matches on name, producer, subtype, region, vintage or associated person, ranked by relevance. Spans the viewer's own wines plus household members' wines placed in the shared cellar; tastings, gifts and recommendations stay the viewer's own. An empty query with facet filters browses by filters alone; an empty query with no filter returns nothing.
+  Matches on name, producer, subtype, region, vintage or associated person, ranked by relevance. The words of the query are matched independently and in any order, and each one has to match something. Words match whole, so a partially typed word finds nothing; a vintage also matches by prefix. Spans the viewer's own wines plus household members' wines placed in the shared cellar; tastings, gifts and recommendations stay the viewer's own. An empty query with facet filters browses by filters alone; an empty query with no filter returns nothing.
   """
   searchBeverages(
     """Combinable facet filters applied on top of the text query"""
     filters: SearchFiltersInput
 
-    """Maximum number of hits returned (defaults to 50)"""
-    limit: Int = 50
+    """Maximum number of hits returned (defaults to 20)"""
+    limit: Int = 20
 
     """
-    Free-text query, case- and accent-insensitive; empty to browse by filters
+    Free-text query, case- and accent-insensitive, word order free, whole words only; empty to browse by filters
     """
     query: String
   ): SearchResults!

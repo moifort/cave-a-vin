@@ -2,13 +2,15 @@ import Apollo
 import Foundation
 
 enum SearchAPI {
-    static func search(query: String, filters: SearchFilters, limit: Int = 50) async throws
+    /// The number of hits is left to the server, so it can be retuned without
+    /// waiting for an App Store release.
+    static func search(query: String, filters: SearchFilters) async throws
         -> SearchResults
     {
         let gqlQuery = VinariumGraphQL.SearchQuery(
             query: GraphQLHelpers.graphQLNullable(query.isEmpty ? nil : query),
             filters: .some(input(from: filters)),
-            limit: .some(Int32(limit))
+            limit: .none
         )
         let data = try await GraphQLHelpers.fetch(GraphQLClient.shared.apollo, query: gqlQuery)
         return SearchResults(
