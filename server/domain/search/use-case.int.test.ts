@@ -65,6 +65,29 @@ describe('SearchIndexUseCase.refresh', () => {
     expect(indexOf('w1')).not.toContain(`fav:${userId}`)
   })
 
+  test('a housemate favourite on a shared wine is indexed under their own name', async () => {
+    seedWine()
+    fake.seed('household-members', userId, {
+      userId,
+      householdId: 'h1',
+      role: 'owner',
+      joinedAt: new Date('2026-01-01'),
+    })
+    fake.seed('household-members', 'marie', {
+      userId: 'marie',
+      householdId: 'h1',
+      role: 'member',
+      joinedAt: new Date('2026-01-01'),
+    })
+    // Marie hearts a wine she does not own; the note lives under her own key.
+    fake.seed('tasting', `marie_w1`, { userId: 'marie', beverageId: 'w1', favorite: true })
+
+    await SearchIndexUseCase.refresh(userId, 'w1' as BeverageId)
+
+    expect(indexOf('w1')).toContain('fav:marie')
+    expect(indexOf('w1')).not.toContain(`fav:${userId}`)
+  })
+
   test('a deleted wine is ignored rather than an error', async () => {
     expect(SearchIndexUseCase.refresh(userId, 'missing' as BeverageId)).resolves.toBeUndefined()
   })

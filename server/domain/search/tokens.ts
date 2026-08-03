@@ -1,7 +1,12 @@
 import { wineDetails } from '~/domain/beverage/business-rules'
+import type { Beverage } from '~/domain/beverage/types'
+import type { CellarBottleView } from '~/domain/cellar/types'
+import type { Gift } from '~/domain/gift/types'
+import type { Recommendation } from '~/domain/recommendation/types'
 import type { UserId } from '~/domain/shared/types'
+import type { TastingNote } from '~/domain/tasting/types'
 import { normalizedForSearch } from './business-rules'
-import type { SearchableWine, SearchFilters } from './types'
+import type { SearchFilters } from './types'
 
 // Below this length a word is left alone: cutting a mark off a three-letter word
 // would leave two letters, which match far too much.
@@ -47,10 +52,21 @@ export const wordTokens = (text: string | undefined) => {
 const personTokens = (userId: UserId, name: string | undefined) =>
   wordTokens(name).map((token) => `p:${userId}:${token}`)
 
+// A wine as the index sees it: not through one viewer's eyes but through every
+// member's at once. A shared bottle carries one tasting note per person who
+// wrote one, and each set of terms is namespaced with its author, so nobody's
+// favourites leak into anybody else's search.
+export type IndexableWine = Beverage & {
+  cellar?: CellarBottleView
+  consumption?: TastingNote[]
+  gift?: Gift[]
+  recommendation?: Recommendation[]
+}
+
 // Everything a wine can be found by. Free-text words carry no namespace; facets
 // carry one so that "red" the colour never collides with "red" the word. Facets
-// that belong to a viewer rather than to the wine are suffixed with their owner.
-export const searchIndexOf = (wine: SearchableWine): string[] => {
+// that belong to a person rather than to the wine are suffixed with their owner.
+export const searchIndexOf = (wine: IndexableWine): string[] => {
   const details = wineDetails(wine)
   const tokens = [
     ...wordTokens(wine.name),
@@ -64,17 +80,18 @@ export const searchIndexOf = (wine: SearchableWine): string[] => {
     ...(details?.color === undefined ? [] : [`color:${details.color}`]),
     // The cellar is shared by the household, so its mark carries no owner.
     ...(wine.cellar === undefined ? [] : ['incellar']),
-    ...(wine.consumption?.favorite === true ? [`fav:${wine.consumption.userId}`] : []),
-    ...(wine.consumption?.consumedDate == null ? [] : [`consumed:${wine.consumption.userId}`]),
-    ...(wine.gift === undefined ? [] : [`gift:${wine.gift.userId}`]),
-    ...personTokens(wine.gift?.userId ?? wine.userId, wine.gift?.received?.from),
-    ...personTokens(wine.gift?.userId ?? wine.userId, wine.gift?.given?.recipientName),
-    ...personTokens(
-      wine.recommendation?.userId ?? wine.userId,
-      wine.recommendation?.recommenderName,
-    ),
-    ...(wine.consumption?.contacts ?? []).flatMap((contact) =>
-      personTokens(wine.consumption?.userId ?? wine.userId, contact),
+    ...(wine.consumption ?? []).flatMap((note) => [
+      ...(note.favorite === true ? [`fav:${note.userId}`] : []),
+      ...(note.consumedDate == null ? [] : [`consumed:${note.userId}`]),
+      ...(note.contacts ?? []).flatMap((contact) => personTokens(note.userId, contact)),
+    ]),
+    ...(wine.gift ?? []).flatMap((gift) => [
+      `gift:${gift.userId}`,
+      ...personTokens(gift.userId, gift.received?.from),
+      ...personTokens(gift.userId, gift.given?.recipientName),
+    ]),
+    ...(wine.recommendation ?? []).flatMap((recommendation) =>
+      personTokens(recommendation.userId, recommendation.recommenderName),
     ),
   ]
   return [...new Set(tokens)]

@@ -19,8 +19,7 @@ import {
 import { RecommendationCommand } from '~/domain/recommendation/command'
 import { RecommendationQuery } from '~/domain/recommendation/query'
 import type { Recommendation } from '~/domain/recommendation/types'
-import { searchIndexOf } from '~/domain/search/tokens'
-import type { SearchableWine } from '~/domain/search/types'
+import { type IndexableWine, searchIndexOf } from '~/domain/search/tokens'
 import type { UserId } from '~/domain/shared/types'
 import { TastingCommand } from '~/domain/tasting/command'
 import { TastingQuery } from '~/domain/tasting/query'
@@ -128,16 +127,19 @@ const withSearchIndex = (
   const gift = byBeverage(satellites.gift)
   const recommendation = byBeverage(satellites.recommendation)
   return wines.map((wine) => {
-    const searchable: SearchableWine = { ...wine }
-    const bottle = cellar.get(String(wine.id))
-    if (bottle) searchable.cellar = bottleView(bottle)
     const note = tasting.get(String(wine.id))
-    if (note) searchable.consumption = note
     const given = gift.get(String(wine.id))
-    if (given) searchable.gift = given
     const recommended = recommendation.get(String(wine.id))
-    if (recommended) searchable.recommendation = recommended
-    return { ...wine, searchIndex: searchIndexOf(searchable) }
+    const bottle = cellar.get(String(wine.id))
+    // An import restores one account, so each satellite holds at most one record.
+    const indexable: IndexableWine = {
+      ...wine,
+      consumption: note ? [note] : [],
+      gift: given ? [given] : [],
+      recommendation: recommended ? [recommended] : [],
+    }
+    if (bottle) indexable.cellar = bottleView(bottle)
+    return { ...wine, searchIndex: searchIndexOf(indexable) }
   })
 }
 

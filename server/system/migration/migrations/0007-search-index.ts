@@ -1,13 +1,13 @@
-import { searchIndexOf } from '~/domain/search/tokens'
-import type { SearchableWine } from '~/domain/search/types'
+import { type IndexableWine, searchIndexOf } from '~/domain/search/tokens'
 import { MigrationName, MigrationVersion } from '~/system/migration/primitives'
 import type { Migration } from '~/system/migration/types'
 
 const BATCH_LIMIT = 400
 
-// The satellite collections, paired with the field they fill on a searchable wine.
-const SATELLITES = [
-  ['cellar', 'cellar'],
+// The personal satellite collections, paired with the field they fill. Several
+// household members can hold a record on the same wine, so each field gathers
+// every one of them; the cellar is handled apart, being shared and single.
+const PERSONAL_SATELLITES = [
   ['tasting', 'consumption'],
   ['gift', 'gift'],
   ['recommendation', 'recommendation'],
@@ -20,29 +20,36 @@ export const migration0007: Migration = {
   version: MigrationVersion(7),
   name: MigrationName('search-index'),
   migrate: async ({ db }) => {
-    const [wineSnap, ...satelliteSnaps] = await Promise.all([
+    const [wineSnap, cellarSnap, ...personalSnaps] = await Promise.all([
       db.collection('beverages').get(),
-      ...SATELLITES.map(([collection]) => db.collection(collection).get()),
+      db.collection('cellar').get(),
+      ...PERSONAL_SATELLITES.map(([collection]) => db.collection(collection).get()),
     ])
 
-    // One map per collection, keyed `${owner}_${beverageId}` — the document id.
-    // Keying by beverage alone would let a housemate's tasting note land on the
-    // wine as if it were the owner's.
-    const byOwnedBeverage = satelliteSnaps.map(
-      (snap) => new Map(snap.docs.map((doc) => [doc.ref.id, doc.data()])),
-    )
+    // Every record touching a wine, grouped by that wine. Each record carries its
+    // own userId, which is what namespaces the terms it produces.
+    const groupByBeverage = (docs: { data: () => Record<string, unknown> }[]) => {
+      const groups = new Map<string, Record<string, unknown>[]>()
+      for (const doc of docs) {
+        const key = String(doc.data().beverageId)
+        groups.set(key, [...(groups.get(key) ?? []), doc.data()])
+      }
+      return groups
+    }
+    const personal = personalSnaps.map((snap) => groupByBeverage(snap.docs))
+    const placed = new Set(cellarSnap.docs.map((doc) => String(doc.data().beverageId)))
 
     for (let start = 0; start < wineSnap.docs.length; start += BATCH_LIMIT) {
       const batch = db.batch()
       for (const doc of wineSnap.docs.slice(start, start + BATCH_LIMIT)) {
-        const wine = doc.data()
-        const searchable = { ...wine } as Record<string, unknown>
-        SATELLITES.forEach(([, field], index) => {
-          const record = byOwnedBeverage[index]?.get(`${wine.userId}_${doc.ref.id}`)
-          if (record) searchable[field] = record
+        const indexable = { ...doc.data() } as Record<string, unknown>
+        PERSONAL_SATELLITES.forEach(([, field], index) => {
+          indexable[field] = personal[index]?.get(doc.ref.id) ?? []
         })
+        // Only its presence matters to the index, so a bare marker is enough.
+        if (placed.has(doc.ref.id)) indexable.cellar = { placed: true }
         batch.update(doc.ref, {
-          searchIndex: searchIndexOf(searchable as unknown as SearchableWine),
+          searchIndex: searchIndexOf(indexable as unknown as IndexableWine),
         })
       }
       await batch.commit()

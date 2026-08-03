@@ -30,14 +30,15 @@ describe('migration 0007 search-index', () => {
     expect(index).toContain('fav:u1')
   })
 
-  test('a satellite belonging to someone else never lands on the wine', async () => {
+  test('a housemate note lands on the wine under their own name, not the owner one', async () => {
     fake.seed('beverages', 'w1', { id: 'w1', userId: 'u1', name: 'Margaux', beverageType: 'wine' })
     fake.seed('tasting', 'u2_w1', { userId: 'u2', beverageId: 'w1', favorite: true })
 
     await migration0007.migrate({ db: fake.db })
 
     const index = fake.snapshot('beverages').get('w1')?.searchIndex as string[]
-    expect(index).not.toContain('fav:u2')
+    expect(index).toContain('fav:u2')
+    expect(index).not.toContain('fav:u1')
   })
 
   test('is safe to run twice', async () => {

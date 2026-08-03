@@ -1,11 +1,16 @@
 import { describe, expect, test } from 'bun:test'
-import { canonical, queryTerms, searchIndexOf, wordTokens } from '~/domain/search/tokens'
-import type { SearchableWine } from '~/domain/search/types'
+import {
+  canonical,
+  type IndexableWine,
+  queryTerms,
+  searchIndexOf,
+  wordTokens,
+} from '~/domain/search/tokens'
 import type { UserId } from '~/domain/shared/types'
 
 const owner = 'user-1' as UserId
 
-const aWine = (overrides: Record<string, unknown> = {}): SearchableWine =>
+const aWine = (overrides: Record<string, unknown> = {}): IndexableWine =>
   ({
     id: 'w1',
     userId: owner,
@@ -15,7 +20,7 @@ const aWine = (overrides: Record<string, unknown> = {}): SearchableWine =>
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
     ...overrides,
-  }) as SearchableWine
+  }) as IndexableWine
 
 describe('canonical', () => {
   test('strips accents and lowercases', () => {
@@ -86,8 +91,8 @@ describe('searchIndexOf', () => {
   test('prefixes the personal facets with their owner', () => {
     const tokens = searchIndexOf(
       aWine({
-        consumption: { userId: owner, beverageId: 'w1', favorite: true },
-        gift: { userId: owner, beverageId: 'w1', received: { from: 'Alice' } },
+        consumption: [{ userId: owner, beverageId: 'w1', favorite: true }],
+        gift: [{ userId: owner, beverageId: 'w1', received: { from: 'Alice' } }],
       }),
     )
     expect(tokens).toContain(`fav:${owner}`)

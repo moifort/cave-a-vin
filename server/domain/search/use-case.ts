@@ -3,11 +3,11 @@ import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId } from '~/domain/beverage/types'
 import { CellarQuery } from '~/domain/cellar/query'
 import { GiftQuery } from '~/domain/gift/query'
+import { HouseholdQuery } from '~/domain/household/query'
 import { RecommendationQuery } from '~/domain/recommendation/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
-import { searchIndexOf } from './tokens'
-import type { SearchableWine } from './types'
+import { type IndexableWine, searchIndexOf } from './tokens'
 
 export namespace SearchIndexUseCase {
   // Recompute what one wine can be found by, from its current state and that of
@@ -21,20 +21,27 @@ export namespace SearchIndexUseCase {
   export const refresh = async (viewerId: UserId, beverageId: BeverageId): Promise<void> => {
     const wine = await BeverageQuery.byIdForViewer(viewerId, beverageId)
     if (wine === 'not-found') return
-    // Satellites belong to the wine's owner: a housemate reindexing a shared
-    // bottle must not stamp it with their own tasting note.
-    const owner = wine.userId
-    const [cellar, consumption, gift, recommendation] = await Promise.all([
-      CellarQuery.placementsByOwnedBeverages([{ id: beverageId, userId: owner }]),
-      TastingQuery.byBeverageIds(owner, [beverageId]),
-      GiftQuery.byBeverageIds(owner, [beverageId]),
-      RecommendationQuery.byBeverageIds(owner, [beverageId]),
+    // Every member's notes are gathered, not just the owner's: a housemate can
+    // heart or gift a bottle they do not own, and the array is rewritten whole,
+    // so reading one person's records would erase everybody else's terms.
+    const scope = await HouseholdQuery.cellarScope(wine.userId)
+    const [cellar, ...perMember] = await Promise.all([
+      CellarQuery.placementsByOwnedBeverages([{ id: beverageId, userId: wine.userId }]),
+      ...scope.memberIds.map((memberId) =>
+        Promise.all([
+          TastingQuery.byBeverageIds(memberId, [beverageId]),
+          GiftQuery.byBeverageIds(memberId, [beverageId]),
+          RecommendationQuery.byBeverageIds(memberId, [beverageId]),
+        ]),
+      ),
     ])
-    const searchable: SearchableWine = { ...wine }
-    if (cellar[0]) searchable.cellar = cellar[0]
-    if (consumption[0]) searchable.consumption = consumption[0]
-    if (gift[0]) searchable.gift = gift[0]
-    if (recommendation[0]) searchable.recommendation = recommendation[0]
-    await BeverageCommand.saveSearchIndex(beverageId, searchIndexOf(searchable))
+    const indexable: IndexableWine = {
+      ...wine,
+      consumption: perMember.flatMap(([tastings]) => tastings),
+      gift: perMember.flatMap(([, gifts]) => gifts),
+      recommendation: perMember.flatMap(([, , recommendations]) => recommendations),
+    }
+    if (cellar[0]) indexable.cellar = cellar[0]
+    await BeverageCommand.saveSearchIndex(beverageId, searchIndexOf(indexable))
   }
 }
