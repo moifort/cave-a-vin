@@ -14,38 +14,17 @@ struct FeedbackSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            ZStack {
                 if sent {
-                    Section {
-                        Label("Message envoyé", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                    } footer: {
-                        Text("Merci, votre message nous aide à améliorer l'application.")
-                    }
+                    confirmation
+                        .transition(.scale(scale: 0.8).combined(with: .opacity))
                 } else {
-                    Section {
-                        Picker("Sujet", selection: $kind) {
-                            Text("Problème").tag(FeedbackKind.bug)
-                            Text("Suggestion").tag(FeedbackKind.idea)
-                        }
-                        .pickerStyle(.segmented)
-                    } footer: {
-                        Text(kindHint)
-                    }
-
-                    Section {
-                        TextField("Votre message", text: $message, axis: .vertical)
-                            .lineLimit(5...)
-                    }
-
-                    Section {
-                        Button("Envoyer") { send() }
-                            .disabled(trimmedMessage.isEmpty)
-                    } footer: {
-                        Text("La version de l'application et le modèle d'appareil accompagnent le message. Ni votre nom ni votre adresse e-mail ne sont transmis.")
-                    }
+                    composer
+                        .transition(.opacity)
                 }
             }
+            .animation(.smooth(duration: 0.3), value: sent)
+            .sensoryFeedback(.success, trigger: sent)
             .navigationTitle("Nous écrire")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -57,7 +36,60 @@ struct FeedbackSheet: View {
                     ) { dismiss() }
                 }
             }
+            .task(id: sent) {
+                guard sent else { return }
+                try? await Task.sleep(for: .seconds(2))
+                guard !Task.isCancelled else { return }
+                dismiss()
+            }
         }
+    }
+
+    private var composer: some View {
+        Form {
+            Section {
+                Picker("Sujet", selection: $kind) {
+                    Text("Problème").tag(FeedbackKind.bug)
+                    Text("Suggestion").tag(FeedbackKind.idea)
+                }
+                .pickerStyle(.segmented)
+            } footer: {
+                Text(kindHint)
+            }
+
+            Section {
+                TextField("Votre message", text: $message, axis: .vertical)
+                    .lineLimit(5...)
+            }
+
+            Section {
+                Button("Envoyer") { send() }
+                    .disabled(trimmedMessage.isEmpty)
+            } footer: {
+                Text("La version de l'application et le modèle d'appareil accompagnent le message. Ni votre nom ni votre adresse e-mail ne sont transmis.")
+            }
+        }
+    }
+
+    /// Centred confirmation that replaces the form once the message is queued,
+    /// then steps aside on its own after a couple of seconds.
+    private var confirmation: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 76))
+                .foregroundStyle(.green)
+                .symbolEffect(.bounce, options: .nonRepeating, value: sent)
+
+            Text("Message envoyé")
+                .font(.title3.weight(.semibold))
+
+            Text("Merci, votre message nous aide à améliorer l'application.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var kindHint: LocalizedStringKey {
