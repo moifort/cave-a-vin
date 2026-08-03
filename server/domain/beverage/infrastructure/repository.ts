@@ -29,6 +29,25 @@ export const findAllByUser = (userId: UserId): Promise<Beverage[]> =>
     return snap.docs.map((doc) => doc.data())
   })
 
+// Replace the search terms of one wine. A targeted update, never a full write:
+// the caller recomputes the tokens, it does not hold the rest of the document.
+export const saveSearchIndex = async (id: BeverageId, tokens: string[]): Promise<void> => {
+  await beverages().doc(id).update({ searchIndex: tokens })
+}
+
+// The owner's wines holding at least one of the terms. Firestore allows a single
+// array clause per query, so this is the only condition it carries: everything
+// else (the other words, the facets, the housemate visibility rule) is settled
+// in memory on the few documents that come back.
+export const findBySearchTerms = async (ownerId: UserId, terms: string[]): Promise<Beverage[]> => {
+  if (terms.length === 0) return []
+  const snap = await beverages()
+    .where('userId', '==', ownerId)
+    .where('searchIndex', 'array-contains-any', terms)
+    .get()
+  return snap.docs.map((doc) => doc.data())
+}
+
 export const findBy = async (userId: UserId, id: BeverageId): Promise<Beverage | null> => {
   const doc = await beverages().doc(id).get()
   const data = doc.data()

@@ -19,15 +19,20 @@ export type FakeRef = {
   id: string
   get: () => Promise<FakeSnapshot>
   set: (data: Doc, options?: { merge?: boolean }) => Promise<void>
+  update: (data: Doc) => Promise<void>
   delete: () => Promise<void>
 }
 
-export type BatchOp = { type: 'set'; ref: FakeRef; data: Doc } | { type: 'delete'; ref: FakeRef }
+export type BatchOp =
+  | { type: 'set'; ref: FakeRef; data: Doc }
+  | { type: 'update'; ref: FakeRef; data: Doc }
+  | { type: 'delete'; ref: FakeRef }
 
 export type FakeBatch = {
   ops: BatchOp[]
   commits: number
   set: (ref: FakeRef, data: Doc) => FakeBatch
+  update: (ref: FakeRef, data: Doc) => FakeBatch
   delete: (ref: FakeRef) => FakeBatch
   commit: () => Promise<void>
 }
@@ -38,7 +43,7 @@ export type FakeTransaction = {
   delete: (ref: FakeRef) => FakeTransaction
 }
 
-export type DirectWrite = { type: 'set' | 'delete'; collection: string; id: string }
+export type DirectWrite = { type: 'set' | 'update' | 'delete'; collection: string; id: string }
 
 type FakeQuery = {
   where: (field: string, op: string, value: unknown) => FakeQuery
@@ -121,6 +126,17 @@ export const createFakeFirestore = () => {
         id,
         resolveWrite(docsOf(collection).get(id), data, options?.merge === true),
       )
+    },
+    // Like Firestore's update: merges into an existing document, and refuses to
+    // create one. A caller racing with a deletion must fail, not resurrect a
+    // ghost document holding only the field it wrote.
+    update: async (data) => {
+      const existing = docsOf(collection).get(id)
+      if (existing === undefined) {
+        throw new Error(`NOT_FOUND: no document to update at ${collection}/${id}`)
+      }
+      directWrites.push({ type: 'update', collection, id })
+      docsOf(collection).set(id, resolveWrite(existing, data, true))
     },
     delete: async () => {
       directWrites.push({ type: 'delete', collection, id })
@@ -227,6 +243,10 @@ export const createFakeFirestore = () => {
         ops.push({ type: 'set', ref, data })
         return batch
       },
+      update: (ref, data) => {
+        ops.push({ type: 'update', ref, data })
+        return batch
+      },
       delete: (ref) => {
         ops.push({ type: 'delete', ref })
         return batch
@@ -235,7 +255,15 @@ export const createFakeFirestore = () => {
         if (commitError) throw commitError
         for (const op of ops) {
           if (op.type === 'set') docsOf(op.ref.collection).set(op.ref.id, op.data)
-          else docsOf(op.ref.collection).delete(op.ref.id)
+          else if (op.type === 'update') {
+            const existing = docsOf(op.ref.collection).get(op.ref.id)
+            if (existing === undefined) {
+              throw new Error(
+                `NOT_FOUND: no document to update at ${op.ref.collection}/${op.ref.id}`,
+              )
+            }
+            docsOf(op.ref.collection).set(op.ref.id, resolveWrite(existing, op.data, true))
+          } else docsOf(op.ref.collection).delete(op.ref.id)
         }
         batch.commits += 1
       },

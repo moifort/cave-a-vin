@@ -17,6 +17,14 @@
       ]
     },
     {
+      "collectionGroup": "beverages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "searchIndex", "arrayConfig": "CONTAINS" }
+      ]
+    },
+    {
       "collectionGroup": "cellar",
       "queryScope": "COLLECTION",
       "fields": [

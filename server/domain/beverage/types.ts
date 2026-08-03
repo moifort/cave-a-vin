@@ -118,6 +118,12 @@ type BeverageBase = {
   purchase?: Purchase
   notes?: Notes
   place?: Place
+  /**
+   * Every term this wine can be found by, written ahead of time so Firestore can
+   * search it (see `server/domain/search/tokens.ts`). Optional: a wine written
+   * before the index existed simply has none until it is reindexed.
+   */
+  searchIndex?: string[]
   createdAt: Date
   updatedAt: Date
 }
