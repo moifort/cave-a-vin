@@ -145,7 +145,16 @@ export const createFakeFirestore = () => {
     if (op === '==') return data[field] === value
     if (op === '!=') return data[field] !== undefined && data[field] !== value
     if (op === 'in') return Array.isArray(value) && value.includes(data[field])
-    throw new Error(`fake-firestore only supports '==', '!=' and 'in' queries, got '${op}'`)
+    const held = data[field]
+    if (op === 'array-contains') return Array.isArray(held) && held.includes(value)
+    if (op === 'array-contains-any')
+      return (
+        Array.isArray(held) && Array.isArray(value) && value.some((wanted) => held.includes(wanted))
+      )
+    throw new Error(
+      `fake-firestore only supports '==', '!=', 'in', 'array-contains' and ` +
+        `'array-contains-any' queries, got '${op}'`,
+    )
   }
 
   const makeQuery = (collection: string, state: QueryState): FakeQuery => ({

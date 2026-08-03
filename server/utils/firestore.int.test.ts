@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import type { BeverageId } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
-import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
+import { createFakeFirestore, fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
 
@@ -42,5 +42,46 @@ describe('userBeverageRecordRepository.findManyByBeverageIds', () => {
     seed()
     const result = await repo.findManyByBeverageIds(userId, ['w1', 'missing'] as BeverageId[])
     expect(result.map((r) => String(r.beverageId))).toEqual(['w1'])
+  })
+})
+
+describe('fake Firestore array operators', () => {
+  test('array-contains matches a document holding the value', async () => {
+    const local = createFakeFirestore()
+    local.seed('beverages', 'w1', { userId: 'u1', searchIndex: ['margaux', 'chateau'] })
+    local.seed('beverages', 'w2', { userId: 'u1', searchIndex: ['petrus'] })
+
+    const snap = await local.db
+      .collection('beverages')
+      .where('searchIndex', 'array-contains', 'margaux')
+      .get()
+
+    expect(snap.docs.map((doc) => doc.ref.id)).toEqual(['w1'])
+  })
+
+  test('array-contains-any matches on any of the values', async () => {
+    const local = createFakeFirestore()
+    local.seed('beverages', 'w1', { userId: 'u1', searchIndex: ['margaux'] })
+    local.seed('beverages', 'w2', { userId: 'u1', searchIndex: ['p:u1:alice'] })
+    local.seed('beverages', 'w3', { userId: 'u1', searchIndex: ['petrus'] })
+
+    const snap = await local.db
+      .collection('beverages')
+      .where('searchIndex', 'array-contains-any', ['margaux', 'p:u1:alice'])
+      .get()
+
+    expect(snap.docs.map((doc) => doc.ref.id)).toEqual(['w1', 'w2'])
+  })
+
+  test('a missing array never matches', async () => {
+    const local = createFakeFirestore()
+    local.seed('beverages', 'w1', { userId: 'u1' })
+
+    const snap = await local.db
+      .collection('beverages')
+      .where('searchIndex', 'array-contains', 'margaux')
+      .get()
+
+    expect(snap.docs).toEqual([])
   })
 })
