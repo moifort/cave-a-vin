@@ -8,6 +8,10 @@ final class SearchViewModel {
     private(set) var sections: [WineListContent.Group] = []
     private(set) var isLoading = false
     private(set) var error: String?
+    /// How many hits are displayed, and how many matched before the server's limit.
+    /// They differ when the search matched more wines than the page shows.
+    private(set) var displayedCount = 0
+    private(set) var totalCount = 0
 
     /// Nothing is searched while there is neither text nor filter: the page then shows
     /// its suggestions rather than an empty list.
@@ -29,6 +33,8 @@ final class SearchViewModel {
         let requested = generation
         guard hasActiveSearch else {
             sections = []
+            displayedCount = 0
+            totalCount = 0
             isLoading = false
             error = nil
             return
@@ -49,6 +55,8 @@ final class SearchViewModel {
             let results = try await SearchAPI.search(query: currentQuery, filters: currentFilters)
             guard requested == generation else { return } // a more recent keystroke landed
             sections = Self.sections(from: results.hits)
+            displayedCount = results.hits.count
+            totalCount = results.totalCount
         } catch is CancellationError {
             return
         } catch {

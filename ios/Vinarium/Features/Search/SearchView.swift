@@ -19,6 +19,8 @@ struct SearchView: View {
                 hasActiveSearch: viewModel.hasActiveSearch,
                 isLoading: viewModel.isLoading,
                 errorMessage: viewModel.error,
+                displayedCount: viewModel.displayedCount,
+                totalCount: viewModel.totalCount,
                 onWineTapped: { selectedWineId = $0 }
             )
             .navigationTitle("Recherche")

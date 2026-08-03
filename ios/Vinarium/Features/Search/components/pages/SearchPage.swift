@@ -6,13 +6,29 @@ struct SearchPage: View {
     var hasActiveSearch: Bool
     var isLoading: Bool = false
     var errorMessage: String?
+    var displayedCount: Int = 0
+    var totalCount: Int = 0
     var onWineTapped: (String) -> Void
+
+    /// The server caps the hits it returns: say so rather than let the list pass for
+    /// the whole of what matched.
+    private var isTruncated: Bool { totalCount > displayedCount && displayedCount > 0 }
 
     var body: some View {
         VStack(spacing: 0) {
             SearchFilterChips(filters: $filters)
                 .padding(.vertical, 8)
             Divider()
+            if isTruncated {
+                Text("Les \(displayedCount) premiers résultats sur \(totalCount)")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    .padding(.vertical, 6)
+                    .accessibilityIdentifier("search-results-summary")
+                Divider()
+            }
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -71,6 +87,25 @@ struct SearchPage: View {
             ]),
         ],
         hasActiveSearch: true,
+        displayedCount: 2,
+        totalCount: 2,
+        onWineTapped: { _ in }
+    )
+}
+
+#Preview("Truncated results") {
+    @Previewable @State var filters = SearchFilters()
+    SearchPage(
+        filters: $filters,
+        sections: [
+            .init(label: "En cave", items: [
+                .init(id: "1", color: .red, name: "Château Margaux", subtitle: "2018 • Bordeaux", rating: 5, isFavorite: true, isInCellar: true),
+                .init(id: "2", color: .white, name: "Pouilly-Fumé", subtitle: "2021 • Loire", rating: 4, isFavorite: false, isInCellar: true),
+            ]),
+        ],
+        hasActiveSearch: true,
+        displayedCount: 20,
+        totalCount: 47,
         onWineTapped: { _ in }
     )
 }

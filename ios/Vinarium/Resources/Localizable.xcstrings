@@ -7963,6 +7963,46 @@
         }
       }
     },
+    "Les %lld premiers résultats sur %lld": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die ersten %lld von %lld Ergebnissen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The first %lld results out of %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los %lld primeros resultados de %lld"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I primi %lld risultati su %lld"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全%2$lld件中、最初の%1$lld件"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os %lld primeiros resultados de %lld"
+          }
+        }
+      }
+    },
     "Les offres ne sont pas disponibles pour le moment.": {
       "localizations": {
         "de": {
