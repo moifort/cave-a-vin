@@ -3,7 +3,7 @@ import { BeverageCommand } from '~/domain/beverage/command'
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { Beverage } from '~/domain/beverage/types'
 import { CellarCommand } from '~/domain/cellar/command'
-import { CellarQuery } from '~/domain/cellar/query'
+import { bottleView, CellarQuery } from '~/domain/cellar/query'
 import type { CellarBottle } from '~/domain/cellar/types'
 import { GiftCommand } from '~/domain/gift/command'
 import { GiftQuery } from '~/domain/gift/query'
@@ -19,6 +19,8 @@ import {
 import { RecommendationCommand } from '~/domain/recommendation/command'
 import { RecommendationQuery } from '~/domain/recommendation/query'
 import type { Recommendation } from '~/domain/recommendation/types'
+import { searchIndexOf } from '~/domain/search/tokens'
+import type { SearchableWine } from '~/domain/search/types'
 import type { UserId } from '~/domain/shared/types'
 import { TastingCommand } from '~/domain/tasting/command'
 import { TastingQuery } from '~/domain/tasting/query'
@@ -81,10 +83,15 @@ export namespace PortabilityUseCase {
     const gift = stamp(envelope.gift) as Gift[]
     const journal = stamp(envelope.journal) as JournalEntry[]
 
+    // The search terms are computed here rather than by reindexing each wine
+    // afterwards: everything the index needs is already in hand, so a join in
+    // memory replaces five reads and a write per imported bottle.
+    const indexed = withSearchIndex(wines, { cellar, tasting, gift, recommendation })
+
     // Each domain wipes then restores its own collection (independent, so the
     // whole restore runs in parallel).
     await Promise.all([
-      BeverageCommand.replaceAllForUser(userId, wines),
+      BeverageCommand.replaceAllForUser(userId, indexed),
       CellarCommand.replaceAllForUser(userId, cellar),
       TastingCommand.replaceAllForUser(userId, tasting),
       RecommendationCommand.replaceAllForUser(userId, recommendation),
@@ -101,6 +108,37 @@ export namespace PortabilityUseCase {
       journal: journal.length,
     }
   }
+}
+
+// Join each imported wine with its satellites and stamp the terms it can be
+// found by, so a restored account is searchable without a second pass.
+const withSearchIndex = (
+  wines: Beverage[],
+  satellites: {
+    cellar: CellarBottle[]
+    tasting: TastingNote[]
+    gift: Gift[]
+    recommendation: Recommendation[]
+  },
+): Beverage[] => {
+  const byBeverage = <T extends { beverageId: string }>(rows: T[]) =>
+    new Map(rows.map((row) => [String(row.beverageId), row]))
+  const cellar = byBeverage(satellites.cellar)
+  const tasting = byBeverage(satellites.tasting)
+  const gift = byBeverage(satellites.gift)
+  const recommendation = byBeverage(satellites.recommendation)
+  return wines.map((wine) => {
+    const searchable: SearchableWine = { ...wine }
+    const bottle = cellar.get(String(wine.id))
+    if (bottle) searchable.cellar = bottleView(bottle)
+    const note = tasting.get(String(wine.id))
+    if (note) searchable.consumption = note
+    const given = gift.get(String(wine.id))
+    if (given) searchable.gift = given
+    const recommended = recommendation.get(String(wine.id))
+    if (recommended) searchable.recommendation = recommended
+    return { ...wine, searchIndex: searchIndexOf(searchable) }
+  })
 }
 
 const dateSchema = z
