@@ -150,6 +150,16 @@ Nested `Beverage` fields (`cellar`, `consumption`, `gift`, `recommendation`, `hi
 
 `server/system/request-cache.ts` exposes `memoizedPerRequest(key, fn)`: a domain query called several times within the same request reads once. The cache lives on the H3 event context, so it is request-scoped and discarded when the request ends — no cross-request staleness. `isInRequestCache(key)` lets a batched read reuse an already-run full scan for zero extra reads.
 
+A write followed by a read in the same request would otherwise see pre-write state, which is why every write in `userBeverageRecordRepository` calls `evictFromRequestCache` on its scan key. Search reindexing depends on it: a mutation writes a satellite, then rebuilds the wine's terms from that satellite in the same request.
+
+### The search index (`searchIndex` on `beverages`)
+
+Firestore has no full-text search, so each beverage document carries a `searchIndex: string[]` of everything it can be found by: the canonical words of its name, producer, subtype, appellation and region, its vintage with prefixes, and its facets (`type:…`, `color:…`, `subtype:…`, `incellar`, `fav:<uid>`, `gift:<uid>`, `consumed:<uid>`, `p:<uid>:<word>` for people). A search asks Firestore for one `array-contains-any` — the only array clause a query may hold — and settles the remaining words, the facets, the household visibility rule and the ranking in memory, on the handful of documents that come back. One composite index covers every combination of filters: `userId + searchIndex`.
+
+Terms that belong to a person rather than to the wine carry their owner's id, because a shared bottle holds the notes of several household members at once and nobody's favourites may surface in someone else's search.
+
+**The rule to remember:** any mutation that can change one of those terms must call `SearchIndexUseCase.refresh(viewerId, beverageId)` afterwards, from the GraphQL resolver. The array is rebuilt whole, never patched, so a term that no longer applies disappears on its own — but a forgotten call leaves a wine that works everywhere except in the search, with no error and no log. `server/domain/search/infrastructure/graphql/reindexing.feat.test.ts` covers each mutation; add a case there when you add one.
+
 ## Cross-Domain Reads
 
 Because there is no read-model layer, composite views are assembled in two ways:
