@@ -30,7 +30,7 @@ resource "google_firestore_index" "composite" {
   # whenever the list changed in the middle.
   for_each = {
     for idx in local.firestore_indexes :
-    "${idx.collectionGroup}|${join(",", [for f in idx.fields : "${f.fieldPath}:${try(f.order, "NA")}"])}" => idx
+    "${idx.collectionGroup}|${join(",", [for f in idx.fields : "${f.fieldPath}:${try(f.order, try(f.arrayConfig, "NA"))}"])}" => idx
   }
 
   provider    = google-beta
@@ -39,11 +39,15 @@ resource "google_firestore_index" "composite" {
   collection  = each.value.collectionGroup
   query_scope = each.value.queryScope
 
+  # A field is indexed either by order (a scalar, ascending or descending) or by
+  # array config (`CONTAINS`, what array-contains queries need). Firestore rejects
+  # a field that declares neither, so both are read from firestore.indexes.json.
   dynamic "fields" {
     for_each = each.value.fields
     content {
-      field_path = fields.value.fieldPath
-      order      = try(fields.value.order, null)
+      field_path   = fields.value.fieldPath
+      order        = try(fields.value.order, null)
+      array_config = try(fields.value.arrayConfig, null)
     }
   }
 }
