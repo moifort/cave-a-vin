@@ -33,7 +33,7 @@ describe('SearchIndexUseCase.refresh', () => {
   test('writes the wine own words and facets', async () => {
     seedWine()
 
-    await SearchIndexUseCase.refresh('w1' as BeverageId)
+    await SearchIndexUseCase.refresh(userId, 'w1' as BeverageId)
 
     expect(indexOf('w1')).toContain('margau')
     expect(indexOf('w1')).toContain('chateau')
@@ -47,7 +47,7 @@ describe('SearchIndexUseCase.refresh', () => {
     fake.seed('cellar', `${userId}_w1`, { userId, beverageId: 'w1', row: 0, col: 0 })
     fake.seed('tasting', `${userId}_w1`, { userId, beverageId: 'w1', favorite: true })
 
-    await SearchIndexUseCase.refresh('w1' as BeverageId)
+    await SearchIndexUseCase.refresh(userId, 'w1' as BeverageId)
 
     expect(indexOf('w1')).toContain('incellar')
     expect(indexOf('w1')).toContain(`fav:${userId}`)
@@ -56,16 +56,16 @@ describe('SearchIndexUseCase.refresh', () => {
   test('a term that no longer applies disappears', async () => {
     seedWine()
     fake.seed('tasting', `${userId}_w1`, { userId, beverageId: 'w1', favorite: true })
-    await SearchIndexUseCase.refresh('w1' as BeverageId)
+    await SearchIndexUseCase.refresh(userId, 'w1' as BeverageId)
     expect(indexOf('w1')).toContain(`fav:${userId}`)
 
     fake.seed('tasting', `${userId}_w1`, { userId, beverageId: 'w1', favorite: false })
-    await SearchIndexUseCase.refresh('w1' as BeverageId)
+    await SearchIndexUseCase.refresh(userId, 'w1' as BeverageId)
 
     expect(indexOf('w1')).not.toContain(`fav:${userId}`)
   })
 
   test('a deleted wine is ignored rather than an error', async () => {
-    expect(SearchIndexUseCase.refresh('missing' as BeverageId)).resolves.toBeUndefined()
+    expect(SearchIndexUseCase.refresh(userId, 'missing' as BeverageId)).resolves.toBeUndefined()
   })
 })

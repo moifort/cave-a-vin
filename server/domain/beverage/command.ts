@@ -75,6 +75,13 @@ export namespace BeverageCommand {
     return await repository.save(beverage)
   }
 
+  // Store the terms this beverage can be found by. The beverage domain owns the
+  // document, the search domain decides what goes in the array — this is the door
+  // between the two.
+  export const saveSearchIndex = async (id: BeverageId, tokens: string[]) => {
+    await repository.saveSearchIndex(id, tokens)
+  }
+
   export const remove = async (userId: UserId, id: BeverageId, batch?: WriteBatch) => {
     const existing = await repository.findBy(userId, id)
     if (!existing) return 'not-found' as const
