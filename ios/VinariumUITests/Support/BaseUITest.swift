@@ -57,7 +57,12 @@ class BaseUITest: XCTestCase {
     private(set) var account: String!
 
     override func setUp() async throws {
-        continueAfterFailure = false
+        // Deliberately left at its default. `continueAfterFailure = false` exits
+        // the test process on the first failure, and xcodebuild reads that as an
+        // unexpected exit rather than a failed test, so -retry-tests-on-failure
+        // never retried anything: measured 1 attempt with it, 3 without. The
+        // helpers below throw on the first miss, which already ends the scenario
+        // without taking the runner down with it.
         account = "e2e-\(UUID().uuidString.lowercased())@vinarium.test"
         app = XCUIApplication()
         app.launchArguments = [
