@@ -11,6 +11,13 @@ export const normalizedForSearch = (text: string) =>
     .replace(/-/g, ' ')
     .trim()
 
+// The query split into words. Word order carries no meaning: "margaux chateau"
+// and "chateau margaux" search for the same two words.
+export const queryTokens = (query: string) =>
+  normalizedForSearch(query)
+    .split(/\s+/)
+    .filter((token) => token.length > 0)
+
 // How strongly a candidate text matches the query: an exact match beats a
 // prefix match, which beats a mere substring. Zero means no match.
 export const matchStrength = (candidate: string | undefined, query: string) => {
@@ -48,37 +55,49 @@ const FIELD_WEIGHTS: Record<SearchMatchedField, number> = {
   'tasting-contact': 40,
 }
 
-// Every field of the wine (and its satellites) the query is matched against,
-// with the strength of that match. Contacts keep their best match only.
-const fieldStrengths = (item: SearchableWine, query: string) => {
+// Every field of the wine (and its satellites) a word is matched against, with
+// the strength of that match. Contacts keep their best match only.
+const fieldStrengths = (item: SearchableWine, token: string) => {
   const contacts = item.consumption?.contacts ?? []
   const details = wineDetails(item)
   const strengths: [SearchMatchedField, number][] = [
-    ['name', matchStrength(item.name, query)],
-    ['producer', matchStrength(item.producer, query)],
-    ['subtype', matchStrength(item.subtype, query)],
-    ['appellation', matchStrength(details?.appellation, query)],
-    ['region', matchStrength(item.region, query)],
-    ['vintage', vintageStrength(details?.vintage, query)],
-    ['gifted-by', matchStrength(item.gift?.received?.from, query)],
-    ['gift-recipient', matchStrength(item.gift?.given?.recipientName, query)],
-    ['recommender', matchStrength(item.recommendation?.recommenderName, query)],
-    ['tasting-contact', Math.max(0, ...contacts.map((contact) => matchStrength(contact, query)))],
+    ['name', matchStrength(item.name, token)],
+    ['producer', matchStrength(item.producer, token)],
+    ['subtype', matchStrength(item.subtype, token)],
+    ['appellation', matchStrength(details?.appellation, token)],
+    ['region', matchStrength(item.region, token)],
+    ['vintage', vintageStrength(details?.vintage, token)],
+    ['gifted-by', matchStrength(item.gift?.received?.from, token)],
+    ['gift-recipient', matchStrength(item.gift?.given?.recipientName, token)],
+    ['recommender', matchStrength(item.recommendation?.recommenderName, token)],
+    ['tasting-contact', Math.max(0, ...contacts.map((contact) => matchStrength(contact, token)))],
   ]
   return strengths.filter(([, strength]) => strength > 0)
 }
 
-// The hit a wine scores for a query: which fields matched and how well, or null
-// when nothing matched. The score is the single best field match — a wine named
-// exactly like the query outranks one that merely contains it in a contact.
+// The hit a wine scores for a query, or null when one of the words found
+// nothing. Every word must match some field (their order is free), and the score
+// sums each word's best field, so a wine answering two words outranks one
+// answering a single word twice over. A field matching the whole query exactly
+// adds its weight again: an exact title beats a longer name that merely holds
+// the same words. Single-word queries take no bonus, their word already is the
+// whole query.
 export const searchHit = (item: SearchableWine, query: string): SearchHit | null => {
-  const matched = fieldStrengths(item, query)
-  if (matched.length === 0) return null
-  return {
-    item,
-    matchedFields: matched.map(([field]) => field),
-    score: Math.max(...matched.map(([field, strength]) => FIELD_WEIGHTS[field] * strength)),
+  const tokens = queryTokens(query)
+  if (tokens.length === 0) return null
+  const matchedFields: SearchMatchedField[] = []
+  let score = 0
+  for (const token of tokens) {
+    const strengths = fieldStrengths(item, token)
+    if (strengths.length === 0) return null
+    for (const [field] of strengths) if (!matchedFields.includes(field)) matchedFields.push(field)
+    score += Math.max(...strengths.map(([field, strength]) => FIELD_WEIGHTS[field] * strength))
   }
+  if (tokens.length > 1) {
+    const whole = fieldStrengths(item, normalizedForSearch(query))
+    score += Math.max(0, ...whole.map(([field, strength]) => FIELD_WEIGHTS[field] * strength))
+  }
+  return { item, matchedFields, score }
 }
 
 export const passesFilters = (item: SearchableWine, filters: SearchFilters) => {
@@ -110,17 +129,17 @@ export const rankedHits = (
   query: string,
   filters: SearchFilters,
 ): SearchHit[] => {
-  const normalizedQuery = normalizedForSearch(query)
+  const tokens = queryTokens(query)
   const filtered = items.filter((item) => passesFilters(item, filters))
   const byName = (a: SearchableWine, b: SearchableWine) => a.name.localeCompare(b.name)
-  if (!normalizedQuery) {
+  if (tokens.length === 0) {
     if (!hasActiveFilters(filters)) return []
     return filtered
       .toSorted(byName)
       .map((item) => ({ item, matchedFields: [] as SearchMatchedField[], score: 0 }))
   }
   return filtered
-    .map((item) => searchHit(item, normalizedQuery))
+    .map((item) => searchHit(item, query))
     .filter((hit): hit is SearchHit => hit !== null)
     .toSorted((a, b) => b.score - a.score || byName(a.item, b.item))
 }

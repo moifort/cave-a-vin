@@ -4,6 +4,7 @@ import {
   matchStrength,
   normalizedForSearch,
   passesFilters,
+  queryTokens,
   rankedHits,
   searchHit,
   vintageStrength,
@@ -54,6 +55,16 @@ describe('normalizedForSearch', () => {
   test('treats hyphens as spaces so composite subtype codes match natural text', () => {
     expect(normalizedForSearch('vin-jaune')).toBe('vin jaune')
     expect(normalizedForSearch('eau-de-vie')).toBe('eau de vie')
+  })
+})
+
+describe('queryTokens', () => {
+  test('splits the normalized query into words', () => {
+    expect(queryTokens('Château  Margaux')).toEqual(['chateau', 'margaux'])
+  })
+
+  test('a blank query has no word', () => {
+    expect(queryTokens('   ')).toEqual([])
   })
 })
 
@@ -117,6 +128,24 @@ describe('searchHit', () => {
     })
     const hit = searchHit(wine, 'margaux')
     expect(hit?.matchedFields).toEqual(['name', 'gifted-by', 'tasting-contact'])
+  })
+
+  test('every word must match, whatever the order', () => {
+    const wine = aWine({ name: 'Château Margaux', region: 'Bordeaux' })
+    expect(searchHit(wine, 'margaux chateau')?.matchedFields).toEqual(['name'])
+    expect(searchHit(wine, 'chateau bordeaux')?.matchedFields).toEqual(['name', 'region'])
+    expect(searchHit(wine, 'chateau petrus')).toBeNull()
+  })
+
+  test('a word on the vintage combines with a word on the name', () => {
+    const wine = aWine({ name: 'Margaux', vintage: 2015 })
+    expect(searchHit(wine, 'margaux 2015')?.matchedFields).toEqual(['name', 'vintage'])
+  })
+
+  test('each word contributes its best field to the score', () => {
+    // 'margaux' matches the name exactly (100 x 3), 'chateau' prefixes the producer (80 x 2).
+    const wine = aWine({ name: 'Margaux', producer: 'Château Latour' })
+    expect(searchHit(wine, 'chateau margaux')?.score).toBe(460)
   })
 
   test('score keeps the single best weighted match', () => {
@@ -275,6 +304,15 @@ describe('rankedHits', () => {
     const whiteMargaux = aWine({ id: 'w2', name: 'Margaux Blanc', color: 'white' })
     const hits = rankedHits([redMargaux, whiteMargaux], 'margaux', { colors: ['red'] })
     expect(hits.map((hit) => String(hit.item.id))).toEqual(['w1'])
+  })
+
+  test('an exact title outranks a wine that merely holds the same words', () => {
+    const exact = aWine({ id: 'w1', name: 'Château Margaux' })
+    const longer = aWine({ id: 'w2', name: 'Château Margaux Pavillon Rouge' })
+    const hits = rankedHits([longer, exact], 'chateau margaux', {})
+    expect(hits.map((hit) => String(hit.item.id))).toEqual(['w1', 'w2'])
+    // 300 for the two words, plus 300 for the name matching the whole query.
+    expect(hits[0]?.score).toBe(600)
   })
 
   test('accent-insensitive end to end', () => {

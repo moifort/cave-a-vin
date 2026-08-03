@@ -60,6 +60,11 @@ export namespace BeverageQuery {
       return [...own, ...housemateWines]
     })
 
+  // The owner's beverages carrying at least one of the given search terms. The
+  // search domain decides what a term is, the beverage domain owns the lookup.
+  export const bySearchTerms = async (ownerId: UserId, terms: string[]) =>
+    repository.findBySearchTerms(ownerId, terms)
+
   export const byId = async (userId: UserId, id: BeverageId) => {
     const beverage = await repository.findBy(userId, id)
     if (!beverage) return 'not-found' as const

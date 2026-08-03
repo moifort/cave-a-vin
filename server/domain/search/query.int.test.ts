@@ -5,6 +5,7 @@ import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
 
 const { SearchQuery } = await import('~/domain/search/query')
+const { migration0007 } = await import('~/system/migration/migrations/0007-search-index')
 
 const userId = 'user-1' as UserId
 
@@ -66,12 +67,20 @@ const seed = () => {
   })
 }
 
+// A seeded database is not searchable until its wines carry their terms. Running
+// the backfill migration is how production gets there, so the tests start from
+// the same state instead of a hand-written index that could drift from it.
+const seedAndIndex = async () => {
+  seed()
+  await migration0007.migrate({ db: fake.db })
+}
+
 const run = (query: string, filters = {}, limit = 50) =>
   SearchQuery.acrossCollections(userId, { query, filters, limit })
 
 describe('SearchQuery.acrossCollections', () => {
   test('matches wine name and attaches satellites', async () => {
-    seed()
+    await seedAndIndex()
     const { hits, totalCount } = await run('margaux')
     expect(totalCount).toBe(1)
     expect(String(hits[0]?.item.id)).toBe('w1')
@@ -81,7 +90,7 @@ describe('SearchQuery.acrossCollections', () => {
   })
 
   test('matches a person across gift satellites', async () => {
-    seed()
+    await seedAndIndex()
     const byGiver = await run('alice')
     expect(byGiver.hits.map((hit) => String(hit.item.id))).toEqual(['w3'])
     expect(byGiver.hits[0]?.matchedFields).toContain('gifted-by')
@@ -92,7 +101,7 @@ describe('SearchQuery.acrossCollections', () => {
   })
 
   test('matches subtype and numeric vintage', async () => {
-    seed()
+    await seedAndIndex()
     expect((await run('porto')).hits.map((hit) => String(hit.item.id))).toEqual(['w3'])
     expect((await run('2015')).hits.map((hit) => String(hit.item.id))).toEqual(['w1'])
   })
@@ -114,40 +123,66 @@ describe('SearchQuery.acrossCollections', () => {
       createdAt: new Date('2026-01-01'),
       updatedAt: new Date('2026-01-01'),
     })
+    await migration0007.migrate({ db: fake.db })
+
     const { hits } = await run('margaux')
     expect(hits.map((hit) => String(hit.item.id))).toEqual(['b', 'a'])
   })
 
   test('filters browse the collection when the query is empty', async () => {
-    seed()
+    await seedAndIndex()
     const { hits } = await run('', { colors: ['white'] })
     expect(hits.map((hit) => String(hit.item.id))).toEqual(['w2'])
     expect(hits[0]?.matchedFields).toEqual([])
   })
 
   test('empty query without filters returns nothing', async () => {
-    seed()
+    await seedAndIndex()
     const { hits, totalCount } = await run('')
     expect(hits).toEqual([])
     expect(totalCount).toBe(0)
   })
 
   test('limit caps hits but totalCount stays full', async () => {
-    seed()
+    await seedAndIndex()
     const { hits, totalCount } = await run('', { status: 'all', colors: ['red', 'white'] }, 1)
     expect(hits).toHaveLength(1)
     expect(totalCount).toBe(2)
   })
 
-  test('reads each collection once (5 scans, no per-wine fallback)', async () => {
-    seed()
+  test('asks Firestore for the matching wines, never for the collection', async () => {
+    await seedAndIndex()
     const before = { docReads: fake.docReads, queryReads: fake.queryReads }
-    await run('margaux')
-    // Five collection scans: beverages, cellar, tasting, gift, recommendation.
-    expect(fake.queryReads - before.queryReads).toBe(5)
-    // Plus the memoized household-scope probe: one bounded membership doc get,
-    // shared by allVisibleTo and householdPlacements within the request.
-    expect(fake.docReads - before.docReads).toBe(1)
+    const { hits } = await run('margaux')
+
+    expect(hits).toHaveLength(1)
+    // Three queries: the indexed wine lookup, plus the gift and recommendation
+    // scans those domains deliberately keep (sparse collections, see their
+    // byBeverageIds). The beverages, cellar and tasting scans are gone.
+    expect(fake.queryReads - before.queryReads).toBe(3)
+  })
+
+  test('the cost does not grow with the size of the collection', async () => {
+    seed()
+    for (let i = 0; i < 40; i++) {
+      fake.seed('beverages', `filler-${i}`, {
+        id: `filler-${i}`,
+        userId,
+        name: `Filler ${i}`,
+        beverageType: 'wine',
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-01-01'),
+      })
+    }
+    await migration0007.migrate({ db: fake.db })
+    const before = fake.queryReads
+
+    const { hits } = await run('margaux')
+
+    expect(hits).toHaveLength(1)
+    // Same three queries as on a three-bottle cellar: the forty extra wines are
+    // never read, which is the whole point of the index.
+    expect(fake.queryReads - before).toBe(3)
   })
 })
 
@@ -189,8 +224,13 @@ describe('SearchQuery.acrossCollections — household visibility', () => {
     })
   }
 
-  test('finds a housemate’s in-cellar wine but not their out-of-cellar one', async () => {
+  const seedHouseholdAndIndex = async () => {
     seedHousehold()
+    await migration0007.migrate({ db: fake.db })
+  }
+
+  test('finds a housemate’s in-cellar wine but not their out-of-cellar one', async () => {
+    await seedHouseholdAndIndex()
     expect((await run('clos')).hits.map((hit) => String(hit.item.id))).toEqual(['m-in'])
   })
 

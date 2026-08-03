@@ -1,7 +1,7 @@
 import { wineDetails } from '~/domain/beverage/business-rules'
 import type { UserId } from '~/domain/shared/types'
 import { normalizedForSearch } from './business-rules'
-import type { SearchableWine } from './types'
+import type { SearchableWine, SearchFilters } from './types'
 
 // Below this length a word is left alone: cutting a mark off a three-letter word
 // would leave two letters, which match far too much.
@@ -85,4 +85,19 @@ export const searchIndexOf = (wine: SearchableWine): string[] => {
 export const queryTerms = (token: string, viewerId: UserId) => {
   const word = canonical(token)
   return [word, `p:${viewerId}:${word}`]
+}
+
+// The facet Firestore is asked for when the query has no text, as the set of
+// terms a matching wine may carry. The rarest facet first: a favourite is
+// scarcer than a colour, which is scarcer than a beverage type. A facet holding
+// several values rides along whole, since array-contains-any is a disjunction —
+// exactly what "red or white" means. The remaining facets are settled in memory.
+export const facetTerms = (filters: SearchFilters, viewerId: UserId): string[] => {
+  if (filters.favorite === true) return [`fav:${viewerId}`]
+  if (filters.gifted === true) return [`gift:${viewerId}`]
+  if (filters.status === 'consumed') return [`consumed:${viewerId}`]
+  if (filters.colors?.length) return filters.colors.map((color) => `color:${color}`)
+  if (filters.status === 'in-cellar') return ['incellar']
+  if (filters.beverageTypes?.length) return filters.beverageTypes.map((type) => `type:${type}`)
+  return []
 }
