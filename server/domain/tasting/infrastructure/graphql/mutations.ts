@@ -1,3 +1,4 @@
+import { SearchIndexUseCase } from '~/domain/search/use-case'
 import { builder } from '~/domain/shared/graphql/builder'
 import { stripNulls } from '~/utils/input'
 import { TastingCommand } from '../../command'
@@ -13,6 +14,7 @@ builder.mutationField('markFavorite', (t) =>
     },
     resolve: async (_root, { beverageId, favorite }, { userId }) => {
       await TastingCommand.setFavorite(userId, beverageId, favorite ?? true)
+      await SearchIndexUseCase.refresh(userId, beverageId)
       return true
     },
   }),
@@ -28,6 +30,7 @@ builder.mutationField('recordTasting', (t) =>
     },
     resolve: async (_root, { beverageId, input }, { userId }) => {
       await TastingCommand.create({ userId, beverageId, ...stripNulls(input) })
+      await SearchIndexUseCase.refresh(userId, beverageId)
       return true
     },
   }),

@@ -1,4 +1,5 @@
 import { match, P } from 'ts-pattern'
+import { SearchIndexUseCase } from '~/domain/search/use-case'
 import { builder } from '~/domain/shared/graphql/builder'
 import { badUserInput, notFound } from '~/domain/shared/graphql/errors'
 import { stripNulls } from '~/utils/input'
@@ -100,6 +101,7 @@ builder.mutationField('addBeverage', (t) =>
         toData(clean),
         clean.giftedBy,
       )
+      if (typeof result !== 'string') await SearchIndexUseCase.refresh(userId, result.id)
       return match(result)
         .with('color-required', colorRequired)
         .with('subtype-invalid', subtypeInvalid)
@@ -133,6 +135,7 @@ builder.mutationField('updateBeverage', (t) =>
       const clean = stripNulls(input)
       const data = { ...toData(clean), name: clean.name, beverageType: clean.beverageType }
       const result = await BeverageUseCase.update(userId, id, data, clean.giftedBy)
+      if (typeof result !== 'string') await SearchIndexUseCase.refresh(userId, id)
       return match(result)
         .with('not-found', () => notFound('Beverage not found'))
         .with('color-required', colorRequired)

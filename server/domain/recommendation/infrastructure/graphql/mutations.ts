@@ -1,3 +1,4 @@
+import { SearchIndexUseCase } from '~/domain/search/use-case'
 import { builder } from '~/domain/shared/graphql/builder'
 import { stripNulls } from '~/utils/input'
 import { RecommendationCommand } from '../../command'
@@ -23,6 +24,7 @@ builder.mutationField('addRecommendation', (t) =>
     },
     resolve: async (_root, { beverageId, input }, { userId }) => {
       await RecommendationCommand.create({ userId, beverageId, ...stripNulls(input) })
+      await SearchIndexUseCase.refresh(userId, beverageId)
       return true
     },
   }),

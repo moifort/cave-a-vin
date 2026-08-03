@@ -1,4 +1,5 @@
 import { match, P } from 'ts-pattern'
+import { SearchIndexUseCase } from '~/domain/search/use-case'
 import { builder } from '~/domain/shared/graphql/builder'
 import { badUserInput, domainError, notFound } from '~/domain/shared/graphql/errors'
 import { stripNulls } from '~/utils/input'
@@ -35,6 +36,7 @@ builder.mutationField('placeBottle', (t) =>
         CellarRow(row),
         CellarCol(col),
       )
+      if (typeof result !== 'string') await SearchIndexUseCase.refresh(userId, beverageId)
       return match(result)
         .with('not-your-beverage', () => notFound('Beverage not found'))
         .with('position-occupied', () =>
@@ -93,6 +95,7 @@ builder.mutationField('consumeBottle', (t) =>
         type: 'tasting',
         ...stripNulls(input),
       })
+      if (result !== 'not-in-cellar') await SearchIndexUseCase.refresh(userId, beverageId)
       return match(result)
         .with('not-in-cellar', () => notFound('Beverage not in cellar'))
         .with(undefined, () => true)
@@ -119,6 +122,7 @@ builder.mutationField('giftBottle', (t) =>
         type: 'gift',
         given: { date: giftedDate, ...(recipientName && { recipientName }) },
       })
+      if (result !== 'not-in-cellar') await SearchIndexUseCase.refresh(userId, beverageId)
       return match(result)
         .with('not-in-cellar', () => notFound('Beverage not in cellar'))
         .with(undefined, () => true)
@@ -155,6 +159,7 @@ builder.mutationField('removeBottle', (t) =>
     },
     resolve: async (_root, { beverageId }, { userId }) => {
       const result = await CellarUseCase.removeBottle(userId, beverageId)
+      if (result !== 'not-in-cellar') await SearchIndexUseCase.refresh(userId, beverageId)
       return match(result)
         .with('not-in-cellar', () => notFound('Beverage not in cellar'))
         .with(undefined, () => true)

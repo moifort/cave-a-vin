@@ -10,7 +10,7 @@ import { chunk } from 'lodash-es'
 import type { BeverageId } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
 import { db } from '~/system/firebase'
-import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
+import { evictFromRequestCache, isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
 
 // Generic Firestore converter that preserves type information when reading
 // documents and recursively turns Timestamp instances back into JS Date.
@@ -81,10 +81,10 @@ export const userBeverageRecordRepository = <T extends { userId: UserId; beverag
     },
     // Batch-load the records for a page of beverages with a single getAll — one
     // read per id, no full-collection scan. Missing docs come back undefined. When
-    // the full scan already ran in this request, reuse it: zero extra reads. Safe
-    // as long as no mutation scans then writes this collection then re-resolves a
-    // satellite in the same request (the read-then-write caveat in request-cache.ts);
-    // evictFromRequestCache is the escape hatch if that flow ever appears.
+    // the full scan already ran in this request, reuse it: zero extra reads. The
+    // read-then-write flow that would make this stale (a mutation writing here and
+    // reindexing the wine in the same request) is covered: every write below drops
+    // the memoized scan.
     findManyByBeverageIds: async (userId: UserId, beverageIds: BeverageId[]): Promise<T[]> => {
       if (beverageIds.length === 0) return []
       if (isInRequestCache(allCacheKey(userId))) {
@@ -95,18 +95,24 @@ export const userBeverageRecordRepository = <T extends { userId: UserId; beverag
       const snaps = await db().getAll(...refs)
       return snaps.map((snap) => snap.data()).filter((data): data is T => data !== undefined)
     },
+    // Writes drop the memoized scan so a read later in the same request sees them.
+    // Search reindexing does exactly that: it rewrites the wine's terms right
+    // after a satellite changed, and a stale scan would index the previous state.
     save: async (record: T): Promise<T> => {
       await records().doc(docId(record.userId, record.beverageId)).set(record)
+      evictFromRequestCache(allCacheKey(record.userId))
       return record
     },
     remove: async (userId: UserId, beverageId: BeverageId, batch?: WriteBatch): Promise<void> => {
       const ref = records().doc(docId(userId, beverageId))
       if (batch) batch.delete(ref)
       else await ref.delete()
+      evictFromRequestCache(allCacheKey(userId))
     },
     removeAllByUser: async (userId: UserId): Promise<void> => {
       const snap = await records().where('userId', '==', userId).get()
       await deleteInBatches(snap.docs.map((doc) => doc.ref))
+      evictFromRequestCache(allCacheKey(userId))
     },
   }
 }
