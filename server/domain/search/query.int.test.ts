@@ -106,6 +106,14 @@ describe('SearchQuery.acrossCollections', () => {
     expect((await run('2015')).hits.map((hit) => String(hit.item.id))).toEqual(['w1'])
   })
 
+  test('a plural spelling finds the wine end to end', async () => {
+    await seedAndIndex()
+    // Firestore is asked for the canonical 'chateau', and the in-memory ranking
+    // has to agree instead of dropping the wine over the extra letter.
+    const { hits } = await run('chateaux')
+    expect(hits.map((hit) => String(hit.item.id))).toEqual(['w1'])
+  })
+
   test('ranks by relevance', async () => {
     fake.seed('beverages', 'a', {
       id: 'a',

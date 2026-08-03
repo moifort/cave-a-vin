@@ -2,13 +2,13 @@ import { describe, expect, test } from 'bun:test'
 import {
   hasActiveFilters,
   matchStrength,
-  normalizedForSearch,
   passesFilters,
   queryTokens,
   rankedHits,
   searchHit,
   vintageStrength,
 } from '~/domain/search/business-rules'
+import { normalizedForSearch } from '~/domain/search/tokens'
 import type { SearchableWine } from '~/domain/search/types'
 
 // Satellites are attached only when present — a bare wine carries no such keys.
@@ -81,6 +81,14 @@ describe('matchStrength', () => {
   test('prefix match beats substring', () => {
     expect(matchStrength('Margaux du Sud', 'margaux')).toBe(2)
     expect(matchStrength('Château Margaux', 'margaux')).toBe(1)
+  })
+
+  test('a plural query still matches the singular text, and the reverse', () => {
+    // Both sides are reduced the same way, so the stored token and the searched
+    // word meet even when one carries a plural mark and the other does not.
+    expect(matchStrength('Château Margaux', 'chateaux')).toBe(2)
+    expect(matchStrength('Châteaux Margaux', 'chateau')).toBe(2)
+    expect(matchStrength('Les Châteaux', 'chateau')).toBe(1)
   })
 
   test('no match yields zero', () => {

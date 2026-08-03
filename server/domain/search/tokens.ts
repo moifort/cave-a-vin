@@ -5,8 +5,17 @@ import type { Gift } from '~/domain/gift/types'
 import type { Recommendation } from '~/domain/recommendation/types'
 import type { UserId } from '~/domain/shared/types'
 import type { TastingNote } from '~/domain/tasting/types'
-import { normalizedForSearch } from './business-rules'
 import type { SearchFilters } from './types'
+
+// Accent-, case- and separator-insensitive canonical form: "Château" matches
+// "chateau", and the "vin-jaune"/"eau-de-vie" subtype codes match "vin jaune".
+export const normalizedForSearch = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/-/g, ' ')
+    .trim()
 
 // Below this length a word is left alone: cutting a mark off a three-letter word
 // would leave two letters, which match far too much.

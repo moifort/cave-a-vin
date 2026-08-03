@@ -1,15 +1,6 @@
 import { wineDetails } from '~/domain/beverage/business-rules'
+import { normalizedForSearch, wordTokens } from './tokens'
 import type { SearchableWine, SearchFilters, SearchHit, SearchMatchedField } from './types'
-
-// Accent-, case- and separator-insensitive canonical form: "Château" matches
-// "chateau", and the "vin-jaune"/"eau-de-vie" subtype codes match "vin jaune".
-export const normalizedForSearch = (text: string) =>
-  text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/-/g, ' ')
-    .trim()
 
 // The query split into words. Word order carries no meaning: "margaux chateau"
 // and "chateau margaux" search for the same two words.
@@ -18,15 +9,20 @@ export const queryTokens = (query: string) =>
     .split(/\s+/)
     .filter((token) => token.length > 0)
 
-// How strongly a candidate text matches the query: an exact match beats a
+// How strongly a candidate text matches a searched word: an exact match beats a
 // prefix match, which beats a mere substring. Zero means no match.
+//
+// Both sides are compared in the canonical form the index is written in, so a
+// word found through Firestore is not then rejected here over a plural mark:
+// "chateaux" has to keep matching "Château" once the index handed the wine over.
 export const matchStrength = (candidate: string | undefined, query: string) => {
   if (!candidate || !query) return 0
-  const normalizedCandidate = normalizedForSearch(candidate)
-  const normalizedQuery = normalizedForSearch(query)
-  if (normalizedCandidate === normalizedQuery) return 3
-  if (normalizedCandidate.startsWith(normalizedQuery)) return 2
-  if (normalizedCandidate.includes(normalizedQuery)) return 1
+  const canonicalCandidate = wordTokens(candidate).join(' ')
+  const canonicalQuery = wordTokens(query).join(' ')
+  if (!canonicalQuery) return 0
+  if (canonicalCandidate === canonicalQuery) return 3
+  if (canonicalCandidate.startsWith(canonicalQuery)) return 2
+  if (canonicalCandidate.includes(canonicalQuery)) return 1
   return 0
 }
 
