@@ -13,6 +13,8 @@ query Quota {
     used
     limit
     remaining
+    welcomeRemaining
+    totalRemaining
     renewsOn
   }
 }

@@ -139,9 +139,11 @@ struct SettingsHomeView: View {
         if quota.isPremium {
             return String(localized: "Scans illimités")
         }
-        return quota.remaining == 0
-            ? String(localized: "Aucun scan restant ce mois-ci")
-            : String(localized: "\(quota.remaining) scans restants ce mois-ci")
+        // The total, granted scans included: the month alone would announce a wall
+        // the user has not reached.
+        return quota.totalRemaining == 0
+            ? String(localized: "Aucun scan restant")
+            : String(localized: "\(quota.totalRemaining) scans restants")
     }
 
     private var appVersion: String {

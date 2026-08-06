@@ -11,6 +11,11 @@ struct SummaryPage: View {
 
     private var capacity: Int { rows * cols }
 
+    /// What finishing the wizard grants. Mirrors `WELCOME_SCANS` on the server,
+    /// which is the source of truth: the grant happens there, this only announces
+    /// it, so the two move together.
+    private let welcomeScans = 20
+
     var body: some View {
         VStack(spacing: 0) {
             List {
@@ -57,6 +62,15 @@ struct SummaryPage: View {
                     } label: {
                         Label("Capacité totale", systemImage: "square.stack.3d.up.fill")
                     }
+                }
+
+                Section {
+                    Label("\(welcomeScans) scans offerts", systemImage: "gift")
+                        .foregroundStyle(.tint)
+                } footer: {
+                    Text(
+                        "Photographiez une étiquette et la fiche se remplit toute seule. De quoi saisir la cave sans rien taper."
+                    )
                 }
             }
 

@@ -9,7 +9,7 @@ enum PremiumTrigger {
 
     var title: String {
         switch self {
-        case .scanAllowanceSpent: return String(localized: "Scans épuisés ce mois-ci")
+        case .scanAllowanceSpent: return String(localized: "Scans épuisés")
         case .discover: return String(localized: "Vinarium Premium")
         }
     }
@@ -17,7 +17,9 @@ enum PremiumTrigger {
     var message: String {
         switch self {
         case .scanAllowanceSpent:
-            return String(localized: "Votre quota du mois a été atteint. Passez en Premium pour profiter du scan illimité.")
+            // Not "this month": the granted scans run out on their own schedule,
+            // and this is shown once nothing is left anywhere.
+            return String(localized: "Tous vos scans ont été utilisés. Passez en Premium pour scanner sans limite.")
         case .discover:
             return String(localized: "Le scan d’étiquette reconnaît vos bouteilles et enrichit leur fiche. Passez en Premium pour scanner sans limite.")
         }
@@ -89,7 +91,12 @@ struct PremiumSheet: View {
     private var allowance: some View {
         if let quota = store.quota {
             if !quota.isPremium {
-                QuotaGauge(used: quota.used, limit: quota.limit, renewsOn: quota.renewsOn)
+                QuotaGauge(
+                    used: quota.used,
+                    limit: quota.limit,
+                    welcomeRemaining: quota.welcomeRemaining,
+                    renewsOn: quota.renewsOn
+                )
             }
         } else if store.isLoading {
             // Placeholder numbers, redacted: the network read is visible and the

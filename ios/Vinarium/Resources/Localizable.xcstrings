@@ -497,7 +497,7 @@
         }
       }
     },
-    "%lld scans restants ce mois-ci": {
+    "%lld scans offerts": {
       "localizations": {
         "de": {
           "variations": {
@@ -505,13 +505,13 @@
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld Scans diesen Monat übrig"
+                  "value": "%lld Gratis-Scans"
                 }
               },
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld Scan diesen Monat übrig"
+                  "value": "%lld Gratis-Scan"
                 }
               }
             }
@@ -523,13 +523,13 @@
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld scans left this month"
+                  "value": "%lld free scans"
                 }
               },
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld scan left this month"
+                  "value": "%lld free scan"
                 }
               }
             }
@@ -541,13 +541,13 @@
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Quedan %lld escaneos este mes"
+                  "value": "%lld escaneos de regalo"
                 }
               },
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Queda %lld escaneo este mes"
+                  "value": "%lld escaneo de regalo"
                 }
               }
             }
@@ -559,13 +559,13 @@
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld scans restants ce mois-ci"
+                  "value": "%lld scans offerts"
                 }
               },
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld scan restant ce mois-ci"
+                  "value": "%lld scan offert"
                 }
               }
             }
@@ -577,13 +577,13 @@
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld scansioni rimaste questo mese"
+                  "value": "%lld scansioni in omaggio"
                 }
               },
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld scansione rimasta questo mese"
+                  "value": "%lld scansione in omaggio"
                 }
               }
             }
@@ -595,7 +595,7 @@
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "今月の残り %lld 回"
+                  "value": "スキャン %lld 回プレゼント"
                 }
               }
             }
@@ -607,13 +607,261 @@
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld digitalizações restantes este mês"
+                  "value": "%lld digitalizações oferecidas"
                 }
               },
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%lld digitalização restante este mês"
+                  "value": "%lld digitalização oferecida"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld scans offerts en réserve": {
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Bonus-Scans übrig"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Bonus-Scan übrig"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld bonus scans left"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld bonus scan left"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Quedan %lld escaneos de regalo"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Queda %lld escaneo de regalo"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld scans offerts en réserve"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld scan offert en réserve"
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld scansioni in omaggio rimaste"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld scansione in omaggio rimasta"
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "特典スキャン残り %lld 回"
+                }
+              }
+            }
+          }
+        },
+        "pt": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld digitalizações oferecidas restantes"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld digitalização oferecida restante"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld scans restants": {
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Scans übrig"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Scan übrig"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld scans left"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld scan left"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Quedan %lld escaneos"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Queda %lld escaneo"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld scans restants"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld scan restant"
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld scansioni rimaste"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld scansione rimasta"
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "残り %lld 回"
+                }
+              }
+            }
+          }
+        },
+        "pt": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld digitalizações restantes"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld digitalização restante"
                 }
               }
             }
@@ -1866,42 +2114,48 @@
         }
       }
     },
-    "Aucun scan restant ce mois-ci": {
+    "Aucun scan restant": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Diesen Monat keine Scans mehr"
+            "value": "Keine Scans mehr"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No scans left this month"
+            "value": "No scans left"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No quedan escaneos este mes"
+            "value": "No quedan escaneos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun scan restant"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuna scansione rimasta questo mese"
+            "value": "Nessuna scansione rimasta"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今月のスキャン残数なし"
+            "value": "残りスキャンなし"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sem digitalizações restantes este mês"
+            "value": "Sem digitalizações restantes"
           }
         }
       }
@@ -9734,6 +9988,52 @@
     },
     "Paywall, découverte": {},
     "Paywall, scans épuisés": {},
+    "Photographiez une étiquette et la fiche se remplit toute seule. De quoi saisir la cave sans rien taper.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fotografiere ein Etikett, und die Angaben füllen sich von selbst. Genug, um den Weinkeller ohne Tippen zu füllen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photograph a label and the details fill themselves in. Enough to stock the cellar without typing a thing."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fotografía una etiqueta y la ficha se completa sola. Suficiente para llenar la bodega sin escribir nada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photographiez une étiquette et la fiche se remplit toute seule. De quoi saisir la cave sans rien taper."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fotografa un'etichetta e la scheda si compila da sola. Abbastanza per riempire la cantina senza digitare nulla."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ラベルを撮影すれば、情報は自動で入ります。入力なしでセラーを登録できます。"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fotografe um rótulo e a ficha preenche-se sozinha. O suficiente para encher a adega sem escrever nada."
+          }
+        }
+      }
+    },
     "Pils/Lager": {},
     "Placement": {
       "localizations": {
@@ -12100,42 +12400,48 @@
         }
       }
     },
-    "Scans épuisés ce mois-ci": {
+    "Scans épuisés": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scans diesen Monat aufgebraucht"
+            "value": "Scans aufgebraucht"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scans used up this month"
+            "value": "Scans used up"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Escaneos agotados este mes"
+            "value": "Escaneos agotados"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scans épuisés"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scansioni esaurite questo mese"
+            "value": "Scansioni esaurite"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今月のスキャンを使い切りました"
+            "value": "スキャン残数なし"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Digitalizações esgotadas este mês"
+            "value": "Digitalizações esgotadas"
           }
         }
       }
@@ -12980,6 +13286,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Todos"
+          }
+        }
+      }
+    },
+    "Tous vos scans ont été utilisés. Passez en Premium pour scanner sans limite.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle deine Scans sind aufgebraucht. Wechsle zu Premium für unbegrenztes Scannen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have used every scan you had. Go Premium to scan without limits."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Has usado todos tus escaneos. Pásate a Premium para escanear sin límites."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tous vos scans ont été utilisés. Passez en Premium pour scanner sans limite."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hai usato tutte le tue scansioni. Passa a Premium per scansionare senza limiti."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スキャンをすべて使い切りました。Premium なら無制限にスキャンできます。"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilizou todas as suas digitalizações. Mude para Premium e digitalize sem limites."
           }
         }
       }
@@ -13985,46 +14337,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "O seu nome personaliza a aplicação."
-          }
-        }
-      }
-    },
-    "Votre quota du mois a été atteint. Passez en Premium pour profiter du scan illimité.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dein Monatskontingent ist erreicht. Wechsle zu Premium für unbegrenztes Scannen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You've reached this month's quota. Go Premium for unlimited scanning."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Has alcanzado el cupo del mes. Pásate a Premium para escanear sin límite."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hai raggiunto la quota del mese. Passa a Premium per scansioni illimitate."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今月の上限に達しました。Premiumで無制限にスキャン。"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Atingiu a quota do mês. Mude para Premium para digitalizações ilimitadas."
           }
         }
       }

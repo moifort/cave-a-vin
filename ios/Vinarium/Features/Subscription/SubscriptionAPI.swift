@@ -10,12 +10,18 @@ struct EntitlementState: Sendable {
     let expiresOn: Date?
 }
 
-/// This month's scan allowance, as the server counts it.
+/// The scan allowance, as the server counts it: the month on one side, the scans
+/// granted at onboarding on the other, and what the two add up to.
 struct QuotaState: Sendable {
     let isPremium: Bool
     let used: Int
     let limit: Int
+    /// What is left of the month alone — the granted scans are not in it.
     let remaining: Int
+    /// Granted once, drawn down only after the month, never refilled.
+    let welcomeRemaining: Int
+    /// Everything that can still be scanned. The number a screen should show.
+    let totalRemaining: Int
     let renewsOn: Date?
 }
 
@@ -43,6 +49,8 @@ enum SubscriptionAPI {
             used: data.quota.used,
             limit: data.quota.limit,
             remaining: data.quota.remaining,
+            welcomeRemaining: data.quota.welcomeRemaining,
+            totalRemaining: data.quota.totalRemaining,
             renewsOn: GraphQLHelpers.parseISO8601(data.quota.renewsOn)
         )
     }
