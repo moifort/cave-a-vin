@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6 (2026.08.06)
+
+### Novidades
+- No menu Definições, pode agora comunicar um erro ou sugerir melhorias e novas funcionalidades.
+- Como prenda de boas-vindas, oferecemos 20 digitalizações na abertura da conta, para que possa experimentar bem a aplicação.
+- Todas as informações sobre a sua quota estão agora disponíveis nas Definições.
+- Para ser mais claro, mostramos quantos resultados a pesquisa encontrou.
+
+### Correções
+- A pesquisa encontra as suas garrafas mesmo que se esqueça dos acentos ou dos plurais: «chateaux margaux» encontra «Château Margaux».
+
+### Desempenho
+- A pesquisa mostra agora os resultados mais depressa, mesmo com muitas garrafas.
+
 ## 1.5 (2026.07.29)
 
 ### Novidades

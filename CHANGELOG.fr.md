@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6 (2026.08.06)
+
+### Nouveautés
+- Dans le menu Réglages, vous pouvez maintenant signaler un bug, suggérer des améliorations ou de nouvelles fonctionnalités.
+- En cadeau de bienvenue, nous offrons 20 scans à l'ouverture du compte, afin que vous puissiez tester et apprécier l'application au mieux.
+- Toutes les informations sur vos quotas sont maintenant accessibles depuis les Réglages.
+- Pour être plus clair, nous affichons le nombre de résultats que la recherche a trouvés.
+
+### Corrections
+- La recherche retrouve vos bouteilles même si vous oubliez les accents ou les pluriels : « chateaux margaux » trouve « Château Margaux ».
+
+### Performance
+- La recherche affiche maintenant les résultats plus rapidement, même sur un grand nombre de bouteilles.
+
 ## 1.5 (2026.07.29)
 
 ### Nouveautés

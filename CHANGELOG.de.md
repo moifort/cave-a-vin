@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6 (2026.08.06)
+
+### Neu
+- Im Menü Einstellungen kannst du jetzt einen Fehler melden oder Verbesserungen und neue Funktionen vorschlagen.
+- Als Willkommensgeschenk schenken wir dir 20 Scans bei der Kontoeröffnung, damit du die App in Ruhe ausprobieren kannst.
+- Alle Angaben zu deinem Kontingent findest du jetzt in den Einstellungen.
+- Für mehr Klarheit zeigen wir dir, wie viele Treffer die Suche gefunden hat.
+
+### Korrekturen
+- Die Suche findet deine Flaschen auch dann, wenn du Akzente oder Pluralformen vergisst: „chateaux margaux“ findet „Château Margaux“.
+
+### Performance
+- Die Suche zeigt ihre Treffer jetzt schneller an, auch bei vielen Flaschen.
+
 ## 1.5 (2026.07.29)
 
 ### Neu

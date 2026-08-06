@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6 (2026.08.06)
+
+### Novedades
+- Desde el menú Ajustes, ahora puedes informar de un error o sugerir mejoras y nuevas funciones.
+- Como regalo de bienvenida, te ofrecemos 20 escaneos al abrir tu cuenta, para que pruebes la app a fondo.
+- Toda la información sobre tu cupo está ahora disponible desde los Ajustes.
+- Para que quede más claro, te mostramos cuántos resultados ha encontrado la búsqueda.
+
+### Correcciones
+- La búsqueda encuentra tus botellas aunque olvides los acentos o los plurales: «chateaux margaux» encuentra «Château Margaux».
+
+### Rendimiento
+- La búsqueda muestra ahora sus resultados más rápido, incluso con muchas botellas.
+
 ## 1.5 (2026.07.29)
 
 ### Novedades

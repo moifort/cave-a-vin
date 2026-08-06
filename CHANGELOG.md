@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6 (2026.08.06)
+
+### New
+- From the Settings menu, you can now report a bug or suggest improvements and new features.
+- As a welcome gift, we are giving you 20 scans when you open your account, so you can try the app properly.
+- Everything about your allowance is now available from the Settings.
+- To make things clearer, we show how many results the search found.
+
+### Fixes
+- Search finds your bottles even when you forget the accents or the plurals: "chateaux margaux" finds "Château Margaux".
+
+### Performance
+- Search now shows its results faster, even on a large number of bottles.
+
 ## 1.5 (2026.07.29)
 
 ### New
