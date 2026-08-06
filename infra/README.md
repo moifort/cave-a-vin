@@ -39,6 +39,46 @@ The `bootstrap.sh` driver:
 End state after a fresh bootstrap: backend operational, Firestore ready,
 Apple Sign-In configured, `ios/Vinarium/GoogleService-Info.plist` written.
 
+## The one step Terraform cannot take: Google Analytics
+
+The app measures its activation funnel with Firebase Analytics, which only
+reports once the Firebase project is linked to a Google Analytics property.
+That link has no Terraform resource
+([hashicorp/terraform-provider-google#17450](https://github.com/hashicorp/terraform-provider-google/issues/17450)),
+so a fresh bootstrap leaves the SDK emitting into the void until it is made
+by hand — once per project, and never again.
+
+The REST call exists
+([`projects.addGoogleAnalytics`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects/addGoogleAnalytics)):
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "x-goog-user-project: vinarium-prod" \
+  -H "Content-Type: application/json" \
+  -d '{"analyticsAccountId":"<GA account id>"}' \
+  https://firebase.googleapis.com/v1beta1/projects/vinarium-prod:addGoogleAnalytics
+```
+
+In practice it answers 403: linking acts on the caller's Analytics account,
+which needs the `analytics.edit` scope, and Google refuses that scope to
+gcloud's OAuth client ("this app is blocked"). So the link is made in the
+Firebase console instead — Project settings → Integrations → Google Analytics
+→ Enable — picking the "Default Account for Firebase" account, which creates
+a property named after the project and a data stream per registered app.
+
+To check the state of a project, which is what the console does not spell out:
+
+```bash
+curl -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "x-goog-user-project: vinarium-prod" \
+  https://firebase.googleapis.com/v1beta1/projects/vinarium-prod/analyticsDetails
+```
+
+`404` means nothing is linked. Linked, it returns the property and one
+`streamMappings` entry per app. `GoogleService-Info.plist` does not change
+when the link is made, so no `terraform apply` is needed afterwards.
+
 ## Subsequent deploys (CI)
 
 Every push to `main` runs `.github/workflows/deploy.yml`, which builds the

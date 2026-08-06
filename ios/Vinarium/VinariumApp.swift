@@ -11,6 +11,7 @@ struct VinariumApp: App {
         // test launch arguments are there. A normal Debug run is untouched.
         UITestEnvironment.bootstrapIfNeeded()
         #endif
+        startAnalytics()
         startSentry()
     }
 

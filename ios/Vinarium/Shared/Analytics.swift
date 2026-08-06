@@ -33,6 +33,18 @@ enum AnalyticsEvent {
     }
 }
 
+/// Called once at launch, right after Firebase is configured. Collection has to be
+/// settled at the SDK level and not only at ours: Firebase reports `first_open`,
+/// `session_start` and `user_engagement` on its own, so muting `track` alone would
+/// still have counted every simulator run and every CI scenario as a real install
+/// in the property the numbers are read from.
+///
+/// Set on every launch rather than once: the SDK remembers the flag across
+/// launches, and the same install must follow the arguments it was started with.
+func startAnalytics() {
+    Analytics.setAnalyticsCollectionEnabled(analyticsEnabled)
+}
+
 /// Records a milestone. Deliberately free of any return value or error: analytics
 /// must never be something a screen has to handle.
 func track(_ event: AnalyticsEvent) {
