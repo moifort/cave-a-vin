@@ -105,7 +105,7 @@ half of the bill without any expected loss on a structured extraction.
 
 | | **Free** | **Premium — €2.99 / month · €24.99 / year** |
 |---|---|---|
-| AI scans | **5 / month** | unlimited (fair use, safety ceiling ~100 / month) |
+| AI scans | **5 / month**, plus **20 granted once** at the end of onboarding | unlimited (fair use, safety ceiling ~100 / month) |
 | Bottles, cellar, tastings, dashboard, sharing | unlimited | unlimited |
 | Manual entry | unlimited | unlimited |
 
@@ -113,6 +113,17 @@ Why these numbers:
 
 - **5 scans a month** caps the free tier at €0.05 per user (€0.21 in the worst case) and is enough
   to judge whether the scan is any good. The wall it creates is the conversion moment.
+- **20 scans granted once**, at the end of onboarding (`WELCOME_SCANS`, added 2026.08.04). The
+  monthly cap is sized for a steady month, and a brand-new account is not in one: its cellar is
+  empty and stocking it is ~30 scans, so five would put the wall before the app had shown anything.
+  The grant is a balance of its own (`ai-credits`, one document per account), drawn down only once
+  the month is spent and never refilled by the calendar — the month goes first because it comes
+  back on the 1st and the grant never does. It costs **~€0.20 per account created**, once
+  (~€0.84 with grounding billed): at 1,000 signups, €200 against a €8/month floor, which is a
+  one-off acquisition cost rather than a recurring one. Sizing rule: enough for a real stocking
+  session, not enough for a whole cellar, so the wall that converts still arrives — after the value
+  rather than before it. One grant per account, on the first onboarding only; a deleted and
+  recreated account gets a fresh one, which the friction of a new Apple ID keeps theoretical.
 - **Manual entry stays free and unlimited.** This is what keeps the wall from being a wall: a free
   user who has run out of scans can still fill their cellar, just by typing. Gating the bottles
   themselves would have turned a monetization limit into a reason to uninstall.

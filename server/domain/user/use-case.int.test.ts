@@ -18,6 +18,9 @@ mock.module('~/system/identity', () => ({
 const { UserUseCase } = await import('~/domain/user/use-case')
 const { UserQuery } = await import('~/domain/user/query')
 const { CellarQuery } = await import('~/domain/cellar/query')
+const { QuotaCommand } = await import('~/domain/quota/command')
+const { QuotaQuery } = await import('~/domain/quota/query')
+const { FREE_MONTHLY_SCANS, WELCOME_SCANS } = await import('~/domain/quota/business-rules')
 
 const user = (id: string) => id as UserId
 
@@ -105,7 +108,7 @@ describe('UserUseCase.completeOnboarding', () => {
     expect((await UserQuery.me(user('b'))).firstName as string).toBe('Marie')
   })
 
-  test('both writes land in a single committed batch (atomic)', async () => {
+  test('every write lands in a single committed batch (atomic)', async () => {
     await UserUseCase.completeOnboarding(user('u1'), {
       firstName: 'Thibaut' as PersonName,
       rows: 10 as CellarRows,
@@ -114,7 +117,40 @@ describe('UserUseCase.completeOnboarding', () => {
     })
     expect(fake.batches).toHaveLength(1)
     expect(fake.batches[0].commits).toBe(1)
-    expect(fake.batches[0].ops).toHaveLength(2)
+    // The cellar config, the granted scans, the profile.
+    expect(fake.batches[0].ops).toHaveLength(3)
+  })
+
+  test('hands the new account the scans it needs to stock its cellar', async () => {
+    await UserUseCase.completeOnboarding(user('u1'), {
+      firstName: 'Thibaut' as PersonName,
+      rows: 10 as CellarRows,
+      cols: 5 as CellarCols,
+      zones: 1 as CellarZones,
+    })
+
+    expect((await QuotaQuery.creditOf(user('u1'))).scans).toBe(WELCOME_SCANS)
+  })
+
+  test('never grants them twice, however often the wizard is run again', async () => {
+    const onboard = () =>
+      UserUseCase.completeOnboarding(user('u1'), {
+        firstName: 'Thibaut' as PersonName,
+        rows: 10 as CellarRows,
+        cols: 5 as CellarCols,
+        zones: 1 as CellarZones,
+      })
+    await onboard()
+    // Draw the granted balance down, so a re-grant would show up as a balance
+    // back at the full amount rather than where it was left.
+    for (let i = 0; i <= FREE_MONTHLY_SCANS; i++) await QuotaCommand.record(user('u1'), 'free')
+
+    await onboard()
+
+    expect((await QuotaQuery.creditOf(user('u1'))).scans as number).toBe(WELCOME_SCANS - 1)
+    // The second run rewrites the profile and nothing else: the grid it already
+    // configured is left alone, and so is the balance.
+    expect(fake.batches[1]?.ops).toHaveLength(1)
   })
 })
 
@@ -130,6 +166,7 @@ describe('UserUseCase.deleteAccount', () => {
     fake.seed('journal', `${id}_j`, { userId: user(id) })
     fake.seed('entitlements', id, { userId: user(id) })
     fake.seed('ai-quotas', `${id}_2026-07`, { userId: user(id) })
+    fake.seed('ai-credits', id, { userId: user(id), scans: 20 })
     fake.seed('user-profiles', id, { userId: user(id), firstName: id })
     fake.seed('cellar-configs', `usr_${id}`, { rows: 8, cols: 6, zones: 1 })
   }
@@ -143,6 +180,7 @@ describe('UserUseCase.deleteAccount', () => {
     'journal',
     'entitlements',
     'ai-quotas',
+    'ai-credits',
     'user-profiles',
     'cellar-configs',
   ]

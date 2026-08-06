@@ -1,15 +1,17 @@
 import { PlanEnum } from '~/domain/entitlement/infrastructure/graphql/enums'
-import { limitOf, remaining, renewsOn } from '~/domain/quota/business-rules'
-import type { Quota } from '~/domain/quota/types'
+import { limitOf, monthlyRemaining, renewsOn, totalRemaining } from '~/domain/quota/business-rules'
+import type { Quota, ScanCredit } from '~/domain/quota/types'
 import { builder } from '~/domain/shared/graphql/builder'
 import type { Plan } from '~/domain/shared/types'
 
-// What the `quota` query answers: the plan, and this month's consumption under it.
-export type QuotaState = { plan: Plan; quota: Quota }
+// What the `quota` query answers: the plan, this month's consumption under it,
+// and the scans granted outside the month.
+export type QuotaState = { plan: Plan; quota: Quota; credit: ScanCredit }
 
 export const QuotaType = builder.objectRef<QuotaState>('Quota').implement({
   description:
-    'The monthly scan allowance: what has been spent, what is left, and when it renews.\n\n' +
+    'The scan allowance: what the month holds, what was granted on top, what has been spent and ' +
+    'when the month renews.\n\n' +
     'Only the AI scan is metered. Adding a bottle by hand, the cellar, tastings and sharing are ' +
     'unlimited on every plan, so a spent allowance never stops the app being used.',
   fields: (t) => ({
@@ -28,8 +30,22 @@ export const QuotaType = builder.objectRef<QuotaState>('Quota').implement({
     }),
     remaining: t.int({
       description:
-        'How many are left, e.g. `3`. Never negative: an allowance already overspent reads as `0`.',
-      resolve: (state) => remaining(state.plan, state.quota),
+        'How many are left of the month, e.g. `3`. Never negative: an allowance already overspent ' +
+        'reads as `0`. Ignores the granted scans — read `totalRemaining` for what can really be ' +
+        'scanned.',
+      resolve: (state) => monthlyRemaining(state.plan, state.quota),
+    }),
+    welcomeRemaining: t.int({
+      description:
+        'How many granted scans are left, e.g. `14`. Handed once when onboarding completes, drawn ' +
+        'down only after the month is spent, and never refilled by the calendar.',
+      resolve: (state) => state.credit.scans,
+    }),
+    totalRemaining: t.int({
+      description:
+        'Everything the account can still scan: the month plus what it was granted, e.g. `17`. ' +
+        'This is the number a screen should show — the one the scan gate refuses at `0`.',
+      resolve: (state) => totalRemaining(state.plan, state.quota, state.credit),
     }),
     renewsOn: t.field({
       type: 'DateTime',

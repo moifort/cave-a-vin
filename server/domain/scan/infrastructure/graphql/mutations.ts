@@ -19,10 +19,10 @@ builder.mutationField('scanBeverage', (t) =>
       'recognized, enriches it with a web search. The result is cached server-side by SHA-256, so ' +
       'scanning the same label twice avoids re-calling the models. Check `recognized` on the ' +
       'result: false means no beverage was identified.\n\n' +
-      'Spends one scan of the monthly allowance (see `me.quota`), and only when the models are ' +
-      'really called: a cached label is free. Fails with `QUOTA_EXHAUSTED` once the allowance is ' +
-      'used up, `IMAGE_TOO_LARGE` above the 10 MB limit, or `SCAN_FAILED` when the model call ' +
-      'errors.',
+      'Spends one scan of the allowance (see the `quota` query): the month first, then the scans ' +
+      'granted at onboarding. Only a real model call is charged, a cached label is free. Fails ' +
+      'with `QUOTA_EXHAUSTED` once nothing is left anywhere, `IMAGE_TOO_LARGE` above the 10 MB ' +
+      'limit, or `SCAN_FAILED` when the model call errors.',
     args: {
       imageBase64: t.arg.string({
         required: true,
@@ -33,10 +33,13 @@ builder.mutationField('scanBeverage', (t) =>
       if (!imageWithinSizeLimit(imageBase64.length))
         return domainError('IMAGE_TOO_LARGE', 'Image exceeds the 10 MB size limit')
 
-      const plan = await EntitlementQuery.planOf(userId)
-      const quota = await QuotaQuery.ofCurrentMonth(userId)
-      if (exhausted(plan, quota))
-        return domainError('QUOTA_EXHAUSTED', 'Monthly scan allowance is used up')
+      const [plan, quota, credit] = await Promise.all([
+        EntitlementQuery.planOf(userId),
+        QuotaQuery.ofCurrentMonth(userId),
+        QuotaQuery.creditOf(userId),
+      ])
+      if (exhausted(plan, quota, credit))
+        return domainError('QUOTA_EXHAUSTED', 'Scan allowance is used up')
 
       // The AI writes its free-text values in the caller's language; the header
       // also partitions the scan cache so languages never cross-contaminate.
@@ -47,7 +50,7 @@ builder.mutationField('scanBeverage', (t) =>
         const { result, cacheHit, usage } = await Scan.scanWithCache(buffer, language)
         // Metered after the fact, and only on a real model call: a Gemini failure
         // must not cost the caller a scan, and a cache hit costs us nothing.
-        if (!cacheHit) await QuotaCommand.record(userId)
+        if (!cacheHit) await QuotaCommand.record(userId, plan)
         // Cost telemetry for the admin metrics — never on the scan's critical
         // path: a failed metrics write must not fail the scan that produced it.
         await AdminCommand.recordAiUsage({ cacheHit, ...usage }).catch(() => {})

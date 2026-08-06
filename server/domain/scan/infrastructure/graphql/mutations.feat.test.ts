@@ -31,7 +31,7 @@ mock.module('~/system/config/index', () => ({
 
 const { schema } = await import('~/domain/shared/graphql/schema')
 const { beverageSatelliteLoaders } = await import('~/domain/shared/graphql/loaders')
-const { FREE_MONTHLY_SCANS } = await import('~/domain/quota/business-rules')
+const { FREE_MONTHLY_SCANS, WELCOME_SCANS, monthOf } = await import('~/domain/quota/business-rules')
 const { QuotaCommand } = await import('~/domain/quota/command')
 const { EntitlementQuery } = await import('~/domain/entitlement/query')
 
@@ -60,7 +60,7 @@ const errorCodeOf = (result: Awaited<ReturnType<typeof execute>>) =>
 
 // Spend the whole free allowance the way a real month would.
 const spendFreeAllowance = async () => {
-  for (let i = 0; i < FREE_MONTHLY_SCANS; i++) await QuotaCommand.record(userId)
+  for (let i = 0; i < FREE_MONTHLY_SCANS; i++) await QuotaCommand.record(userId, 'free')
 }
 
 // Make this account Premium the way a verified purchase does.
@@ -92,9 +92,43 @@ describe('scanning within the free allowance', () => {
   })
 
   test('lets the last scan of the allowance through', async () => {
-    for (let i = 0; i < FREE_MONTHLY_SCANS - 1; i++) await QuotaCommand.record(userId)
+    for (let i = 0; i < FREE_MONTHLY_SCANS - 1; i++) await QuotaCommand.record(userId, 'free')
 
     expect((await scan()).errors).toBeUndefined()
+  })
+})
+
+describe('scanning on the scans granted at onboarding', () => {
+  test('goes through once the month is spent', async () => {
+    await QuotaCommand.grantWelcomeCredit(userId)
+    await spendFreeAllowance()
+
+    expect((await scan()).errors).toBeUndefined()
+  })
+
+  test('is what the allowance reports, month and grant apart', async () => {
+    await QuotaCommand.grantWelcomeCredit(userId)
+    await spendFreeAllowance()
+
+    await scan()
+
+    const quota = await execute(
+      `query { quota { used remaining welcomeRemaining totalRemaining } }`,
+    )
+    expect(quota.data?.quota).toMatchObject({
+      used: FREE_MONTHLY_SCANS,
+      remaining: 0,
+      welcomeRemaining: WELCOME_SCANS - 1,
+      totalRemaining: WELCOME_SCANS - 1,
+    })
+  })
+
+  test('is refused only once the grant is spent too', async () => {
+    await QuotaCommand.grantWelcomeCredit(userId)
+    await spendFreeAllowance()
+    for (let i = 0; i < WELCOME_SCANS; i++) await QuotaCommand.record(userId, 'free')
+
+    expect(errorCodeOf(await scan())).toBe('QUOTA_EXHAUSTED')
   })
 })
 
@@ -172,23 +206,28 @@ describe('what a scan actually costs the caller', () => {
 })
 
 describe('the reads a gated scan pays for', () => {
-  // The plan and the month's counter, then the counter again inside the
-  // transaction that spends it — that last one is the price of counting two
-  // scans that land together as two. All keyed reads: gating a scan must never
-  // scan a collection.
-  test('costs three keyed document reads and no collection scan', async () => {
+  // The plan, the month's counter and the granted balance, then the counter
+  // again inside the transaction that spends it — that last one is the price of
+  // counting two scans that land together as two. All keyed reads: gating a scan
+  // must never scan a collection.
+  test('costs four keyed document reads and no collection scan', async () => {
     await scan()
 
-    expect(fake.docReads).toBe(3)
+    expect(fake.docReads).toBe(4)
     expect(fake.queryReads).toBe(0)
   })
 
-  test('refusing a scan costs only the two gate reads', async () => {
-    await spendFreeAllowance()
-    const before = fake.docReads
+  // Seeded rather than spent through the command: spending it would have read
+  // the same counters first, and a request-memoized read is not billed twice.
+  test('refusing a scan costs only the three gate reads', async () => {
+    fake.seed('ai-quotas', `${userId}_${monthOf(new Date())}`, {
+      userId,
+      month: monthOf(new Date()),
+      scans: FREE_MONTHLY_SCANS,
+    })
 
-    await scan()
-
-    expect(fake.docReads - before).toBe(2)
+    expect(errorCodeOf(await scan())).toBe('QUOTA_EXHAUSTED')
+    expect(fake.docReads).toBe(3)
+    expect(fake.queryReads).toBe(0)
   })
 })

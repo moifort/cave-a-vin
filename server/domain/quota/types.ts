@@ -14,3 +14,19 @@ export type Quota = {
   month: QuotaMonth
   scans: Count
 }
+
+/** Scans granted outside the monthly allowance, as a balance that is drawn down
+ *  and never refilled by the calendar. One grant per account, at the end of
+ *  onboarding: stocking a cellar is the moment the app is judged, and metering
+ *  it at five would have made that judgement about the meter.
+ *
+ *  Absent storage means nothing left, the same way an absent quota reads zero. */
+export type ScanCredit = {
+  userId: UserId
+  scans: Count
+}
+
+/** Which counter the next scan comes out of. The month goes first because it
+ *  refills on the 1st and the grant never does — spending the grant while the
+ *  month still had room would quietly burn a one-off on a scan that was free. */
+export type ScanDebit = { on: 'monthly' } | { on: 'credit' } | { on: 'nothing' }

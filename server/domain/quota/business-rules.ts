@@ -1,5 +1,5 @@
 import { QuotaMonth as toQuotaMonth } from '~/domain/quota/primitives'
-import type { Quota, QuotaMonth } from '~/domain/quota/types'
+import type { Quota, QuotaMonth, ScanCredit, ScanDebit } from '~/domain/quota/types'
 import { Count } from '~/domain/shared/primitives'
 import type { Count as CountType, Plan, UserId } from '~/domain/shared/types'
 
@@ -16,6 +16,14 @@ export const FREE_MONTHLY_SCANS: CountType = Count(5)
 // while staying far above real use: stocking a whole cellar is ~30 scans. To
 // recalibrate when the scan cost changes, see docs/freemium-economics.md.
 export const PREMIUM_MONTHLY_SCANS: CountType = Count(100)
+
+// What a new account is handed when it finishes onboarding, once and for good.
+// Stocking a whole cellar is ~30 scans, so five a month turns the first session
+// into a wall before the app has shown what it does. Twenty covers a real
+// stocking session without covering a whole cellar: the wall still arrives, but
+// after the value rather than before it. Costs ~0.20 EUR per account created,
+// once — see docs/freemium-economics.md.
+export const WELCOME_SCANS: CountType = Count(20)
 
 // The month a moment belongs to, `"2026-07"`. UTC on purpose: the window must not
 // move with the caller's timezone, and someone scanning near midnight on the 1st
@@ -37,16 +45,43 @@ export const freshQuota = (userId: UserId, month: QuotaMonth): Quota => ({
   scans: Count(0),
 })
 
+// An account holding no granted scans — what an absent document means.
+export const noCredit = (userId: UserId): ScanCredit => ({ userId, scans: Count(0) })
+
+// The grant itself, handed once at the end of onboarding.
+export const welcomeCredit = (userId: UserId): ScanCredit => ({ userId, scans: WELCOME_SCANS })
+
 // How many scans the plan allows per month.
 export const limitOf = (plan: Plan): CountType =>
   plan === 'premium' ? PREMIUM_MONTHLY_SCANS : FREE_MONTHLY_SCANS
 
-// What is left this month. Never negative: a limit lowered under an already-spent
-// counter reads as zero, not as a debt.
-export const remaining = (plan: Plan, quota: Quota): CountType =>
+// What is left of the month's allowance. Never negative: a limit lowered under an
+// already-spent counter reads as zero, not as a debt.
+export const monthlyRemaining = (plan: Plan, quota: Quota): CountType =>
   Count(Math.max(0, limitOf(plan) - quota.scans))
 
-export const exhausted = (plan: Plan, quota: Quota): boolean => quota.scans >= limitOf(plan)
+// Everything the account can still scan: the month plus what it was granted.
+export const totalRemaining = (plan: Plan, quota: Quota, credit: ScanCredit): CountType =>
+  Count(monthlyRemaining(plan, quota) + credit.scans)
+
+// Which counter the next scan comes out of.
+export const debitFor = (plan: Plan, quota: Quota, credit: ScanCredit): ScanDebit =>
+  monthlyRemaining(plan, quota) > 0
+    ? { on: 'monthly' }
+    : credit.scans > 0
+      ? { on: 'credit' }
+      : { on: 'nothing' }
+
+// Nothing left anywhere — the only state that refuses a scan.
+export const exhausted = (plan: Plan, quota: Quota, credit: ScanCredit): boolean =>
+  debitFor(plan, quota, credit).on === 'nothing'
 
 // The quota once a scan has been spent.
 export const consumed = (quota: Quota): Quota => ({ ...quota, scans: Count(quota.scans + 1) })
+
+// The balance once a granted scan has been spent. Floored at zero: a balance
+// drawn down concurrently must never read back as a debt.
+export const consumedCredit = (credit: ScanCredit): ScanCredit => ({
+  ...credit,
+  scans: Count(Math.max(0, credit.scans - 1)),
+})

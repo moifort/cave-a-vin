@@ -16,13 +16,19 @@ builder.queryField('quota', (t) =>
       '    used\n' +
       '    limit\n' +
       '    remaining\n' +
+      '    welcomeRemaining\n' +
+      '    totalRemaining\n' +
       '    renewsOn\n' +
       '  }\n' +
       '}\n' +
       '```',
-    resolve: async (_root, _args, { userId }) => ({
-      plan: await EntitlementQuery.planOf(userId),
-      quota: await QuotaQuery.ofCurrentMonth(userId),
-    }),
+    resolve: async (_root, _args, { userId }) => {
+      const [plan, quota, credit] = await Promise.all([
+        EntitlementQuery.planOf(userId),
+        QuotaQuery.ofCurrentMonth(userId),
+        QuotaQuery.creditOf(userId),
+      ])
+      return { plan, quota, credit }
+    },
   }),
 )

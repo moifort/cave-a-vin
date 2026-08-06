@@ -10,20 +10,30 @@ import { RecommendationCommand } from '~/domain/recommendation/command'
 import type { PersonName, UserId } from '~/domain/shared/types'
 import { TastingCommand } from '~/domain/tasting/command'
 import { UserCommand } from '~/domain/user/command'
+import { UserQuery } from '~/domain/user/query'
 import { atomically } from '~/utils/firestore'
 
 export namespace UserUseCase {
-  // Finish onboarding: persist the profile (firstName + timestamp) and the cellar
-  // dimensions in one batch, so a partial failure never leaves the user "half
-  // onboarded" — either both land or neither does.
+  // Finish onboarding: persist the profile (firstName + timestamp), the cellar
+  // dimensions and the scans the account starts with, in one batch, so a partial
+  // failure never leaves the user "half onboarded" — either all of it lands or
+  // none of it does.
+  //
+  // The scans are granted only the FIRST time, on an account that has no profile
+  // yet: the mutation is reachable again afterwards (a user re-sizing their
+  // cellar through the wizard), and re-granting there would be a renewable gift.
+  // The read is the one the auth gate already did, memoized, so it costs nothing.
   export const completeOnboarding = async (
     userId: UserId,
     input: { firstName: PersonName; rows: CellarRows; cols: CellarCols; zones: CellarZones },
-  ) =>
-    atomically(async (batch) => {
+  ) => {
+    const firstTime = (await UserQuery.me(userId)).onboardingCompletedAt === undefined
+    return atomically(async (batch) => {
       await CellarCommand.configureFor(userId, input.rows, input.cols, input.zones, batch)
+      if (firstTime) await QuotaCommand.grantWelcomeCredit(userId, batch)
       return UserCommand.completeOnboarding(userId, input.firstName, batch)
     })
+  }
 
   // Delete the account and every trace of it. Each step reaches a domain through
   // its public Command surface, never a repository — the domains own their storage.
