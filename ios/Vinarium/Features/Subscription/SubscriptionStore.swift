@@ -89,7 +89,12 @@ final class SubscriptionStore {
                 if !granted {
                     errorMessage = String(localized: "L’achat a bien été enregistré par Apple, mais nous n’avons pas pu l’activer. Rouvrez l’app dans un instant : il sera repris automatiquement. Si rien ne change, touchez « Restaurer mes achats ».")
                 }
-                if granted { await refreshQuota() }
+                if granted {
+                    // The end of the funnel, counted on what our own server
+                    // granted rather than on what the App Store sheet said.
+                    track(.purchaseCompleted(plan: product.id))
+                    await refreshQuota()
+                }
                 return granted
             case .pending:
                 // Ask-to-buy and other deferred approvals: nothing to do but wait

@@ -14,6 +14,14 @@ enum PremiumTrigger {
         }
     }
 
+    /// What GA4 reads to tell the paywall that sells from the one that consoles.
+    var analyticsName: String {
+        switch self {
+        case .scanAllowanceSpent: return "scan_allowance_spent"
+        case .discover: return "discover"
+        }
+    }
+
     var message: String {
         switch self {
         case .scanAllowanceSpent:
@@ -48,6 +56,7 @@ struct PremiumSheet: View {
                 .padding(.vertical, 24)
             }
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear { track(.paywallShown(trigger: trigger.analyticsName)) }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { dismiss() }

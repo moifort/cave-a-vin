@@ -12,6 +12,7 @@
 		BF85BBEF2F990504004F8A34 /* ApolloAPI in Frameworks */ = {isa = PBXBuildFile; productRef = AA0E01242F5072C10074B393 /* ApolloAPI */; };
 		BF85BBF02F990504004F8A34 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = FB0E01222F5072C10074B393 /* FirebaseCore */; };
 		BF85BBF12F990504004F8A34 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FB0E01242F5072C10074B393 /* FirebaseAuth */; };
+		BF85BBF22F990504004F8A34 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FB0E01262F5072C10074B393 /* FirebaseAnalytics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF85BBF12F990504004F8A34 /* FirebaseAuth in Frameworks */,
+				BF85BBF22F990504004F8A34 /* FirebaseAnalytics in Frameworks */,
 				BF85BBF02F990504004F8A34 /* FirebaseCore in Frameworks */,
 				BF85BBEF2F990504004F8A34 /* ApolloAPI in Frameworks */,
 				BF85BBEE2F990504004F8A34 /* Apollo in Frameworks */,
@@ -111,6 +113,7 @@
 				AA0E01242F5072C10074B393 /* ApolloAPI */,
 				FB0E01222F5072C10074B393 /* FirebaseCore */,
 				FB0E01242F5072C10074B393 /* FirebaseAuth */,
+				FB0E01262F5072C10074B393 /* FirebaseAnalytics */,
 				5E0E01222F5072C10074B393 /* Sentry */,
 			);
 			productName = Vinarium;
@@ -553,6 +556,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = FB0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		FB0E01262F5072C10074B393 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FB0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

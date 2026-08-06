@@ -50,6 +50,15 @@ final class OnboardingViewModel {
                 cols: cols,
                 zones: zones
             )
+            // Only a completion the server acknowledged counts: this is the step
+            // the whole activation funnel is measured against.
+            track(
+                .onboardingCompleted(
+                    rows: rows,
+                    cols: cols,
+                    fromPreset: { if case .preset = choice { true } else { false } }()
+                )
+            )
             isSubmitting = false
             return true
         } catch {

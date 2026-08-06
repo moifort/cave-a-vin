@@ -14,6 +14,9 @@ struct OnboardingView: View {
             content
                 .animation(.default, value: step)
         }
+        // The entrance of the activation funnel: everything after is measured
+        // against how many installs got this far.
+        .onAppear { track(.onboardingStarted) }
         .alert(
             "Une erreur est survenue",
             isPresented: Binding(

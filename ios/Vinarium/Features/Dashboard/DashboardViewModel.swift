@@ -6,11 +6,19 @@ final class DashboardViewModel {
     var isLoading = false
     var error: String?
 
+    /// A cellar worth opening the app for. Below this the app is a form that was
+    /// filled in once; above it, it is being used.
+    private static let stockedThreshold = 10
+
     func load() async {
         isLoading = true
         error = nil
         do {
-            data = try await DashboardAPI.getData()
+            let loaded = try await DashboardAPI.getData()
+            data = loaded
+            if loaded.bottleCount >= Self.stockedThreshold {
+                trackOnce(.cellarStocked(bottles: loaded.bottleCount))
+            }
         } catch {
             self.error = reportError(error)
         }

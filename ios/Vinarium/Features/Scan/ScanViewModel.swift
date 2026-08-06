@@ -54,23 +54,27 @@ final class ScanViewModel {
         isAnalyzing = true
         scanNotRecognized = false
         error = nil
+        track(.scanStarted)
 
         Task {
             do {
                 let result = try await WineAPI.scan(imageData: imageData)
                 if result.recognized {
+                    track(.scanSucceeded)
                     // Inside the flow sheet, the analysis overlay fades out to reveal
                     // the review: the sheet stays open (step is no longer the camera).
                     self.step = .review(result, imageData)
                     self.isAnalyzing = false
                 } else {
                     // The sheet stays open and switches to the error message.
+                    track(.scanNoResult)
                     self.scanNotRecognized = true
                     self.isAnalyzing = false
                 }
             } catch let apiError as APIError where apiError.domainCode == "QUOTA_EXHAUSTED" {
                 // This is not a failure, it is where the plan stops. The flow sheet
                 // closes, then the paywall is presented from `onDismiss`.
+                track(.scanBlockedByQuota)
                 self.pendingPaywall = true
                 self.isAnalyzing = false
             } catch {
@@ -134,6 +138,11 @@ final class ScanViewModel {
             } else {
                 wine = try await WineAPI.create(submission.request)
                 createdWine = wine
+                // The activation metric, counted where the bottle is really
+                // created: a retry reuses the wine above and must not count twice.
+                // Every bottle reaches the form through a scan today; the source
+                // is carried anyway, for the day one does not.
+                track(.bottleAdded(source: .scan))
             }
             try await persistTasting(for: wine.id, submission)
             try await persistRecommendation(for: wine.id, submission)
