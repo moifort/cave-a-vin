@@ -29,22 +29,22 @@
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
         display: flex;
         flex-direction: column;
-        padding: 96px 56px 72px;
+        padding: 64px 52px 56px;
         overflow: hidden;
       }
 
-      header { text-align: center; margin-bottom: 56px; }
+      header { text-align: center; margin-bottom: 40px; }
 
       h1 {
-        font-size: 86px;
+        font-size: 76px;
         line-height: 1.05;
         font-weight: 700;
         letter-spacing: -0.02em;
       }
 
       .subtitle {
-        margin-top: 26px;
-        font-size: 40px;
+        margin-top: 20px;
+        font-size: 36px;
         line-height: 1.3;
         color: var(--muted);
         font-weight: 400;
@@ -64,8 +64,8 @@
         grid-template-columns: repeat(4, 1fr);
         /* minmax(0, 1fr), not 1fr: a plain 1fr row still grows to fit its
            content, and the tallest tile pushed the last row off the panel. */
-        grid-template-rows: repeat(9, minmax(0, 1fr));
-        gap: 22px;
+        grid-template-rows: repeat(11, minmax(0, 1fr));
+        gap: 18px;
       }
 
       .tile {
@@ -96,14 +96,14 @@
       .t-map     { grid-area: 1 / 1 / 4 / 3; }
       .t-fav     { grid-area: 1 / 3 / 4 / 4; }
       .t-spirits { grid-area: 1 / 4 / 4 / 5; }
-      .t-notes   { grid-area: 4 / 1 / 6 / 2; }
-      .t-hero    { grid-area: 4 / 2 / 6 / 4; }
-      .t-ai      { grid-area: 4 / 4 / 6 / 5; }
-      .t-ready   { grid-area: 6 / 1 / 8 / 3; }
-      .t-sake    { grid-area: 6 / 3 / 10 / 4; }
-      .t-stars   { grid-area: 6 / 4 / 8 / 5; }
-      .t-sharing { grid-area: 8 / 1 / 10 / 3; }
-      .t-price   { grid-area: 8 / 4 / 10 / 5; }
+      .t-notes   { grid-area: 4 / 1 / 7 / 2; }
+      .t-hero    { grid-area: 4 / 2 / 7 / 4; }
+      .t-ai      { grid-area: 4 / 4 / 7 / 5; }
+      .t-ready   { grid-area: 7 / 1 / 10 / 3; }
+      .t-sake    { grid-area: 7 / 3 / 12 / 4; }
+      .t-stars   { grid-area: 7 / 4 / 10 / 5; }
+      .t-sharing { grid-area: 10 / 1 / 12 / 3; }
+      .t-price   { grid-area: 10 / 4 / 12 / 5; }
 
       /* The app itself, at the centre of what it can do. Its placement lives
          with the other tiles above; only its look belongs here. */

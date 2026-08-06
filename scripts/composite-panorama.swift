@@ -142,75 +142,62 @@ let width = panoramaImage.width
 let height = panoramaImage.height
 let (panoramaContext, panorama) = rgbaBitmap(of: panoramaImage, width: width, height: height)
 
+// The device is drawn here rather than generated: asked for a phone at a given
+// size, the image model produced a different one every time and a different one
+// per panel, and the panels are read side by side. Placed by hand, the six of
+// them line up to the pixel and the screenshots never stretch.
+let panelWidth = Double(width) / 3
+let deviceHeight = Double(height) * 0.82
+let screenshotRatio = 1206.0 / 2622.0
+let screenHeight = deviceHeight
+let screenWidth = screenHeight * screenshotRatio
+let bezel = screenWidth * 0.022
+let cornerRadius = screenWidth * 0.09
+// Top edge at 16% of the height, so the caption band above it is the same on
+// every panel.
+let deviceTop = Double(height) * 0.16
+
 for third in 0..<3 {
-  let xStart = width * third / 3
-  let xEnd = width * (third + 1) / 3
+  let centerX = panelWidth * (Double(third) + 0.5)
+  // Core Graphics counts y from the bottom; the framing above is expressed from
+  // the top, as the panel is read.
+  let screenRect = CGRect(
+    x: centerX - screenWidth / 2,
+    y: Double(height) - deviceTop - screenHeight,
+    width: screenWidth,
+    height: screenHeight)
+  let bodyRect = screenRect.insetBy(dx: -bezel, dy: -bezel)
 
-  // Bounding box of confidently-magenta pixels in this third.
-  var minX = Int.max
-  var maxX = Int.min
-  var minY = Int.max
-  var maxY = Int.min
-  for y in 0..<height {
-    for x in xStart..<xEnd {
-      if magentaWeight(panorama, (y * width + x) * 4) > 0.8 {
-        minX = min(minX, x)
-        maxX = max(maxX, x)
-        minY = min(minY, y)
-        maxY = max(maxY, y)
-      }
-    }
-  }
-  // Sentinel check must come first: with no magenta at all, computing a width from the
-  // Int.max/Int.min sentinels would trap on overflow.
-  guard minX <= maxX else {
-    fail("No magenta screen found in third \(third + 1) of \(panoramaPath)")
-  }
-  let screenWidth = maxX - minX + 1
-  let screenHeight = maxY - minY + 1
-  guard screenWidth > (xEnd - xStart) / 5, screenHeight > height / 5 else {
-    fail("No magenta screen found in third \(third + 1) of \(panoramaPath)")
-  }
+  panoramaContext.saveGState()
+  // The body: a dark frame with a soft drop shadow, so the device sits in the
+  // room instead of floating on top of it.
+  panoramaContext.setShadow(
+    offset: CGSize(width: 0, height: -bezel * 1.5), blur: bezel * 4,
+    color: CGColor(red: 0, green: 0, blue: 0, alpha: 0.55))
+  panoramaContext.setFillColor(CGColor(red: 0.09, green: 0.09, blue: 0.1, alpha: 1))
+  panoramaContext.addPath(
+    CGPath(
+      roundedRect: bodyRect, cornerWidth: cornerRadius + bezel, cornerHeight: cornerRadius + bezel,
+      transform: nil))
+  panoramaContext.fillPath()
+  panoramaContext.restoreGState()
 
-  // A screen that is not screenshot-shaped would silently stretch the UI when filled.
-  let screenshotRatio = 1206.0 / 2622.0
-  let screenRatio = Double(screenWidth) / Double(screenHeight)
-  guard abs(screenRatio - screenshotRatio) / screenshotRatio < 0.05 else {
-    fail(
-      "Screen in third \(third + 1) has ratio \(screenRatio) but screenshots are \(screenshotRatio); regenerate the panorama")
-  }
+  // The screenshot, clipped to the screen's rounded corners.
+  panoramaContext.saveGState()
+  panoramaContext.addPath(
+    CGPath(
+      roundedRect: screenRect, cornerWidth: cornerRadius, cornerHeight: cornerRadius,
+      transform: nil))
+  panoramaContext.clip()
+  panoramaContext.draw(loadImage(arguments[2 + third]), in: screenRect)
+  panoramaContext.restoreGState()
 
-  let screenshot = loadImage(arguments[2 + third])
-  let (scaledContext, scaled) = rgbaBitmap(of: screenshot, width: screenWidth, height: screenHeight)
+  guard !captions[third].isEmpty else { continue }
 
-  // Replace magenta pixels with the scaled screenshot, blending on the soft mask
-  // so anti-aliased screen edges keep their bezel transition. The contexts own
-  // the pixel buffers, so keep them alive for the whole loop.
-  withExtendedLifetime((panoramaContext, scaledContext)) {
-    for y in 0..<screenHeight {
-      // Both buffers come from identically-configured contexts, so rows line up 1:1.
-      for x in 0..<screenWidth {
-        let target = ((minY + y) * width + (minX + x)) * 4
-        // Scaled up and clamped: a plain weight leaves the partly-magenta pixels
-        // of an anti-aliased screen edge half-replaced, which reads as a pink
-        // fringe around the screen. Steeper, the edge stays soft and the colour
-        // goes.
-        let weight = min(1, magentaWeight(panorama, target) * 2.5)
-        if weight <= 0 { continue }
-        let source = (y * screenWidth + x) * 4
-        for channel in 0..<3 {
-          let original = Double(panorama[target + channel])
-          let replacement = Double(scaled[source + channel])
-          panorama[target + channel] = UInt8(max(0, min(255, (original + (replacement - original) * weight).rounded())))
-        }
-      }
-    }
-  }
+  let minY = Int(deviceTop)
+  let xStart = Int(panelWidth * Double(third))
+  let xEnd = Int(panelWidth * Double(third + 1))
 
-  // The caption goes in the band the panorama leaves free above the phone.
-  // `minY` is a row of the pixel buffer, whose first row is the top of the
-  // image, while the context draws from a bottom-left origin — hence the flip.
-  if !captions[third].isEmpty, minY > height / 12 {
     // A dark scrim over the text area, drawn here rather than asked of the image
     // model: told to keep an area calm, it produced a blurred band with a hard
     // edge across the picture. A gradient we draw ourselves is even, predictable
@@ -268,7 +255,6 @@ for third in 0..<3 {
         sentence, x: band.minX + band.width * 0.025, top: cursor, width: band.width * 0.95,
         context: panoramaContext)
     }
-  }
 }
 
 guard let output = panoramaContext.makeImage(),

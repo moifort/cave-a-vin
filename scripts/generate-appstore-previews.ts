@@ -2,18 +2,18 @@
 /**
  * Generates App Store marketing screenshots ("triptychs") with Nano Banana Pro.
  *
- * Each triptych is ONE continuous 4:3 panorama: Nano Banana Pro renders the
- * scene with three phone mockups whose screens are solid magenta placeholders,
- * then composite-panorama.swift pastes the real app screenshots onto those
- * screens (pixel-perfect UI, no generative text glitches) and sets the caption
- * above each phone. The panorama is finally sliced into three 1206x2622
- * portrait panels (the 6.9" size App Store Connect accepts) so the background
- * flows across adjacent App Store screenshots.
+ * Each triptych is ONE continuous 4:3 panorama: Nano Banana Pro renders an
+ * empty room, then composite-panorama.swift draws the three devices, pastes the
+ * real app screenshots into them and sets the caption above each. The panorama
+ * is finally sliced into three 1206x2622 portrait panels (the 6.9" size App
+ * Store Connect accepts) so the background flows across adjacent App Store
+ * screenshots.
  *
- * Two things are deliberately kept away from the image model: the app's UI, and
- * the captions. It garbles any text it draws, and there are seven languages to
- * set, Japanese included. So the scene is generated once per triptych, cached,
- * and every language reuses it — same background everywhere, one API call.
+ * The model is given the room and nothing else. It garbles any text it draws,
+ * so the captions are set in Core Text; and asked for a phone at a given size it
+ * returned a different one on every run and a different one per panel, so the
+ * devices are placed by hand. What is left — light, wood, depth — is what it is
+ * good at. One scene per triptych, cached, reused by every language.
  *
  * Usage:
  *   bun scripts/generate-appstore-previews.ts                  # every language, both triptychs
@@ -182,12 +182,10 @@ Create ONE single seamless panoramic marketing image (4:3 landscape). It will be
 - The background is one continuous scene flowing across the whole image with no visible seams: ${triptych.scene}.
 - The scene FILLS THE ENTIRE FRAME, edge to edge and corner to corner, like a single photograph taken in one place. No borders, no letterboxing, no horizontal bands, no flat colour blocks, no blurred strip along the top or the bottom, no vignette, no visible boundary between an upper and a lower area — any straight horizontal edge across the image is a defect, and so is a band of blur that does not belong to the depth of the scene.
 - Sharpness is even across the whole height: the top of the image is as much part of the room as the middle, only further away. Do not darken, fade or defocus any area to leave room for text.
-- Exactly three iPhone mockups with thin dark titanium frames, perfectly front-facing (zero perspective tilt or rotation), all at the same size and the same vertical position, with a soft premium drop shadow: one centered in the left third, one centered in the middle third, one centered in the right third.
-- Each phone is the subject of the picture, not an object in it: its height covers about 74% of the image height and its center sits just below the middle, leaving only a narrow strip of floor under it. The scene is what surrounds it, and the phone dominates the frame.
-- Each phone's screen is a single flat solid pure magenta (#FF00FF) panel filling the entire display edge to edge, following the display's rounded corners. Perfectly uniform magenta: no gradients, no reflections, no glare, no UI, no notch, no camera island, no text. The real app screenshots will be composited onto these magenta panels afterwards, so anything drawn on them would be destroyed.
-- Above the phones there is simply more room — a wall, shelving, the far end of the space — with nothing brightly lit and nothing demanding attention. Captions are typeset over it afterwards and the compositor lays its own gradient there, so the image itself needs no empty band.
+- NO phone, no device, no screen, no tablet, no object shaped like one anywhere in the image. The devices are drawn afterwards by the compositor, at an exact size and position: asked for them, the model returned a different size on every run and a different one per panel, and the three panels are read side by side.
+- The middle of each third is where a device will stand, covering roughly 80% of the height: keep those three areas free of anything the eye would miss — no bottle, no candle, no lamp centered in a third. Interest belongs at the sides.
 - ABSOLUTELY NO TEXT anywhere in the image: no captions, no labels, no logos, no watermarks, no lettering of any kind. Every word is added later.
-- CRITICAL composition rule: the image will be cut along two vertical lines at exactly 1/3 and 2/3 of the width. No phone may touch those lines; keep at least 5% of the total width clear on both sides of each cut line. Only the background crosses the cut lines.
+- CRITICAL composition rule: the image will be cut along two vertical lines at exactly 1/3 and 2/3 of the width. Nothing that reads as a single object may straddle those lines: the scene crosses them, a bottle standing on one does not.
 - Palette: deep burgundy (#8C1229), plum, warm gold accents (#D4AE59); dark, sophisticated, high-end wine brand aesthetic.`
 
 // Only needed to draw a new scene. Rendering a language onto a cached one asks
