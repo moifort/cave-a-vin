@@ -37,13 +37,13 @@ A purely functional approach to wine cellar management.
 
 | Layer    | Stack                                                                     |
 | -------- | ------------------------------------------------------------------------- |
-| iOS      | SwiftUI, Swift 6, iOS 26, Apollo iOS, StoreKit 2, Firebase Auth (Sign in with Apple) |
+| iOS      | SwiftUI, Swift 6, iOS 26, Apollo iOS, StoreKit 2, Firebase Auth (Sign in with Apple), Firebase Analytics |
 | Backend  | Nitro on Firebase Cloud Functions Gen 2, Apollo Server 5, Pothos          |
 | Storage  | Firestore (multi-user, isolated by `userId`, shared cellars via households) |
 | AI       | Gemini 2.5 Flash (vision + Google Search grounding)                       |
 | Metrics  | App Store Connect Sales Reports API + BigQuery billing export (admin economics) |
 | Infra    | Terraform (google + google-beta) — provisions everything from scratch    |
-| Observability | Sentry (one trace from the tap to the resolver, symbolicated iOS crashes, per-release source maps) |
+| Observability | Sentry (one trace from the tap to the resolver, symbolicated iOS crashes, per-release source maps), GA4 for the activation funnel (muted in Debug and under UI tests) |
 | Testing  | `bun:test` for the backend, XCUITest against the Firebase emulators for the app ([docs/e2e.md](docs/e2e.md)) |
 
 ## One-shot bootstrap
