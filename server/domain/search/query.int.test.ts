@@ -247,4 +247,13 @@ describe('SearchQuery.acrossCollections — household visibility', () => {
     // 'Sofia' only appears in Marie's private gift record — off-limits to the viewer.
     expect((await run('sofia')).hits).toEqual([])
   })
+
+  test('the favourites filter returns the viewer’s own, never a housemate’s', async () => {
+    seedHousehold()
+    // Marie hearts the bottle she shares with the viewer, who has not.
+    fake.seed('tasting', 'marie_m-in', { userId: 'marie', beverageId: 'm-in', favorite: true })
+    await migration0007.migrate({ db: fake.db })
+
+    expect((await run('', { favorite: true })).hits).toEqual([])
+  })
 })
