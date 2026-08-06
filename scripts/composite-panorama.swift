@@ -1,5 +1,6 @@
 // Composites real app screenshots onto the magenta placeholder screens of a
-// generated App Store panorama (see generate-appstore-previews.ts).
+// generated App Store panorama (see generate-appstore-previews.ts), and draws
+// the marketing caption above each phone.
 //
 // The panorama contains three front-facing phone mockups whose screens are
 // solid magenta (#FF00FF). For each horizontal third, this tool finds the
@@ -7,9 +8,16 @@
 // replaces only the magenta pixels (soft mask), preserving bezels and
 // anti-aliased edges. The panorama file is rewritten in place.
 //
+// The captions are drawn here rather than asked of the image model: the model
+// mangles text it renders, and it would have to be trusted with seven languages
+// including Japanese. Core Text sets them from the same font the app uses, so a
+// German compound word wraps instead of overflowing and kana come out as kana.
+//
 // Usage: swift composite-panorama.swift <panorama.png> <left.png> <center.png> <right.png>
+//                                       [<language> <caption1> <caption2> <caption3>]
 
 import CoreGraphics
+import CoreText
 import Foundation
 import ImageIO
 import UniformTypeIdentifiers
@@ -49,10 +57,68 @@ func magentaWeight(_ pixels: UnsafeMutablePointer<UInt8>, _ offset: Int) -> Doub
   return max(0, min(1, (min(r, b) - g - 60) / 80))
 }
 
-let arguments = CommandLine.arguments
-guard arguments.count == 5 else {
-  fail("Usage: swift composite-panorama.swift <panorama.png> <left.png> <center.png> <right.png>")
+/// Draws one caption centered in `rect`, wrapping and shrinking until it fits.
+/// The size is expressed against the panel width so the three panels always
+/// carry the same weight of text, whatever the language does with the wording.
+func drawCaption(
+  _ text: String, in rect: CGRect, language: String, context: CGContext
+) {
+  guard !text.isEmpty, rect.height > 0 else { return }
+  // Core Text reads the setting through a raw pointer, so the value has to
+  // outlive the call that copies it — hence the explicit scope.
+  var alignment = CTTextAlignment.center
+  let paragraph = withUnsafeBytes(of: &alignment) { buffer -> CTParagraphStyle in
+    var setting = CTParagraphStyleSetting(
+      spec: .alignment, valueSize: MemoryLayout<CTTextAlignment>.size, value: buffer.baseAddress!)
+    return CTParagraphStyleCreate(&setting, 1)
+  }
+
+  // Shrink rather than clip: German runs long, Japanese runs short, and a
+  // caption that overflows its band is worse than one set a size smaller.
+  for size in stride(from: rect.width * 0.075, to: rect.width * 0.03, by: -2) {
+    let font = CTFontCreateUIFontForLanguage(.system, size, language as CFString)
+      ?? CTFontCreateWithName("Helvetica-Bold" as CFString, size, nil)
+    // The Core Text attribute names, not AppKit's: this tool links neither
+    // AppKit nor UIKit, and NSAttributedString.Key.font comes from those.
+    let attributed = NSAttributedString(
+      string: text,
+      attributes: [
+        NSAttributedString.Key(kCTFontAttributeName as String): font,
+        NSAttributedString.Key(kCTForegroundColorAttributeName as String): CGColor(
+          red: 1, green: 0.98, blue: 0.94, alpha: 1),
+        NSAttributedString.Key(kCTParagraphStyleAttributeName as String): paragraph,
+      ])
+    let framesetter = CTFramesetterCreateWithAttributedString(attributed)
+    let measured = CTFramesetterSuggestFrameSizeWithConstraints(
+      framesetter, CFRange(location: 0, length: 0), nil,
+      CGSize(width: rect.width, height: .greatestFiniteMagnitude), nil)
+    guard measured.height <= rect.height, measured.width <= rect.width else { continue }
+
+    // Vertically centered in the band left free above the phone.
+    let box = CGRect(
+      x: rect.minX, y: rect.midY - measured.height / 2, width: rect.width, height: measured.height)
+    let path = CGPath(rect: box, transform: nil)
+    let frame = CTFramesetterCreateFrame(framesetter, CFRange(location: 0, length: 0), path, nil)
+
+    context.saveGState()
+    // A soft dark halo: the background is a photo, and white on a light
+    // reflection would disappear.
+    context.setShadow(
+      offset: .zero, blur: size * 0.35, color: CGColor(red: 0, green: 0, blue: 0, alpha: 0.65))
+    CTFrameDraw(frame, context)
+    context.restoreGState()
+    return
+  }
 }
+
+let arguments = CommandLine.arguments
+guard arguments.count == 5 || arguments.count == 9 else {
+  fail(
+    "Usage: swift composite-panorama.swift <panorama.png> <left.png> <center.png> <right.png> [<language> <caption1> <caption2> <caption3>]"
+  )
+}
+let captionLanguage = arguments.count == 9 ? arguments[5] : ""
+let captions = arguments.count == 9 ? Array(arguments[6...8]) : ["", "", ""]
 let panoramaPath = arguments[1]
 let panoramaImage = loadImage(panoramaPath)
 let width = panoramaImage.width
@@ -118,6 +184,20 @@ for third in 0..<3 {
         }
       }
     }
+  }
+
+  // The caption goes in the band the panorama leaves free above the phone.
+  // `minY` is a row of the pixel buffer, whose first row is the top of the
+  // image, while the context draws from a bottom-left origin — hence the flip.
+  if !captions[third].isEmpty, minY > height / 12 {
+    let margin = Double(height) * 0.02
+    let inset = Double(xEnd - xStart) * 0.08
+    let band = CGRect(
+      x: Double(xStart) + inset,
+      y: Double(height - minY) + margin,
+      width: Double(xEnd - xStart) - inset * 2,
+      height: Double(minY) - margin * 2)
+    drawCaption(captions[third], in: band, language: captionLanguage, context: panoramaContext)
   }
 }
 

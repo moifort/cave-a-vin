@@ -1,6 +1,55 @@
 default_platform(:ios)
 
 platform :ios do
+  # The App Store locales the listing is written in, keyed by the language code
+  # the capture pipeline uses (scripts/screenshots.sh, docs/screenshots.md).
+  APP_STORE_LOCALES = {
+    "fr" => "fr-FR",
+    "en" => "en-US",
+    "de" => "de-DE",
+    "es" => "es-ES",
+    "it" => "it",
+    "pt" => "pt-PT",
+    "ja" => "ja"
+  }.freeze
+
+  desc "Upload the App Store screenshots, and nothing else."
+  lane :screenshots do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_KEY_PATH")
+    )
+
+    # deliver wants one directory per App Store locale; the pipeline writes one
+    # per app language. Staged rather than renamed at the source: the language
+    # codes are what the app and the captures speak, and Apple's locales are a
+    # detail of this upload.
+    repo = File.expand_path("../..", __dir__)
+    staged = File.join(repo, "build", "appstore-upload")
+    FileUtils.rm_rf(staged)
+    APP_STORE_LOCALES.each do |language, locale|
+      source = File.join(repo, "screenshots", "appstore", language)
+      next UI.important("No panels for #{language}, skipping") unless Dir.exist?(source)
+      destination = File.join(staged, locale)
+      FileUtils.mkdir_p(destination)
+      FileUtils.cp(Dir.glob(File.join(source, "*.png")), destination)
+    end
+
+    deliver(
+      api_key: api_key,
+      app_identifier: "com.polyforms.vinarium.app",
+      screenshots_path: staged,
+      overwrite_screenshots: true,
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_app_version_update: true,
+      submit_for_review: false,
+      force: true,
+      run_precheck_before_submit: false
+    )
+  end
+
   # Attach the already-uploaded build to its App Store version, set the "What's New"
   # notes from CHANGELOG.md, and submit for review with automatic release on approval.
   # The binary is uploaded by the `release` job (altool); this lane never uploads it.
