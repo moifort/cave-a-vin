@@ -115,6 +115,15 @@ if [ "${1:-}" = "--inner" ]; then
     exit 1
   fi
 
+  # An optional command to run once the server answers, before the tests. The
+  # scenarios seed themselves through the UI, so this stays empty for a gate
+  # run; the screenshots need a cellar nobody would sit through building by hand
+  # (scripts/screenshots.sh sets it).
+  if [ -n "${E2E_SEED:-}" ]; then
+    echo "==> Seeding: $E2E_SEED"
+    eval "$E2E_SEED"
+  fi
+
   echo "==> Running $TESTS on $DESTINATION"
   # Two retries. Every CI failure so far landed on a different step — a tap that
   # missed, a sheet that had not settled — while the server answered every single

@@ -19,6 +19,7 @@ The changelog lives in one file per served language, each organized newest-versi
 - **Unit tests**: `bun test`
 - **Test coverage**: `bun test --coverage`
 - **End-to-end**: `./scripts/e2e.sh` (Firebase emulators + Nitro + iPhone simulator, nothing touches production — see [docs/e2e.md](docs/e2e.md)). Needs a JDK for the Firestore emulator.
+- **Screenshots**: `./scripts/screenshots.sh [all|<lang>…]` — same local stack, on a cellar seeded for the occasion; feeds both the README and the App Store panels (see [docs/screenshots.md](docs/screenshots.md)).
 - **Linter**: `bunx biome check`
 - **Runtime**: always use `bun`/`bunx`, never `npm`/`npx`
 - **GraphQL codegen** (if the schema changed): `bun run generate:graphql` (regenerates `shared/schema.graphql`), then `cd ios && apollo-ios-cli generate` (config `ios/apollo-codegen-config.json`)
@@ -40,7 +41,7 @@ The changelog lives in one file per served language, each organized newest-versi
 Before pushing, update the user-facing surfaces, then push:
 
 1. **README** (`README.md`): update the Features list / Tech Stack if the pushed work changed them.
-2. **README previews** (`screenshots/*.png`): regenerate the affected screenshots if the touched UI changed visually.
+2. **README previews** (`screenshots/*.png`): regenerate them with `scripts/screenshots.sh` if the touched UI changed visually (the App Store panels follow with `bun scripts/generate-appstore-previews.ts` — see [docs/screenshots.md](docs/screenshots.md)).
 3. **iOS GraphQL API** (if the GraphQL schema changed): run `bun run generate:graphql`, then `cd ios && apollo-ios-cli generate`, and commit the regenerated `shared/schema.graphql` and `ios/Vinarium/Generated/GraphQL/` so the app's typed operations stay in sync with the deployed schema.
 4. **Linter**: run `bun run lint:fix` (`biome check --write`) and commit what it fixes. CI is not a linter — a lint error must never be discovered from a red pipeline. Biome scans the whole repo, `ios/` included; when it flags a **generated** artifact, exclude it in `biome.json` rather than let the linter reformat it.
 5. Push.
