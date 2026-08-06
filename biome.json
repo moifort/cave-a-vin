@@ -11,7 +11,6 @@
       "**",
       "!shared",
       "!server/system/changelog-content.ts",
-      "!scripts/bento-panel.html",
       "!ios/Vinarium/Assets.xcassets",
       "!ios/Vinarium/Resources/Localizable.xcstrings"
     ]

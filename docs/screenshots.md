@@ -14,7 +14,7 @@ screenshots/<lang>/*.png        the six other App Store languages
 scripts/generate-appstore-previews.ts
         │                       scene + captions + slicing
         ▼
-screenshots/appstore/<lang>/*.png   the six panels uploaded to App Store Connect
+screenshots/appstore/<lang>/*.png   the five panels uploaded to App Store Connect
 ```
 
 ## Capturing
@@ -101,25 +101,6 @@ The generated scenes are cached in `screenshots/appstore/scenes/` and committed:
 adding a language or rewording a caption then costs nothing and needs no API
 key. `--regenerate` is the only path that calls the model, and it needs
 `NITRO_GOOGLE_API_KEY`.
-
-## The bento panel
-
-The five other panels each show one screen. The last one shows the range, which
-is what someone swiping to the end is asking about (`06-bento.png`, last in the
-order the upload reads the directory in):
-
-```bash
-bun scripts/generate-bento-panel.ts            # every language
-bun scripts/generate-bento-panel.ts --lang ja  # one language
-```
-
-`scripts/bento-panel.html` is a page pinned to 1320x2868 that Chrome renders
-headless, so nothing is scaled or cropped afterwards. It is drawn rather than
-photographed because no single screen in the app shows all of this, and a
-mosaic of real tiles beats a montage of cropped screenshots. Its palette and
-tile language come from the landing page (`portfolio`, `[data-theme='vinarium']`)
-so the store and the site read as one product; the artwork it needs lives in
-`screenshots/appstore/bento-assets/`.
 
 ## Uploading
 
