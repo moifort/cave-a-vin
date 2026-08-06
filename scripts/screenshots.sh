@@ -27,6 +27,11 @@ case "${1:-fr}" in
 esac
 [ ${#LANGUAGES[@]} -eq 0 ] && LANGUAGES=(fr)
 
+# The captures are the App Store's, so they are taken on the device the store
+# asks for: the 6.9" iPhone 17 Pro Max, 1320x2868. The end-to-end gate keeps its
+# own pinned simulator — it tests behaviour, not pixels.
+export E2E_SIMULATOR="${E2E_SIMULATOR:-iPhone 17 Pro Max}"
+
 mkdir -p build
 
 for language in "${LANGUAGES[@]}"; do

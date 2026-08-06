@@ -137,10 +137,11 @@ minutes; attach it to the 1.0 version.
   needed. The backend runs in production." (No demo login required.)
 - Screenshots: at least the 6.9"/6.7" iPhone size. Capture from the iPhone 17 simulator once
   signed in (Cmd+S in the simulator saves a correctly-sized PNG).
-- Marketing screenshots ("triptych" panoramas in `screenshots/appstore/`, six 1206x2622 PNGs):
-  regenerate with `bun scripts/generate-appstore-previews.ts [1|2]` (Nano Banana Pro renders the
-  panorama, real screenshots from `screenshots/` are composited onto the phone screens, then the
-  panorama is sliced into three panels). Upload to ASC stays manual.
+- Marketing screenshots (panoramas in `screenshots/appstore/`, five 1320x2868 PNGs plus the bento
+  panel): regenerate with `bun scripts/generate-appstore-previews.ts [1|2]` (Nano Banana Pro
+  renders the panorama, real screenshots from `screenshots/` are composited onto the phone
+  screens, then the panorama is sliced into panels) and `bun scripts/generate-bento-panel.ts`.
+  Upload to ASC stays manual.
 - **Submit for Review**. Optionally set manual release to keep control.
 
 ## Phase 5 — Make it unlisted [ASC + form]

@@ -1,24 +1,23 @@
-// Composites real app screenshots onto the magenta placeholder screens of a
-// generated App Store panorama (see generate-appstore-previews.ts), and draws
-// the marketing caption above each phone.
+// Draws a device per panel onto a generated App Store panorama (see
+// generate-appstore-previews.ts), pastes the real app screenshot into each one,
+// and sets the marketing caption above it.
 //
-// The panorama contains three front-facing phone mockups whose screens are
-// solid magenta (#FF00FF). For each horizontal third, this tool finds the
-// magenta region, scales the matching screenshot to its bounding box, and
-// replaces only the magenta pixels (soft mask), preserving bezels and
-// anti-aliased edges. The panorama file is rewritten in place.
+// The panorama is split into as many equal columns as there are screenshots
+// passed — two or three, whatever the panorama was cut for — and one phone is
+// drawn dead centre of each. The panorama file is rewritten in place.
 //
 // The captions are drawn here rather than asked of the image model: the model
 // mangles text it renders, and it would have to be trusted with seven languages
 // including Japanese. Core Text sets them from the same font the app uses, so a
 // German compound word wraps instead of overflowing and kana come out as kana.
 //
-// Usage: swift composite-panorama.swift <panorama.png> <left.png> <center.png> <right.png>
-//                                       [<language> <caption1> <caption2> <caption3> [<subtitle>]]
+// Usage: swift composite-panorama.swift <panorama.png> <language> <subtitle>
+//                                       <screenshot> <caption> [<screenshot> <caption> ...]
 //
-// The optional subtitle is set smaller under every caption, the same sentence on
-// the three panels: it says what the app does, while each caption says what its
-// panel shows.
+// Language and subtitle may be empty; a panel with an empty caption gets its
+// device and no text. The subtitle is set smaller under every caption, the same
+// sentence on each panel: it says what the app does, while each caption says
+// what its panel shows.
 
 import CoreGraphics
 import CoreText
@@ -127,16 +126,19 @@ func draw(_ text: FittedText, x: Double, top: Double, width: Double, context: CG
 }
 
 let arguments = CommandLine.arguments
-guard arguments.count == 5 || arguments.count == 9 || arguments.count == 10 else {
+// One panorama, a language, a subtitle, then a (screenshot, caption) pair per
+// panel — so an even count, six at the least.
+guard arguments.count >= 6, arguments.count % 2 == 0 else {
   fail(
-    "Usage: swift composite-panorama.swift <panorama.png> <left.png> <center.png> <right.png> [<language> <caption1> <caption2> <caption3> [<subtitle>]]"
+    "Usage: swift composite-panorama.swift <panorama.png> <language> <subtitle> <screenshot> <caption> [<screenshot> <caption> ...]"
   )
 }
-let hasCaptions = arguments.count >= 9
-let captionLanguage = hasCaptions ? arguments[5] : ""
-let captions = hasCaptions ? Array(arguments[6...8]) : ["", "", ""]
-let subtitle = arguments.count == 10 ? arguments[9] : ""
 let panoramaPath = arguments[1]
+let captionLanguage = arguments[2]
+let subtitle = arguments[3]
+let panels = stride(from: 4, to: arguments.count, by: 2).map {
+  (screenshot: arguments[$0], caption: arguments[$0 + 1])
+}
 let panoramaImage = loadImage(panoramaPath)
 let width = panoramaImage.width
 let height = panoramaImage.height
@@ -144,21 +146,27 @@ let (panoramaContext, panorama) = rgbaBitmap(of: panoramaImage, width: width, he
 
 // The device is drawn here rather than generated: asked for a phone at a given
 // size, the image model produced a different one every time and a different one
-// per panel, and the panels are read side by side. Placed by hand, the six of
-// them line up to the pixel and the screenshots never stretch.
-let panelWidth = Double(width) / 3
-let deviceHeight = Double(height) * 0.82
-let screenshotRatio = 1206.0 / 2622.0
-let screenHeight = deviceHeight
-let screenWidth = screenHeight * screenshotRatio
-let bezel = screenWidth * 0.022
-let cornerRadius = screenWidth * 0.09
-// Top edge at 16% of the height, so the caption band above it is the same on
+// per panel, and the panels are read side by side. Placed by hand, they line up
+// to the pixel from one panel to the next and the screenshots never stretch.
+let panelWidth = Double(width) / Double(panels.count)
+// The screen, as a share of the panel's height. Large enough that the app is
+// legible in a store thumbnail, small enough that the room still shows on both
+// sides — past ~78% the background is a sliver and the triptych stops reading
+// as one scene.
+let screenHeight = Double(height) * 0.72
+// The iPhone 17 Pro Max's own proportions: a 1320x2868 display, a bezel a
+// little under 2% of the screen's width, and the rail around it about half as
+// thick again.
+let screenWidth = screenHeight * (1320.0 / 2868.0)
+let bezel = screenWidth * 0.019
+let rail = bezel * 1.4
+let screenRadius = screenWidth * 0.115
+// Top edge at 19% of the height, so the caption band above it is the same on
 // every panel.
-let deviceTop = Double(height) * 0.16
+let deviceTop = Double(height) * 0.19
 
-for third in 0..<3 {
-  let centerX = panelWidth * (Double(third) + 0.5)
+for (index, panel) in panels.enumerated() {
+  let centerX = panelWidth * (Double(index) + 0.5)
   // Core Graphics counts y from the bottom; the framing above is expressed from
   // the top, as the panel is read.
   let screenRect = CGRect(
@@ -166,19 +174,73 @@ for third in 0..<3 {
     y: Double(height) - deviceTop - screenHeight,
     width: screenWidth,
     height: screenHeight)
-  let bodyRect = screenRect.insetBy(dx: -bezel, dy: -bezel)
+  let bodyRect = screenRect.insetBy(dx: -(bezel + rail), dy: -(bezel + rail))
+  let bodyRadius = screenRadius + bezel + rail
+
+  // The titanium rail, drawn as a gradient across the body so the edge catches
+  // the light the way a brushed metal band does — a flat grey reads as a
+  // cardboard cut-out at this size.
+  panoramaContext.saveGState()
+  panoramaContext.setShadow(
+    offset: CGSize(width: 0, height: -rail * 2), blur: rail * 6,
+    color: CGColor(red: 0, green: 0, blue: 0, alpha: 0.55))
+  panoramaContext.addPath(
+    CGPath(roundedRect: bodyRect, cornerWidth: bodyRadius, cornerHeight: bodyRadius, transform: nil))
+  panoramaContext.setFillColor(CGColor(red: 0.36, green: 0.35, blue: 0.34, alpha: 1))
+  panoramaContext.fillPath()
+  panoramaContext.restoreGState()
 
   panoramaContext.saveGState()
-  // The body: a dark frame with a soft drop shadow, so the device sits in the
-  // room instead of floating on top of it.
-  panoramaContext.setShadow(
-    offset: CGSize(width: 0, height: -bezel * 1.5), blur: bezel * 4,
-    color: CGColor(red: 0, green: 0, blue: 0, alpha: 0.55))
-  panoramaContext.setFillColor(CGColor(red: 0.09, green: 0.09, blue: 0.1, alpha: 1))
+  panoramaContext.addPath(
+    CGPath(roundedRect: bodyRect, cornerWidth: bodyRadius, cornerHeight: bodyRadius, transform: nil))
+  panoramaContext.clip()
+  if let rails = CGGradient(
+    colorsSpace: CGColorSpaceCreateDeviceRGB(),
+    colors: [
+      CGColor(red: 0.78, green: 0.76, blue: 0.73, alpha: 1),
+      CGColor(red: 0.30, green: 0.29, blue: 0.28, alpha: 1),
+      CGColor(red: 0.55, green: 0.53, blue: 0.51, alpha: 1),
+      CGColor(red: 0.24, green: 0.23, blue: 0.22, alpha: 1),
+      CGColor(red: 0.72, green: 0.70, blue: 0.67, alpha: 1),
+    ] as CFArray,
+    locations: [0, 0.18, 0.5, 0.82, 1])
+  {
+    panoramaContext.drawLinearGradient(
+      rails, start: CGPoint(x: bodyRect.minX, y: 0), end: CGPoint(x: bodyRect.maxX, y: 0),
+      options: [])
+  }
+  panoramaContext.restoreGState()
+
+  // The black glass between the rail and the picture.
+  panoramaContext.saveGState()
+  let glassRect = screenRect.insetBy(dx: -bezel, dy: -bezel)
   panoramaContext.addPath(
     CGPath(
-      roundedRect: bodyRect, cornerWidth: cornerRadius + bezel, cornerHeight: cornerRadius + bezel,
+      roundedRect: glassRect, cornerWidth: screenRadius + bezel, cornerHeight: screenRadius + bezel,
       transform: nil))
+  panoramaContext.setFillColor(CGColor(red: 0.02, green: 0.02, blue: 0.03, alpha: 1))
+  panoramaContext.fillPath()
+  panoramaContext.restoreGState()
+
+  // The side buttons: volume pair and action button on the left, the side
+  // button on the right, at the heights the device carries them.
+  panoramaContext.saveGState()
+  panoramaContext.setFillColor(CGColor(red: 0.30, green: 0.29, blue: 0.28, alpha: 1))
+  let buttonDepth = rail * 0.8
+  let buttons: [(Double, Double, Bool)] = [
+    (0.20, 0.035, true),  // action button
+    (0.28, 0.075, true),  // volume up
+    (0.38, 0.075, true),  // volume down
+    (0.30, 0.115, false),  // side button
+  ]
+  for (top, length, isLeft) in buttons {
+    let y = screenRect.maxY - screenHeight * top - screenHeight * length
+    let x = isLeft ? bodyRect.minX - buttonDepth * 0.6 : bodyRect.maxX - buttonDepth * 0.4
+    panoramaContext.addPath(
+      CGPath(
+        roundedRect: CGRect(x: x, y: y, width: buttonDepth, height: screenHeight * length),
+        cornerWidth: buttonDepth / 2, cornerHeight: buttonDepth / 2, transform: nil))
+  }
   panoramaContext.fillPath()
   panoramaContext.restoreGState()
 
@@ -186,17 +248,17 @@ for third in 0..<3 {
   panoramaContext.saveGState()
   panoramaContext.addPath(
     CGPath(
-      roundedRect: screenRect, cornerWidth: cornerRadius, cornerHeight: cornerRadius,
+      roundedRect: screenRect, cornerWidth: screenRadius, cornerHeight: screenRadius,
       transform: nil))
   panoramaContext.clip()
-  panoramaContext.draw(loadImage(arguments[2 + third]), in: screenRect)
+  panoramaContext.draw(loadImage(panel.screenshot), in: screenRect)
   panoramaContext.restoreGState()
 
-  guard !captions[third].isEmpty else { continue }
+  guard !panel.caption.isEmpty else { continue }
 
   let minY = Int(deviceTop)
-  let xStart = Int(panelWidth * Double(third))
-  let xEnd = Int(panelWidth * Double(third + 1))
+  let xStart = Int(panelWidth * Double(index))
+  let xEnd = Int(panelWidth * Double(index + 1))
 
     // A dark scrim over the text area, drawn here rather than asked of the image
     // model: told to keep an area calm, it produced a blurred band with a hard
@@ -238,7 +300,7 @@ for third in 0..<3 {
     let titleHeight = subtitle.isEmpty ? band.height : band.height * 0.6
     guard
       let title = fitText(
-        captions[third], width: band.width, maxHeight: titleHeight,
+        panel.caption, width: band.width, maxHeight: titleHeight,
         language: captionLanguage, weight: subtitle.isEmpty ? 1 : 1.15)
     else { continue }
     let sentence = fitText(

@@ -22,14 +22,17 @@
       * { box-sizing: border-box; margin: 0; padding: 0; }
 
       body {
-        width: 1206px;
-        height: 2622px;
+        width: 1320px;
+        height: 2868px;
         background: var(--bg);
         color: var(--text);
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
         display: flex;
         flex-direction: column;
-        padding: 64px 52px 56px;
+        /* Deep top and bottom margins: the mosaic filling the panel edge to edge
+           read as a wall of tiles, and the App Store shows it beside panels
+           where the phone floats in a room. The air is what makes it a poster. */
+        padding: 300px 60px 300px;
         overflow: hidden;
       }
 

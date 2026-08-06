@@ -1,12 +1,12 @@
 #!/usr/bin/env bun
 /**
- * Generates App Store marketing screenshots ("triptychs") with Nano Banana Pro.
+ * Generates App Store marketing screenshots with Nano Banana Pro.
  *
- * Each triptych is ONE continuous 4:3 panorama: Nano Banana Pro renders an
- * empty room, then composite-panorama.swift draws the three devices, pastes the
- * real app screenshots into them and sets the caption above each. The panorama
- * is finally sliced into three 1206x2622 portrait panels (the 6.9" size App
- * Store Connect accepts) so the background flows across adjacent App Store
+ * Each panorama is ONE continuous image: Nano Banana Pro renders an empty room,
+ * then composite-panorama.swift draws a device per panel, pastes the real app
+ * screenshots into them and sets the caption above each. The panorama is
+ * finally sliced into 1320x2868 portrait panels (the 6.9" size App Store
+ * Connect asks for) so the background flows across adjacent App Store
  * screenshots.
  *
  * The model is given the room and nothing else. It garbles any text it draws,
@@ -16,9 +16,9 @@
  * good at. One scene per triptych, cached, reused by every language.
  *
  * Usage:
- *   bun scripts/generate-appstore-previews.ts                  # every language, both triptychs
+ *   bun scripts/generate-appstore-previews.ts                  # every language, both panoramas
  *   bun scripts/generate-appstore-previews.ts --lang fr        # one language
- *   bun scripts/generate-appstore-previews.ts --lang fr,en 1   # one triptych
+ *   bun scripts/generate-appstore-previews.ts --lang fr,en 1   # one panorama
  *   bun scripts/generate-appstore-previews.ts --regenerate     # new scenes (costs API calls)
  *
  * Reads the captures from screenshots/<lang>/ (screenshots/ for French, which is
@@ -31,9 +31,14 @@ import { join } from 'node:path'
 import { $ } from 'bun'
 
 const MODEL = 'gemini-3-pro-image'
-const PANEL_WIDTH = 1206
-const PANEL_HEIGHT = 2622
-const TRIPTYCH_WIDTH = PANEL_WIDTH * 3
+// The 6.9" App Store size, which is the iPhone 17 Pro Max's own screen: the
+// captures come from that simulator, so nothing is ever rescaled.
+const PANEL_WIDTH = 1320
+const PANEL_HEIGHT = 2868
+// A scene is always drawn three panels wide, whatever the panorama that uses it
+// needs: the prompt asks the model for a 4:3 room, and a panorama of two panels
+// simply keeps its left two thirds. One shape of scene, one prompt, one cache.
+const SCENE_WIDTH = PANEL_WIDTH * 3
 
 const repoRoot = join(import.meta.dir, '..')
 const screenshotsDir = join(repoRoot, 'screenshots')
@@ -47,16 +52,17 @@ const LANGUAGES = ['fr', 'en', 'de', 'es', 'it', 'pt', 'ja'] as const
 type Language = (typeof LANGUAGES)[number]
 
 type Panel = { source: string; output: string; captions: Record<Language, string> }
-type Triptych = {
+type Panorama = {
   id: number
   scene: string
   /** One sentence saying what the app does, set under every title of the
-   *  triptych. The titles say what each panel shows; this says what it is for. */
+   *  panorama. The titles say what each panel shows; this says what it is for. */
   subtitles?: Record<Language, string>
-  panels: [Panel, Panel, Panel]
+  /** Two or three, the width a scene can be cut into. */
+  panels: Panel[]
 }
 
-// What the app does, in one line. Repeated across a triptych on purpose: an App
+// What the app does, in one line. Repeated across a panorama on purpose: an App
 // Store visitor swipes through the panels one at a time and may well start on
 // the second, so the sentence has to be under whichever one they land on.
 const WHAT_THE_APP_DOES: Record<Language, string> = {
@@ -69,7 +75,7 @@ const WHAT_THE_APP_DOES: Record<Language, string> = {
   ja: '何があるか、どこにあるか、いつ飲むか。',
 }
 
-const TRIPTYCHS: Triptych[] = [
+const PANORAMAS: Panorama[] = [
   {
     id: 1,
     scene:
@@ -157,29 +163,16 @@ const TRIPTYCHS: Triptych[] = [
           ja: '産地、ヴィンテージ、位置',
         },
       },
-      {
-        source: 'journal.png',
-        output: '06-journal.png',
-        captions: {
-          fr: 'Revivez chaque dégustation',
-          en: 'Relive every tasting',
-          de: 'Jede Verkostung noch einmal erleben',
-          es: 'Revive cada cata',
-          it: 'Rivivi ogni degustazione',
-          pt: 'Reviva cada prova',
-          ja: '味わいの記録を、もう一度',
-        },
-      },
     ],
   },
 ]
 
-const buildPrompt = (triptych: Triptych) =>
+const buildPrompt = (panorama: Panorama) =>
   `You are designing App Store marketing screenshots for "Vinarium", a premium French wine-cellar management iOS app.
 
 Create ONE single seamless panoramic marketing image (4:3 landscape). It will be sliced vertically into THREE equal portrait panels (left, center, right) shown side by side on the App Store, so:
 
-- The background is one continuous scene flowing across the whole image with no visible seams: ${triptych.scene}.
+- The background is one continuous scene flowing across the whole image with no visible seams: ${panorama.scene}.
 - The scene FILLS THE ENTIRE FRAME, edge to edge and corner to corner, like a single photograph taken in one place. No borders, no letterboxing, no horizontal bands, no flat colour blocks, no blurred strip along the top or the bottom, no vignette, no visible boundary between an upper and a lower area — any straight horizontal edge across the image is a defect, and so is a band of blur that does not belong to the depth of the scene.
 - Sharpness is even across the whole height: the top of the image is as much part of the room as the middle, only further away. Do not darken, fade or defocus any area to leave room for text.
 - NO phone, no device, no screen, no tablet, no object shaped like one anywhere in the image. The devices are drawn afterwards by the compositor, at an exact size and position: asked for them, the model returned a different size on every run and a different one per panel, and the three panels are read side by side.
@@ -196,16 +189,16 @@ const apiKey = process.env.NITRO_GOOGLE_API_KEY
 const sourceDir = (language: Language) =>
   language === 'fr' ? screenshotsDir : join(screenshotsDir, language)
 
-const generateScene = async (triptych: Triptych, target: string) => {
+const generateScene = async (panorama: Panorama, target: string) => {
   if (!apiKey) throw new Error('NITRO_GOOGLE_API_KEY is not set (expected in .env)')
-  console.log(`Triptych ${triptych.id}: generating the scene with ${MODEL}...`)
+  console.log(`Panorama ${panorama.id}: generating the scene with ${MODEL}...`)
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
     {
       method: 'POST',
       headers: { 'x-goog-api-key': apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: buildPrompt(triptych) }] }],
+        contents: [{ parts: [{ text: buildPrompt(panorama) }] }],
         generationConfig: {
           responseModalities: ['TEXT', 'IMAGE'],
           imageConfig: { aspectRatio: '4:3', imageSize: '4K' },
@@ -222,55 +215,64 @@ const generateScene = async (triptych: Triptych, target: string) => {
   await Bun.write(target, Buffer.from(image.data, 'base64'))
 }
 
-// Normalize the scene to exactly 3618x2622 so screenshots are composited at
+// Normalize the scene to exactly 3960x2868 so screenshots are composited at
 // final resolution (a single downscale) before the panorama is cut into columns.
 const normalize = async (path: string) => {
-  await $`sips --resampleWidth ${TRIPTYCH_WIDTH} ${path}`.quiet()
+  await $`sips --resampleWidth ${SCENE_WIDTH} ${path}`.quiet()
   // If the model ignored the 4:3 ratio and the resampled height falls short, the crop below
   // would silently PAD the image with background instead of cropping — reject that upfront.
   const size = await $`sips -g pixelHeight ${path}`.text()
   const height = Number(size.match(/pixelHeight: (\d+)/)?.[1])
   if (!(height >= PANEL_HEIGHT))
     throw new Error(
-      `Scene is only ${TRIPTYCH_WIDTH}x${height} after resampling, needs ${PANEL_HEIGHT} of height`,
+      `Scene is only ${SCENE_WIDTH}x${height} after resampling, needs ${PANEL_HEIGHT} of height`,
     )
-  await $`sips -c ${PANEL_HEIGHT} ${TRIPTYCH_WIDTH} ${path}`.quiet()
+  await $`sips -c ${PANEL_HEIGHT} ${SCENE_WIDTH} ${path}`.quiet()
 }
 
 /** The generated scene, from the cache when it is there. */
-const sceneFor = async (triptych: Triptych, regenerate: boolean) => {
-  const cached = join(sceneCacheDir, `scene-${triptych.id}.png`)
+const sceneFor = async (panorama: Panorama, regenerate: boolean) => {
+  const cached = join(sceneCacheDir, `scene-${panorama.id}.png`)
   if (!regenerate && (await Bun.file(cached).exists())) {
-    console.log(`Triptych ${triptych.id}: reusing the cached scene`)
+    console.log(`Panorama ${panorama.id}: reusing the cached scene`)
     return cached
   }
-  await generateScene(triptych, cached)
+  await generateScene(panorama, cached)
   await normalize(cached)
   return cached
 }
 
 const renderLanguage = async (
-  triptych: Triptych,
+  panorama: Panorama,
   scene: string,
   language: Language,
   workDir: string,
 ) => {
-  const sources = triptych.panels.map((panel) => join(sourceDir(language), panel.source))
+  const sources = panorama.panels.map((panel) => join(sourceDir(language), panel.source))
   for (const source of sources)
     if (!(await Bun.file(source).exists()))
       throw new Error(`Missing capture: ${source} — run scripts/screenshots.sh ${language}`)
 
-  const panorama = join(workDir, `panorama-${triptych.id}-${language}.png`)
-  await $`cp ${scene} ${panorama}`.quiet()
-  const captions = triptych.panels.map((panel) => panel.captions[language])
-  const subtitle = triptych.subtitles?.[language] ?? ''
-  await $`swift ${compositor} ${panorama} ${sources[0]} ${sources[1]} ${sources[2]} ${language} ${captions[0]} ${captions[1]} ${captions[2]} ${subtitle}`.quiet()
+  const width = PANEL_WIDTH * panorama.panels.length
+  const canvas = join(workDir, `panorama-${panorama.id}-${language}.png`)
+  await $`cp ${scene} ${canvas}`.quiet()
+  // A panorama narrower than the scene keeps its left panels: the devices are
+  // centred on the columns of the canvas, so it has to be cut to width before
+  // they are drawn, not after.
+  if (width < SCENE_WIDTH)
+    await $`sips -c ${PANEL_HEIGHT} ${width} --cropOffset 1 0 ${canvas}`.quiet()
+  const subtitle = panorama.subtitles?.[language] ?? ''
+  const pairs = panorama.panels.flatMap((panel, index) => [
+    sources[index],
+    panel.captions[language],
+  ])
+  await $`swift ${compositor} ${canvas} ${language} ${subtitle} ${pairs}`.quiet()
 
   const outputDir = join(appstoreDir, language)
   await mkdir(outputDir, { recursive: true })
-  for (const [index, panel] of triptych.panels.entries()) {
+  for (const [index, panel] of panorama.panels.entries()) {
     const panelPath = join(outputDir, panel.output)
-    await $`cp ${panorama} ${panelPath}`.quiet()
+    await $`cp ${canvas} ${panelPath}`.quiet()
     // offsetY is 1 (not 0) because sips ignores an all-zero --cropOffset and falls back to a
     // centered crop; 1 gets clamped back to the top edge since the crop is full-height.
     await $`sips -c ${PANEL_HEIGHT} ${PANEL_WIDTH} --cropOffset 1 ${index * PANEL_WIDTH} ${panelPath}`.quiet()
@@ -290,15 +292,15 @@ for (const language of languages)
     process.exit(1)
   }
 const requested = argv.find((argument) => /^[12]$/.test(argument))
-const triptychs = requested ? TRIPTYCHS.filter((t) => t.id === Number(requested)) : TRIPTYCHS
+const panoramas = requested ? PANORAMAS.filter((p) => p.id === Number(requested)) : PANORAMAS
 
 await mkdir(sceneCacheDir, { recursive: true })
 const workDir = await mkdtemp(join(tmpdir(), 'vinarium-previews-'))
-for (const triptych of triptychs) {
-  const scene = await sceneFor(triptych, regenerate)
+for (const panorama of panoramas) {
+  const scene = await sceneFor(panorama, regenerate)
   for (const language of languages) {
-    console.log(`Triptych ${triptych.id}, ${language}:`)
-    await renderLanguage(triptych, scene, language, workDir)
+    console.log(`Panorama ${panorama.id}, ${language}:`)
+    await renderLanguage(panorama, scene, language, workDir)
   }
 }
 console.log('Done.')

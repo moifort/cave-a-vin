@@ -27,7 +27,10 @@ scripts/screenshots.sh de ja      # a subset
 
 The script runs the same local stack as the end-to-end gate — Firebase
 emulators, the Nitro server, the iPhone simulator — so nothing reaches
-production and no AI quota is spent (the scan is stubbed). It needs a JDK, like
+production and no AI quota is spent (the scan is stubbed). It captures on an
+**iPhone 17 Pro Max**, whose screen is the 6.9" size the store asks for; the
+gate keeps its own pinned simulator, since it tests behaviour rather than
+pixels. It needs a JDK, like
 [the e2e run](./e2e.md).
 
 Two pieces make it work:
@@ -67,22 +70,32 @@ date header.
 
 ```bash
 bun scripts/generate-appstore-previews.ts             # every language
-bun scripts/generate-appstore-previews.ts --lang fr 1 # one language, one triptych
+bun scripts/generate-appstore-previews.ts --lang fr 1 # one language, one panorama
 bun scripts/generate-appstore-previews.ts --regenerate # draw new scenes
 ```
 
-Each triptych is one panoramic image sliced into three 1206x2622 panels, so the
-background flows from one App Store screenshot to the next.
+Each panorama is one image sliced into 1320x2868 panels — the 6.9" App Store
+size, which is the iPhone 17 Pro Max's own screen, so a capture is never
+rescaled — and the background flows from one App Store screenshot to the next.
+The first panorama carries three panels (dashboard, cellar, wine list), the
+second two (scan, wine detail). A scene is always drawn three panels wide,
+whatever uses it: a shorter panorama keeps its left panels, which is why one
+prompt and one cache serve both.
 
-Two things are kept away from the image model on purpose:
+Three things are kept away from the image model on purpose:
 
 - **The app's UI.** The model renders plausible-looking but wrong text
-  ("Appelletion", "Eortie"). So it draws phones with flat magenta screens and
-  `scripts/composite-panorama.swift` pastes the real captures onto them.
+  ("Appelletion", "Eortie"), so `scripts/composite-panorama.swift` pastes the
+  real captures instead.
 - **The captions.** Same reason, times seven languages. The compositor sets them
   with Core Text, in the system font for the language, shrinking and wrapping to
   fit — which is how a German compound word and a Japanese line can share one
   layout.
+- **The device.** Asked for a phone at a given size, the model returned a
+  different size on every run and a different one per panel — the one thing that
+  cannot vary, since the panels are read side by side. The compositor draws it:
+  the same rect on every panel, titanium rail, side buttons, the screenshot
+  clipped to the screen's corners.
 
 The generated scenes are cached in `screenshots/appstore/scenes/` and committed:
 adding a language or rewording a caption then costs nothing and needs no API
@@ -92,14 +105,15 @@ key. `--regenerate` is the only path that calls the model, and it needs
 ## The bento panel
 
 The five other panels each show one screen. The last one shows the range, which
-is what someone swiping to the end is asking about:
+is what someone swiping to the end is asking about (`06-bento.png`, last in the
+order the upload reads the directory in):
 
 ```bash
 bun scripts/generate-bento-panel.ts            # every language
 bun scripts/generate-bento-panel.ts --lang ja  # one language
 ```
 
-`scripts/bento-panel.html` is a page pinned to 1206x2622 that Chrome renders
+`scripts/bento-panel.html` is a page pinned to 1320x2868 that Chrome renders
 headless, so nothing is scaled or cropped afterwards. It is drawn rather than
 photographed because no single screen in the app shows all of this, and a
 mosaic of real tiles beats a montage of cropped screenshots. Its palette and

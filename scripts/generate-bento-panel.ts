@@ -1,15 +1,16 @@
 #!/usr/bin/env bun
 /**
  * Renders the "everything the app does" App Store panel — a bento mosaic in the
- * landing page's visual language — into screenshots/appstore/<lang>/07-bento.png.
+ * landing page's visual language — into screenshots/appstore/<lang>/06-bento.png.
  *
  * The five other panels each show one screen; this one shows the range, which is
  * what a visitor swiping to the end is asking about. It is drawn from HTML
  * rather than photographed: there is no single screen in the app that shows all
  * of this, and a mosaic of real tiles beats a montage of cropped screenshots.
  *
- * Chrome renders it headless at exactly 1206x2622, so nothing is scaled or
- * cropped afterwards.
+ * Chrome renders it headless at exactly 1320x2868 — the 6.9" App Store size,
+ * which is the iPhone 17 Pro Max's own screen — so nothing is scaled or cropped
+ * afterwards.
  *
  * Usage:
  *   bun scripts/generate-bento-panel.ts             # every language
@@ -20,8 +21,8 @@ import { join } from 'node:path'
 import { $ } from 'bun'
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-const WIDTH = 1206
-const HEIGHT = 2622
+const WIDTH = 1320
+const HEIGHT = 2868
 
 const repoRoot = join(import.meta.dir, '..')
 const template = join(import.meta.dir, 'bento-panel.html')
@@ -154,7 +155,9 @@ const render = async (language: Language) => {
 
   const outputDir = join(appstoreDir, language)
   await mkdir(outputDir, { recursive: true })
-  const output = join(outputDir, '07-bento.png')
+  // Last of the panels, and named for the rank the store reads them in: the
+  // directory is uploaded as it sorts.
+  const output = join(outputDir, '06-bento.png')
 
   // `--window-size` is the CSS viewport and the body is pinned to it, so the
   // screenshot comes out at the exact App Store size with nothing to crop.
