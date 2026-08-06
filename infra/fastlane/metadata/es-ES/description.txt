@@ -1,0 +1,33 @@
+Vinarium es tu bodega de vino en el bolsillo.
+
+Fotografía la etiqueta de una botella: la IA reconoce el vino y rellena automáticamente la bodega, la añada, la región y la denominación, e incluso estima su precio. Se acabó escribirlo todo a mano.
+
+FUNCIONES
+• Escaneo con IA: fotografía una etiqueta y obtén una ficha completa en segundos
+• Bodega en cuadrícula: coloca tus botellas por fila y columna y encuéntralas de un vistazo
+• Diario: historial de entradas y salidas, con tus notas de cata y valoraciones
+• Panel: valor de tu bodega, ocupación, botellas para beber pronto, actividad reciente
+• Búsqueda potente: por nombre, productor, región, añada o persona, con filtros combinables
+• Listos para beber: Vinarium te avisa cuando una botella alcanza su madurez
+• Favoritos: marca los vinos, destilados o cervezas que te han marcado y encuéntralos con un toque
+• Dónde la encontraste: el escaneo guarda el lugar en el que estabas, para recordar dónde descubriste la botella
+• Regalos y recomendaciones: lleva la cuenta de los vinos regalados, recibidos o recomendados por un amigo
+
+NO SOLO VINO
+Un oporto, un ron, un whisky, un sake, un champán o una cerveza también tienen su sitio en la bodega, con los datos propios de su tipo de botella.
+
+COMPARTIR EN EL HOGAR
+Comparte una sola bodega con las personas de tu hogar mediante un código de invitación. Cada uno puede colocar, mover o beber cualquier botella de la bodega común, manteniendo su propia biblioteca, notas y diario en privado.
+
+RESPETO POR TU PRIVACIDAD
+Sin publicidad, sin seguimiento. Tus datos siguen siendo tuyos y puedes exportarlos cuando quieras.
+
+Inicia sesión con un toque usando Iniciar sesión con Apple y empieza a construir tu bodega.
+
+VINARIUM PREMIUM
+La bodega, el diario y el uso compartido en el hogar son gratuitos e ilimitados. Solo se cuenta el escaneo de etiquetas: cinco escaneos al mes. Premium elimina ese límite y añade a cada botella escaneada el precio estimado, la ventana de consumo y la región.
+
+Premium mensual: 2,99 €/mes. Premium anual: 24,99 €/año, tras 7 días de prueba gratuita. La suscripción se renueva automáticamente salvo cancelación al menos 24 horas antes del final del periodo en curso. Se gestiona y se cancela desde los ajustes de la cuenta de App Store.
+
+Términos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidad: https://moifort.github.io/vinarium/

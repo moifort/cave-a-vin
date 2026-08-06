@@ -1,0 +1,33 @@
+Vinarium is your wine cellar in your pocket.
+
+Photograph a bottle's label: the AI recognizes the wine and automatically fills in the estate, vintage, region, appellation, and even estimates its price. No more typing everything by hand.
+
+FEATURES
+• AI scan: snap a label, get a complete record in seconds
+• Grid cellar: arrange your bottles by row and column, find them at a glance
+• Journal: a history of entries and exits, with your tasting notes and ratings
+• Dashboard: your cellar's value, occupancy rate, bottles to drink soon, recent activity
+• Powerful search: by name, producer, region, vintage or person, with combinable filters
+• Ready to drink: Vinarium alerts you when a bottle reaches maturity
+• Favorites: mark the wines, spirits or beers that stayed with you, and find them again in one tap
+• Where you found it: the scan records the place you were in, so you remember where a bottle came from
+• Gifts & recommendations: keep track of wines given, received, or recommended by a friend
+
+NOT ONLY WINE
+A port, a rum, a whisky, a sake, a champagne or a beer has its place in the cellar too, with the details that belong to its kind of bottle.
+
+HOUSEHOLD SHARING
+Share a single cellar with the people in your household through an invitation code. Everyone can store, move or drink any bottle in the common cellar, while keeping their own library, notes and journal private.
+
+RESPECT FOR YOUR PRIVACY
+No ads, no tracking. Your data stays yours and can be exported at any time.
+
+Sign in with a single tap using Sign in with Apple and start building your cellar.
+
+VINARIUM PREMIUM
+The cellar, the journal and household sharing are free and unlimited. Only the label scan is metered: five scans a month. Premium lifts that limit and adds the estimated price, the drinking window and the region to every scanned bottle.
+
+Premium comes as a monthly plan or a yearly plan that opens on a 7-day free trial; both prices are shown in the App Store. The subscription renews automatically unless it is cancelled at least 24 hours before the end of the current period. It is managed and cancelled from the App Store account settings.
+
+Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Privacy Policy: https://moifort.github.io/vinarium/

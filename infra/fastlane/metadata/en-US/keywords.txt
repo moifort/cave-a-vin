@@ -1,0 +1,1 @@
+cellar,wine,sommelier,vintage,tasting,bottle,spirits,scanner,grape,winery,cave

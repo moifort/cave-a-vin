@@ -1,0 +1,33 @@
+Vinarium, c'est votre cave à vin dans votre poche.
+
+Photographiez l'étiquette d'une bouteille : l'intelligence artificielle reconnaît le vin et remplit automatiquement le domaine, le millésime, la région, l'appellation, et estime même son prix. Plus besoin de tout saisir à la main.
+
+FONCTIONNALITÉS
+• Scan IA : prenez une étiquette en photo, obtenez une fiche complète en quelques secondes
+• Cave en grille : rangez vos bouteilles par rangée et colonne, retrouvez-les d'un coup d'œil
+• Journal : historique des entrées et sorties, avec vos notes de dégustation et vos évaluations
+• Tableau de bord : valeur de votre cave, taux d'occupation, bouteilles à boire bientôt, activité récente
+• Recherche puissante : par nom, producteur, région, millésime ou personne, avec filtres combinables
+• Prêts à boire : Vinarium vous alerte quand une bouteille arrive à maturité
+• Favoris : marquez les vins, spiritueux ou bières qui vous ont marqué, et retrouvez-les en un clic
+• Lieu de découverte : le scan enregistre l'endroit où vous étiez, pour vous rappeler où vous avez découvert la bouteille
+• Cadeaux & recommandations : gardez la trace des vins offerts, reçus, ou conseillés par un ami
+
+PAS QUE DU VIN
+Un porto, un rhum, un whisky, un saké, un champagne ou une bière trouvent aussi leur place dans la cave, avec les informations propres à chaque type de boisson.
+
+PARTAGE EN FOYER
+Partagez une seule cave avec les personnes de votre foyer grâce à un code d'invitation. Chacun peut ranger, déplacer ou déguster n'importe quelle bouteille de la cave commune, tout en gardant sa propre bibliothèque, ses notes et son journal privés.
+
+RESPECT DE VOTRE VIE PRIVÉE
+Pas de publicité, pas de traçage. Vos données restent les vôtres et sont exportables à tout moment.
+
+Connectez-vous en un geste avec Sign in with Apple et commencez à bâtir votre cave.
+
+VINARIUM PREMIUM
+La cave, le journal et le partage en foyer sont gratuits et illimités. Seul le scan d'étiquette est compté : 5 scans par mois. Premium lève cette limite et ajoute sur chaque bouteille scannée l'estimation du prix, la période de garde et la région.
+
+Premium mensuel : 2,99 €/mois. Premium annuel : 24,99 €/an, après 7 jours d'essai gratuit. L'abonnement se renouvelle automatiquement sauf résiliation au moins 24 h avant la fin de la période en cours. La gestion et la résiliation se font dans les réglages du compte App Store.
+
+Conditions d'utilisation : https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Politique de confidentialité : https://moifort.github.io/vinarium/

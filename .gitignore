@@ -54,7 +54,9 @@ ios/shared/
 # fastlane (CI-only, used by release-ios.yml `submit` job) — generated artifacts
 infra/fastlane/report.xml
 infra/fastlane/README.md
-infra/fastlane/metadata/
+# The listing itself is versioned (description, keywords, promotional text); only
+# the "What's New" notes are generated, by release-ios.yml from the changelogs.
+infra/fastlane/metadata/*/release_notes.txt
 infra/fastlane/screenshots/
 infra/fastlane/test_output/
 

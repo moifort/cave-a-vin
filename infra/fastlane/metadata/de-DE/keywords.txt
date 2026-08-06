@@ -1,0 +1,1 @@
+weinkeller,wein,sommelier,jahrgang,verkostung,flasche,spirituosen,scanner,rebsorte,weingut

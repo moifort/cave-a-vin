@@ -1,0 +1,1 @@
+cantina,vino,enologia,degustazione,sommelier,annata,bottiglia,distillati,scanner,vitigno

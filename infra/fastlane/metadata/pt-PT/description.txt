@@ -1,0 +1,33 @@
+O Vinarium é a sua adega no bolso.
+
+Fotografe o rótulo de uma garrafa: a IA reconhece o vinho e preenche automaticamente a quinta, a colheita, a região e a denominação, e até estima o preço. Deixe de inserir tudo à mão.
+
+FUNCIONALIDADES
+• Digitalização com IA: fotografe um rótulo e obtenha uma ficha completa em segundos
+• Adega em grelha: organize as garrafas por fila e coluna e encontre-as num relance
+• Diário: histórico de entradas e saídas, com as suas notas de prova e avaliações
+• Painel: valor da adega, ocupação, garrafas para beber em breve, atividade recente
+• Pesquisa poderosa: por nome, produtor, região, colheita ou pessoa, com filtros combináveis
+• Prontos a beber: o Vinarium avisa quando uma garrafa atinge a maturidade
+• Favoritos: marque os vinhos, destilados ou cervejas que o marcaram e volte a encontrá-los num toque
+• Onde a encontrou: a digitalização guarda o local onde estava, para recordar onde descobriu a garrafa
+• Ofertas e recomendações: acompanhe os vinhos oferecidos, recebidos ou recomendados por um amigo
+
+NÃO SÓ VINHO
+Um porto, um rum, um whisky, um saqué, um champanhe ou uma cerveja também têm lugar na adega, com os dados próprios do seu tipo de garrafa.
+
+PARTILHA NO AGREGADO
+Partilhe uma única adega com as pessoas do seu agregado através de um código de convite. Cada um pode guardar, mover ou beber qualquer garrafa da adega comum, mantendo privados a sua biblioteca, notas e diário.
+
+RESPEITO PELA SUA PRIVACIDADE
+Sem publicidade, sem rastreio. Os seus dados continuam a ser seus e podem ser exportados a qualquer momento.
+
+Inicie sessão com um toque usando Iniciar sessão com a Apple e comece a construir a sua adega.
+
+VINARIUM PREMIUM
+A adega, o diário e a partilha no agregado são gratuitos e ilimitados. Apenas a digitalização de rótulos é contabilizada: cinco digitalizações por mês. O Premium levanta esse limite e acrescenta a cada garrafa digitalizada o preço estimado, a janela de consumo e a região.
+
+Premium mensal: 2,99 €/mês. Premium anual: 24,99 €/ano, após 7 dias de teste gratuito. A subscrição renova-se automaticamente salvo cancelamento pelo menos 24 horas antes do fim do período em curso. É gerida e cancelada nas definições da conta App Store.
+
+Termos de utilização: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidade: https://moifort.github.io/vinarium/

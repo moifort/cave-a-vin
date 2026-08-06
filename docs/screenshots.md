@@ -111,3 +111,17 @@ cd infra && bundle exec fastlane screenshots
 Uploads the panels and nothing else, staging the language directories into the
 App Store's locale names. Needs `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_PATH`
 — the same App Store Connect key the release uses.
+
+## The listing text
+
+`infra/fastlane/metadata/<locale>/` holds what the product page says, one
+directory per App Store locale: `description.txt`, `keywords.txt` and
+`promotional_text.txt`. It is versioned so a wording change is read as a diff
+rather than typed into seven web forms, and `deliver` pushes it with the
+release (the `submit` lane, which is why nothing here is behind `skip_metadata`).
+`release_notes.txt` is the exception: release-ios.yml writes it from the
+changelogs at release time, so it stays ignored.
+
+A published version's page is frozen in App Store Connect — description,
+keywords and screenshots only become editable again on the next version. The
+promotional text is the one field Apple lets through at any time.
