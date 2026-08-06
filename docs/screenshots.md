@@ -89,5 +89,30 @@ adding a language or rewording a caption then costs nothing and needs no API
 key. `--regenerate` is the only path that calls the model, and it needs
 `NITRO_GOOGLE_API_KEY`.
 
-The panels are uploaded to App Store Connect by hand, per language — fastlane
-runs with `skip_screenshots`.
+## The bento panel
+
+The five other panels each show one screen. The last one shows the range, which
+is what someone swiping to the end is asking about:
+
+```bash
+bun scripts/generate-bento-panel.ts            # every language
+bun scripts/generate-bento-panel.ts --lang ja  # one language
+```
+
+`scripts/bento-panel.html` is a page pinned to 1206x2622 that Chrome renders
+headless, so nothing is scaled or cropped afterwards. It is drawn rather than
+photographed because no single screen in the app shows all of this, and a
+mosaic of real tiles beats a montage of cropped screenshots. Its palette and
+tile language come from the landing page (`portfolio`, `[data-theme='vinarium']`)
+so the store and the site read as one product; the artwork it needs lives in
+`screenshots/appstore/bento-assets/`.
+
+## Uploading
+
+```bash
+cd infra && bundle exec fastlane screenshots
+```
+
+Uploads the panels and nothing else, staging the language directories into the
+App Store's locale names. Needs `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_PATH`
+— the same App Store Connect key the release uses.

@@ -47,14 +47,35 @@ const LANGUAGES = ['fr', 'en', 'de', 'es', 'it', 'pt', 'ja'] as const
 type Language = (typeof LANGUAGES)[number]
 
 type Panel = { source: string; output: string; captions: Record<Language, string> }
-type Triptych = { id: number; scene: string; panels: [Panel, Panel, Panel] }
+type Triptych = {
+  id: number
+  scene: string
+  /** One sentence saying what the app does, set under every title of the
+   *  triptych. The titles say what each panel shows; this says what it is for. */
+  subtitles?: Record<Language, string>
+  panels: [Panel, Panel, Panel]
+}
+
+// What the app does, in one line. Repeated across a triptych on purpose: an App
+// Store visitor swipes through the panels one at a time and may well start on
+// the second, so the sentence has to be under whichever one they land on.
+const WHAT_THE_APP_DOES: Record<Language, string> = {
+  fr: "Ce que vous avez, où c'est rangé, quand le boire.",
+  en: 'What you own, where it sits, when to drink it.',
+  de: 'Was du hast, wo es liegt, wann du es trinkst.',
+  es: 'Lo que tienes, dónde está, cuándo beberlo.',
+  it: "Cosa hai, dov'è, quando berlo.",
+  pt: 'O que tem, onde está, quando beber.',
+  ja: '何があるか、どこにあるか、いつ飲むか。',
+}
 
 const TRIPTYCHS: Triptych[] = [
   {
     id: 1,
     scene:
-      'a moody high-end wine cellar: dark oak shelves with softly lit wine bottles receding into ' +
-      'depth-of-field, warm amber glow, subtle burgundy-to-plum gradient light',
+      'a moody high-end wine cellar: dark oak shelves filled with wine bottles, warm amber glow ' +
+      'from recessed lights, deep burgundy-to-plum tones',
+    subtitles: WHAT_THE_APP_DOES,
     panels: [
       {
         source: 'dashboard.png',
@@ -73,26 +94,26 @@ const TRIPTYCHS: Triptych[] = [
         source: 'cellar.png',
         output: '02-cave.png',
         captions: {
-          fr: 'Chaque bouteille à sa place',
-          en: 'Every bottle in its place',
-          de: 'Jede Flasche an ihrem Platz',
-          es: 'Cada botella en su sitio',
-          it: 'Ogni bottiglia al suo posto',
-          pt: 'Cada garrafa no seu lugar',
-          ja: '一本ずつ、定位置に',
+          fr: 'Une place précise pour vos bouteilles',
+          en: 'A precise spot for every bottle',
+          de: 'Ein fester Platz für jede Flasche',
+          es: 'Un sitio exacto para cada botella',
+          it: 'Un posto preciso per ogni bottiglia',
+          pt: 'Um lugar exato para cada garrafa',
+          ja: '一本ずつ、決まった場所に',
         },
       },
       {
         source: 'wine-list.png',
         output: '03-vins.png',
         captions: {
-          fr: 'Toute votre collection',
-          en: 'Your whole collection',
-          de: 'Deine ganze Sammlung',
-          es: 'Toda tu colección',
-          it: 'Tutta la tua collezione',
-          pt: 'Toda a sua coleção',
-          ja: 'コレクションのすべて',
+          fr: 'Retrouver une bouteille parmi des milliers',
+          en: 'Find one bottle among thousands',
+          de: 'Eine Flasche unter Tausenden finden',
+          es: 'Encuentra una botella entre miles',
+          it: 'Trova una bottiglia tra migliaia',
+          pt: 'Encontre uma garrafa entre milhares',
+          ja: '何千本の中から、一本を',
         },
       },
     ],
@@ -104,7 +125,11 @@ const TRIPTYCHS: Triptych[] = [
       'soft bokeh, warm candle-like ambient light, subtle burgundy-to-plum gradient',
     panels: [
       {
-        source: 'scan.png',
+        // The review form, not the viewfinder: a simulator has no camera, so
+        // the scan screen photographs as a white rectangle. The form the AI
+        // filled shows what the feature is worth — the answer rather than the
+        // tool.
+        source: 'scan-review.png',
         output: '04-scan.png',
         captions: {
           fr: "Scannez, l'IA fait le reste",
@@ -155,11 +180,12 @@ const buildPrompt = (triptych: Triptych) =>
 Create ONE single seamless panoramic marketing image (4:3 landscape). It will be sliced vertically into THREE equal portrait panels (left, center, right) shown side by side on the App Store, so:
 
 - The background is one continuous scene flowing across the whole image with no visible seams: ${triptych.scene}.
-- The scene FILLS THE ENTIRE FRAME, edge to edge and corner to corner, like a single photograph. No borders, no letterboxing, no horizontal bands, no flat colour blocks, no visible boundary between an upper and a lower area — any straight horizontal edge across the image is a defect.
+- The scene FILLS THE ENTIRE FRAME, edge to edge and corner to corner, like a single photograph taken in one place. No borders, no letterboxing, no horizontal bands, no flat colour blocks, no blurred strip along the top or the bottom, no vignette, no visible boundary between an upper and a lower area — any straight horizontal edge across the image is a defect, and so is a band of blur that does not belong to the depth of the scene.
+- Sharpness is even across the whole height: the top of the image is as much part of the room as the middle, only further away. Do not darken, fade or defocus any area to leave room for text.
 - Exactly three iPhone mockups with thin dark titanium frames, perfectly front-facing (zero perspective tilt or rotation), all at the same size and the same vertical position, with a soft premium drop shadow: one centered in the left third, one centered in the middle third, one centered in the right third.
 - Each phone is large: its height covers about 60% of the image height, and its center sits slightly below the middle of the image. The area under the phones is still the scene, in soft focus — never an empty dark strip.
 - Each phone's screen is a single flat solid pure magenta (#FF00FF) panel filling the entire display edge to edge, following the display's rounded corners. Perfectly uniform magenta: no gradients, no reflections, no glare, no UI, no notch, no camera island, no text. The real app screenshots will be composited onto these magenta panels afterwards, so anything drawn on them would be destroyed.
-- The upper fifth of the image stays visually quiet — the same scene, further out of focus and gently darker, with no bright highlight and nothing in sharp focus — because marketing captions are typeset over it afterwards. Quiet, not separate: the transition must be a smooth gradient of focus and light, never an edge.
+- Above the phones there is simply more room — a wall, shelving, the far end of the space — with nothing brightly lit and nothing demanding attention. Captions are typeset over it afterwards and the compositor lays its own gradient there, so the image itself needs no empty band.
 - ABSOLUTELY NO TEXT anywhere in the image: no captions, no labels, no logos, no watermarks, no lettering of any kind. Every word is added later.
 - CRITICAL composition rule: the image will be cut along two vertical lines at exactly 1/3 and 2/3 of the width. No phone may touch those lines; keep at least 5% of the total width clear on both sides of each cut line. Only the background crosses the cut lines.
 - Palette: deep burgundy (#8C1229), plum, warm gold accents (#D4AE59); dark, sophisticated, high-end wine brand aesthetic.`
@@ -239,7 +265,8 @@ const renderLanguage = async (
   const panorama = join(workDir, `panorama-${triptych.id}-${language}.png`)
   await $`cp ${scene} ${panorama}`.quiet()
   const captions = triptych.panels.map((panel) => panel.captions[language])
-  await $`swift ${compositor} ${panorama} ${sources[0]} ${sources[1]} ${sources[2]} ${language} ${captions[0]} ${captions[1]} ${captions[2]}`.quiet()
+  const subtitle = triptych.subtitles?.[language] ?? ''
+  await $`swift ${compositor} ${panorama} ${sources[0]} ${sources[1]} ${sources[2]} ${language} ${captions[0]} ${captions[1]} ${captions[2]} ${subtitle}`.quiet()
 
   const outputDir = join(appstoreDir, language)
   await mkdir(outputDir, { recursive: true })

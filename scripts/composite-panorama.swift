@@ -14,7 +14,11 @@
 // German compound word wraps instead of overflowing and kana come out as kana.
 //
 // Usage: swift composite-panorama.swift <panorama.png> <left.png> <center.png> <right.png>
-//                                       [<language> <caption1> <caption2> <caption3>]
+//                                       [<language> <caption1> <caption2> <caption3> [<subtitle>]]
+//
+// The optional subtitle is set smaller under every caption, the same sentence on
+// the three panels: it says what the app does, while each caption says what its
+// panel shows.
 
 import CoreGraphics
 import CoreText
@@ -57,13 +61,24 @@ func magentaWeight(_ pixels: UnsafeMutablePointer<UInt8>, _ offset: Int) -> Doub
   return max(0, min(1, (min(r, b) - g - 60) / 80))
 }
 
-/// Draws one caption centered in `rect`, wrapping and shrinking until it fits.
-/// The size is expressed against the panel width so the three panels always
-/// carry the same weight of text, whatever the language does with the wording.
-func drawCaption(
-  _ text: String, in rect: CGRect, language: String, context: CGContext
-) {
-  guard !text.isEmpty, rect.height > 0 else { return }
+/// A piece of text measured at the largest size that fits the given width and
+/// height, ready to be drawn wherever the caller decides.
+struct FittedText {
+  let framesetter: CTFramesetter
+  let size: CGSize
+  let fontSize: Double
+}
+
+/// Measures `text` at the largest size that fits, shrinking rather than
+/// clipping: German runs long, Japanese runs short, and a caption that overflows
+/// its band is worse than one set a size smaller. The size is expressed against
+/// the panel width so the three panels carry the same weight of text, whatever
+/// the language does with the wording.
+func fitText(
+  _ text: String, width: Double, maxHeight: Double, language: String,
+  weight: Double = 1, opacity: Double = 1
+) -> FittedText? {
+  guard !text.isEmpty, maxHeight > 0 else { return nil }
   // Core Text reads the setting through a raw pointer, so the value has to
   // outlive the call that copies it — hence the explicit scope.
   var alignment = CTTextAlignment.center
@@ -73,9 +88,7 @@ func drawCaption(
     return CTParagraphStyleCreate(&setting, 1)
   }
 
-  // Shrink rather than clip: German runs long, Japanese runs short, and a
-  // caption that overflows its band is worse than one set a size smaller.
-  for size in stride(from: rect.width * 0.075, to: rect.width * 0.03, by: -2) {
+  for size in stride(from: width * 0.075 * weight, to: width * 0.025 * weight, by: -2) {
     let font = CTFontCreateUIFontForLanguage(.system, size, language as CFString)
       ?? CTFontCreateWithName("Helvetica-Bold" as CFString, size, nil)
     // The Core Text attribute names, not AppKit's: this tool links neither
@@ -85,40 +98,44 @@ func drawCaption(
       attributes: [
         NSAttributedString.Key(kCTFontAttributeName as String): font,
         NSAttributedString.Key(kCTForegroundColorAttributeName as String): CGColor(
-          red: 1, green: 0.98, blue: 0.94, alpha: 1),
+          red: 1, green: 0.98, blue: 0.94, alpha: opacity),
         NSAttributedString.Key(kCTParagraphStyleAttributeName as String): paragraph,
       ])
     let framesetter = CTFramesetterCreateWithAttributedString(attributed)
     let measured = CTFramesetterSuggestFrameSizeWithConstraints(
       framesetter, CFRange(location: 0, length: 0), nil,
-      CGSize(width: rect.width, height: .greatestFiniteMagnitude), nil)
-    guard measured.height <= rect.height, measured.width <= rect.width else { continue }
-
-    // Vertically centered in the band left free above the phone.
-    let box = CGRect(
-      x: rect.minX, y: rect.midY - measured.height / 2, width: rect.width, height: measured.height)
-    let path = CGPath(rect: box, transform: nil)
-    let frame = CTFramesetterCreateFrame(framesetter, CFRange(location: 0, length: 0), path, nil)
-
-    context.saveGState()
-    // A soft dark halo: the background is a photo, and white on a light
-    // reflection would disappear.
-    context.setShadow(
-      offset: .zero, blur: size * 0.35, color: CGColor(red: 0, green: 0, blue: 0, alpha: 0.65))
-    CTFrameDraw(frame, context)
-    context.restoreGState()
-    return
+      CGSize(width: width, height: .greatestFiniteMagnitude), nil)
+    guard measured.height <= maxHeight, measured.width <= width else { continue }
+    return FittedText(framesetter: framesetter, size: measured, fontSize: size)
   }
+  return nil
+}
+
+/// Draws measured text with its top-left at `origin`, in a box `width` wide.
+func draw(_ text: FittedText, x: Double, top: Double, width: Double, context: CGContext) {
+  let box = CGRect(x: x, y: top - text.size.height, width: width, height: text.size.height)
+  let frame = CTFramesetterCreateFrame(
+    text.framesetter, CFRange(location: 0, length: 0), CGPath(rect: box, transform: nil), nil)
+  context.saveGState()
+  // A soft dark halo: the background is a photograph, and white text over a
+  // bright reflection would disappear into it.
+  context.setShadow(
+    offset: .zero, blur: text.fontSize * 0.35,
+    color: CGColor(red: 0, green: 0, blue: 0, alpha: 0.65))
+  CTFrameDraw(frame, context)
+  context.restoreGState()
 }
 
 let arguments = CommandLine.arguments
-guard arguments.count == 5 || arguments.count == 9 else {
+guard arguments.count == 5 || arguments.count == 9 || arguments.count == 10 else {
   fail(
-    "Usage: swift composite-panorama.swift <panorama.png> <left.png> <center.png> <right.png> [<language> <caption1> <caption2> <caption3>]"
+    "Usage: swift composite-panorama.swift <panorama.png> <left.png> <center.png> <right.png> [<language> <caption1> <caption2> <caption3> [<subtitle>]]"
   )
 }
-let captionLanguage = arguments.count == 9 ? arguments[5] : ""
-let captions = arguments.count == 9 ? Array(arguments[6...8]) : ["", "", ""]
+let hasCaptions = arguments.count >= 9
+let captionLanguage = hasCaptions ? arguments[5] : ""
+let captions = hasCaptions ? Array(arguments[6...8]) : ["", "", ""]
+let subtitle = arguments.count == 10 ? arguments[9] : ""
 let panoramaPath = arguments[1]
 let panoramaImage = loadImage(panoramaPath)
 let width = panoramaImage.width
@@ -174,7 +191,11 @@ for third in 0..<3 {
       // Both buffers come from identically-configured contexts, so rows line up 1:1.
       for x in 0..<screenWidth {
         let target = ((minY + y) * width + (minX + x)) * 4
-        let weight = magentaWeight(panorama, target)
+        // Scaled up and clamped: a plain weight leaves the partly-magenta pixels
+        // of an anti-aliased screen edge half-replaced, which reads as a pink
+        // fringe around the screen. Steeper, the edge stays soft and the colour
+        // goes.
+        let weight = min(1, magentaWeight(panorama, target) * 2.5)
         if weight <= 0 { continue }
         let source = (y * screenWidth + x) * 4
         for channel in 0..<3 {
@@ -190,6 +211,32 @@ for third in 0..<3 {
   // `minY` is a row of the pixel buffer, whose first row is the top of the
   // image, while the context draws from a bottom-left origin — hence the flip.
   if !captions[third].isEmpty, minY > height / 12 {
+    // A dark scrim over the text area, drawn here rather than asked of the image
+    // model: told to keep an area calm, it produced a blurred band with a hard
+    // edge across the picture. A gradient we draw ourselves is even, predictable
+    // and stops exactly where we say.
+    let scrimHeight = Double(minY) * 1.15
+    if let gradient = CGGradient(
+      colorsSpace: CGColorSpaceCreateDeviceRGB(),
+      colors: [
+        CGColor(red: 0.05, green: 0.01, blue: 0.03, alpha: 0.72),
+        CGColor(red: 0.05, green: 0.01, blue: 0.03, alpha: 0),
+      ] as CFArray,
+      locations: [0, 1])
+    {
+      panoramaContext.saveGState()
+      panoramaContext.clip(
+        to: CGRect(
+          x: Double(xStart), y: Double(height) - scrimHeight,
+          width: Double(xEnd - xStart), height: scrimHeight))
+      panoramaContext.drawLinearGradient(
+        gradient,
+        start: CGPoint(x: 0, y: Double(height)),
+        end: CGPoint(x: 0, y: Double(height) - scrimHeight),
+        options: [])
+      panoramaContext.restoreGState()
+    }
+
     let margin = Double(height) * 0.02
     let inset = Double(xEnd - xStart) * 0.08
     let band = CGRect(
@@ -197,7 +244,30 @@ for third in 0..<3 {
       y: Double(height - minY) + margin,
       width: Double(xEnd - xStart) - inset * 2,
       height: Double(minY) - margin * 2)
-    drawCaption(captions[third], in: band, language: captionLanguage, context: panoramaContext)
+
+    // The title, and under it the sentence saying what the app does — measured
+    // first, then drawn as one block centered in the band, so the two read as a
+    // pair rather than as two things that happen to share an area.
+    let titleHeight = subtitle.isEmpty ? band.height : band.height * 0.6
+    guard
+      let title = fitText(
+        captions[third], width: band.width, maxHeight: titleHeight,
+        language: captionLanguage, weight: subtitle.isEmpty ? 1 : 1.15)
+    else { continue }
+    let sentence = fitText(
+      subtitle, width: band.width * 0.95, maxHeight: band.height * 0.25,
+      language: captionLanguage, weight: 0.55, opacity: 0.85)
+
+    let gap = title.fontSize * 0.55
+    let blockHeight = title.size.height + (sentence.map { gap + $0.size.height } ?? 0)
+    var cursor = band.midY + blockHeight / 2
+    draw(title, x: band.minX, top: cursor, width: band.width, context: panoramaContext)
+    cursor -= title.size.height + gap
+    if let sentence {
+      draw(
+        sentence, x: band.minX + band.width * 0.025, top: cursor, width: band.width * 0.95,
+        context: panoramaContext)
+    }
   }
 }
 
