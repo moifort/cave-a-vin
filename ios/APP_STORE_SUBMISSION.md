@@ -95,6 +95,10 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 > 4. **Push a `ios-v<version>` tag** (e.g. `ios-v1.1`) — runs
 >    **`.github/workflows/release-ios.yml`** on a GitHub macOS runner: archive → export →
 >    upload to App Store Connect (automatic signing driven by the App Store Connect API key).
+>    Once the binary is up, the tag also pushes the marketing panels of
+>    `screenshots/appstore/` (`.github/workflows/appstore-screenshots.yml`, called from the
+>    release workflow) and only then submits the version for review — screenshots have to
+>    land while the version is still editable.
 >    The tag sets `MARKETING_VERSION` (`ios-v1.1` → `1.1`); the build number is
 >    `git rev-list --count HEAD` — no manual `CURRENT_PROJECT_VERSION` bump. Also triggerable
 >    from the Actions tab (`workflow_dispatch`). The runner is on a **final** macOS, so the
@@ -140,7 +144,9 @@ minutes; attach it to the 1.0 version.
 - Marketing screenshots (panoramas in `screenshots/appstore/`, five 1320x2868 PNGs): regenerate
   with `bun scripts/generate-appstore-previews.ts [1|2]` (Nano Banana Pro renders the panorama,
   real screenshots from `screenshots/` are composited onto the phone screens, then the panorama
-  is sliced into panels). Upload to ASC stays manual.
+  is sliced into panels). The upload is carried by the release tag; to push panels between
+  two releases, run the **App Store screenshots** workflow from the Actions tab (it replaces
+  every screenshot of the editable version, so the version must not be in review).
 - **Submit for Review**. Optionally set manual release to keep control.
 
 ## Phase 5 — Make it unlisted [ASC + form]

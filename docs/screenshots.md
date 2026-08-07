@@ -104,13 +104,22 @@ key. `--regenerate` is the only path that calls the model, and it needs
 
 ## Uploading
 
+A release tag does it: `release-ios.yml` calls `appstore-screenshots.yml` once the
+binary is uploaded and before the version is submitted, so the panels shipped with
+the app are the ones that reach the store. The order matters — a version already in
+review refuses new screenshots.
+
+Between two releases, run the **App Store screenshots** workflow from the Actions
+tab, or locally:
+
 ```bash
 cd infra && bundle exec fastlane screenshots
 ```
 
 Uploads the panels and nothing else, staging the language directories into the
-App Store's locale names. Needs `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_PATH`
-— the same App Store Connect key the release uses.
+App Store's locale names, and replacing whatever the version carried. Needs
+`ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_PATH` — the same App Store Connect key
+the release uses, which lives in the GitHub secrets and not on the dev Mac.
 
 ## The listing text
 
