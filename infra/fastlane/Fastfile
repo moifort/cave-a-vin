@@ -1,60 +1,10 @@
 default_platform(:ios)
 
 platform :ios do
-  # The App Store locales the listing is written in, keyed by the language code
-  # the capture pipeline uses (scripts/screenshots.sh, docs/screenshots.md).
-  APP_STORE_LOCALES = {
-    "fr" => "fr-FR",
-    "en" => "en-US",
-    "de" => "de-DE",
-    "es" => "es-ES",
-    "it" => "it",
-    "pt" => "pt-PT",
-    "ja" => "ja"
-  }.freeze
-
-  desc "Upload the App Store screenshots, and nothing else."
-  lane :screenshots do
-    api_key = app_store_connect_api_key(
-      key_id: ENV.fetch("ASC_KEY_ID"),
-      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
-      key_filepath: ENV.fetch("ASC_KEY_PATH")
-    )
-
-    # deliver wants one directory per App Store locale; the pipeline writes one
-    # per app language. Staged rather than renamed at the source: the language
-    # codes are what the app and the captures speak, and Apple's locales are a
-    # detail of this upload.
-    repo = File.expand_path("../..", __dir__)
-    staged = File.join(repo, "build", "appstore-upload")
-    FileUtils.rm_rf(staged)
-    # A missing language is a hard stop, never a skip: deliver deletes the version's
-    # screenshots before uploading, so a staging that came out empty leaves the version
-    # with none at all. That is exactly what happened on 2026-08-07, from a checkout
-    # where screenshots/appstore/<lang>/ is gitignored and therefore absent.
-    APP_STORE_LOCALES.each do |language, locale|
-      source = File.join(repo, "screenshots", "appstore", language)
-      panels = Dir.glob(File.join(source, "*.png"))
-      UI.user_error!("No panels in screenshots/appstore/#{language} — generate them with " \
-                     "`bun scripts/generate-appstore-previews.ts` before uploading") if panels.empty?
-      destination = File.join(staged, locale)
-      FileUtils.mkdir_p(destination)
-      FileUtils.cp(panels, destination)
-    end
-
-    deliver(
-      api_key: api_key,
-      app_identifier: "com.polyforms.vinarium.app",
-      screenshots_path: staged,
-      overwrite_screenshots: true,
-      skip_binary_upload: true,
-      skip_metadata: true,
-      skip_app_version_update: true,
-      submit_for_review: false,
-      force: true,
-      run_precheck_before_submit: false
-    )
-  end
+  # The screenshots are uploaded by scripts/upload-appstore-panels.ts, not from here:
+  # `deliver` put every panel on the version twice on 2026-08-07, on a run it reported
+  # as successful. The script talks to the App Store Connect API directly and counts
+  # what the store ends up holding.
 
   # Attach the already-uploaded build to its App Store version, set the "What's New"
   # notes from CHANGELOG.md, and submit for review with automatic release on approval.

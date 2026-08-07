@@ -19,17 +19,10 @@ jobs:
     name: 🖼️ App Store screenshots
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
     steps:
       - uses: actions/checkout@v7
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.10'
-          bundler-cache: true
-          working-directory: infra
+      - uses: oven-sh/setup-bun@v2
 
       - name: Install the App Store Connect API key
         run: |
@@ -39,7 +32,9 @@ jobs:
           echo "ASC_KEY_PATH=$RUNNER_TEMP/asc/AuthKey.p8" >> "$GITHUB_ENV"
 
       - name: Upload the panels
-        working-directory: infra
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         # The version has to be editable: a version already in review refuses new
         # screenshots, so this runs before the submission, not after it.
-        run: bundle exec fastlane ios screenshots
+        run: bun run scripts/upload-appstore-panels.ts

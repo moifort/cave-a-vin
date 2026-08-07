@@ -119,13 +119,14 @@ Between two releases, run the **App Store screenshots** workflow from the Action
 tab, or locally:
 
 ```bash
-cd infra && bundle exec fastlane screenshots
+bun scripts/upload-appstore-panels.ts
 ```
 
-Uploads the panels and nothing else, staging the language directories into the
-App Store's locale names, and replacing whatever the version carried. Needs
-`ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_PATH` — the same App Store Connect key
-the release uses, which lives in the GitHub secrets and not on the dev Mac.
+It empties the 6.9" set of each locale, uploads the five panels in filename order,
+and ends by counting what the store holds — a mismatch fails the run. That counting
+is not decoration: `fastlane deliver` did this job until 2026-08-07 and uploaded
+every panel twice, reporting success. Needs `ASC_KEY_ID`, `ASC_ISSUER_ID` and
+`ASC_KEY_PATH` — the same App Store Connect key the release uses.
 
 ## The listing text
 
