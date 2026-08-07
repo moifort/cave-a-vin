@@ -85,17 +85,15 @@ infra/apple.p8
 # Generated server assets
 server/system/changelog-content.ts
 
-# App Store captures and panels. The French captures at screenshots/*.png stay
-# tracked — the README embeds them — and so do the generated scenes, which cost
-# an API call and never come out the same twice. Everything else is derived in
-# minutes by scripts/screenshots.sh and generate-appstore-previews.ts, and would
-# otherwise add ~110 MB to the history on every pass (see docs/screenshots.md).
+# App Store captures. The raw per-language captures are an intermediate step,
+# re-taken in minutes by scripts/screenshots.sh; the French ones at
+# screenshots/*.png stay tracked because the README embeds them. The panels of
+# screenshots/appstore/ are tracked on purpose, weight included: the release
+# uploads them from the checkout, and capturing them on a runner would add half
+# an hour to every release (see docs/screenshots.md).
 screenshots/en/
 screenshots/de/
 screenshots/es/
 screenshots/it/
 screenshots/pt/
 screenshots/ja/
-screenshots/appstore/*/
-!screenshots/appstore/scenes/
-!screenshots/appstore/bento-assets/

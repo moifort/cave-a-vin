@@ -109,6 +109,12 @@ binary is uploaded and before the version is submitted, so the panels shipped wi
 the app are the ones that reach the store. The order matters — a version already in
 review refuses new screenshots.
 
+This is why the panels are committed, weight and all: the runner uploads what the
+checkout carries. Capturing them there instead would mean booting the emulators, the
+backend and the simulator for seven languages, half an hour added to every release
+for images that have not changed. So regenerate them **before** tagging — a panel
+that stays stale in the repo stays stale in the store.
+
 Between two releases, run the **App Store screenshots** workflow from the Actions
 tab, or locally:
 

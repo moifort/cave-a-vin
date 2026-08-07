@@ -28,12 +28,18 @@ platform :ios do
     repo = File.expand_path("../..", __dir__)
     staged = File.join(repo, "build", "appstore-upload")
     FileUtils.rm_rf(staged)
+    # A missing language is a hard stop, never a skip: deliver deletes the version's
+    # screenshots before uploading, so a staging that came out empty leaves the version
+    # with none at all. That is exactly what happened on 2026-08-07, from a checkout
+    # where screenshots/appstore/<lang>/ is gitignored and therefore absent.
     APP_STORE_LOCALES.each do |language, locale|
       source = File.join(repo, "screenshots", "appstore", language)
-      next UI.important("No panels for #{language}, skipping") unless Dir.exist?(source)
+      panels = Dir.glob(File.join(source, "*.png"))
+      UI.user_error!("No panels in screenshots/appstore/#{language} — generate them with " \
+                     "`bun scripts/generate-appstore-previews.ts` before uploading") if panels.empty?
       destination = File.join(staged, locale)
       FileUtils.mkdir_p(destination)
-      FileUtils.cp(Dir.glob(File.join(source, "*.png")), destination)
+      FileUtils.cp(panels, destination)
     end
 
     deliver(
