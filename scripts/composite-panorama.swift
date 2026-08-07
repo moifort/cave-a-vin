@@ -44,7 +44,11 @@ func rgbaBitmap(of image: CGImage, width: Int, height: Int) -> (CGContext, Unsaf
     let context = CGContext(
       data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: bytesPerRow,
       space: CGColorSpaceCreateDeviceRGB(),
-      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+      // Opaque, and the alpha byte kept only to keep the four-byte pixel the
+      // magenta scan reads. App Store Connect rejects a screenshot carrying an
+      // alpha channel (IMAGE_ALPHA_NOT_ALLOWED), and the panels are opaque
+      // anyway: the scene fills every one of them edge to edge.
+      bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
   else { fail("Cannot create bitmap context") }
   context.interpolationQuality = .high
   context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
