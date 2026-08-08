@@ -31,8 +31,9 @@ export namespace BeverageUseCase {
     id: BeverageId,
     data: Parameters<typeof BeverageCommand.update>[2],
     receivedFrom?: PersonName,
+    erase: Parameters<typeof BeverageCommand.update>[3] = [],
   ) => {
-    const result = await BeverageCommand.update(userId, id, data)
+    const result = await BeverageCommand.update(userId, id, data, erase)
     if (typeof result !== 'string' && receivedFrom)
       await GiftCommand.receiveFrom(userId, id, receivedFrom)
     return result

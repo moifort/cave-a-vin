@@ -1,5 +1,10 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
-import { requiresColor, retainedSubtype, subtypeAllowed } from '~/domain/beverage/business-rules'
+import {
+  requiresColor,
+  retainedSubtype,
+  subtypeAllowed,
+  withoutFields,
+} from '~/domain/beverage/business-rules'
 import * as repository from '~/domain/beverage/infrastructure/repository'
 import { randomBeverageId } from '~/domain/beverage/primitives'
 import type {
@@ -8,6 +13,7 @@ import type {
   BeverageId,
   BeverageName,
   BeverageType,
+  ErasableField,
   WineDetails,
 } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
@@ -38,10 +44,14 @@ export namespace BeverageCommand {
     return await repository.save(beverage)
   }
 
+  // `erase` names the fields the caller emptied. Absent from `data` means "leave
+  // it alone", so emptying needs its own channel: without it no field could ever
+  // be cleared once written.
   export const update = async (
     userId: UserId,
     id: BeverageId,
     data: BeverageData & { name?: BeverageName; beverageType?: BeverageType },
+    erase: readonly ErasableField[] = [],
   ) => {
     const existing = await repository.findBy(userId, id)
     if (!existing) return 'not-found' as const
@@ -59,19 +69,23 @@ export namespace BeverageCommand {
     // type drops the details object entirely (a beer has no wine specifics).
     const wine =
       beverageType === 'wine' ? { ...(existingWine ?? {}), ...(data.wine ?? {}) } : undefined
-    if (requiresColor(beverageType) && !wine?.color) return 'color-required' as const
     // A subtype explicitly provided must fit the (possibly new) type; one merely
     // inherited from before a type change is silently dropped when it no longer fits.
     if (data.subtype && !subtypeAllowed(beverageType, data.subtype))
       return 'subtype-invalid' as const
     const subtype = data.subtype ?? retainedSubtype(beverageType, existingSubtype)
 
-    const beverage = assemble(
+    const merged = assemble(
       { ...existingCommon, ...baseData, name: data.name ?? existing.name, updatedAt: new Date() },
       beverageType,
       subtype,
       wine,
     )
+    // The erasures land last, so the colour rule judges what is actually stored:
+    // emptying the colour of a wine is refused, not silently re-merged.
+    const beverage = withoutFields(merged, erase)
+    if (requiresColor(beverageType) && !(beverage as { wine?: WineDetails }).wine?.color)
+      return 'color-required' as const
     return await repository.save(beverage)
   }
 

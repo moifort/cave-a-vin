@@ -3,7 +3,7 @@ import { SearchIndexUseCase } from '~/domain/search/use-case'
 import { builder } from '~/domain/shared/graphql/builder'
 import { badUserInput, notFound } from '~/domain/shared/graphql/errors'
 import { stripNulls } from '~/utils/input'
-import type { BeverageData, WineDetails } from '../../types'
+import type { BeverageData, ErasableField, WineDetails } from '../../types'
 import { BeverageUseCase } from '../../use-case'
 import { AddBeverageInput, UpdateBeverageInput } from './inputs'
 import { BeverageType } from './types'
@@ -75,6 +75,33 @@ const toData = (input: BeverageFlatInput): BeverageData => {
   } as BeverageData
 }
 
+// A field the caller sent as an explicit null is one it wants emptied — the only
+// way to tell that apart from a field it simply did not send.
+const erasedBy = (input: Record<string, unknown>): ErasableField[] =>
+  Object.keys(input).filter((key): key is ErasableField => input[key] === null && key in ERASABLE)
+
+const ERASABLE: Record<ErasableField, true> = {
+  alcoholContent: true,
+  producer: true,
+  region: true,
+  country: true,
+  notes: true,
+  subtype: true,
+  purchasePrice: true,
+  purchaseDate: true,
+  latitude: true,
+  longitude: true,
+  placeName: true,
+  color: true,
+  vintage: true,
+  appellation: true,
+  classification: true,
+  grapeVarieties: true,
+  servingTemperature: true,
+  drinkFrom: true,
+  drinkUntil: true,
+}
+
 const colorRequired = () => badUserInput('A wine requires a color')
 const subtypeInvalid = () => badUserInput('This subtype does not fit the beverage type')
 
@@ -134,7 +161,7 @@ builder.mutationField('updateBeverage', (t) =>
     resolve: async (_root, { id, input }, { userId }) => {
       const clean = stripNulls(input)
       const data = { ...toData(clean), name: clean.name, beverageType: clean.beverageType }
-      const result = await BeverageUseCase.update(userId, id, data, clean.giftedBy)
+      const result = await BeverageUseCase.update(userId, id, data, clean.giftedBy, erasedBy(input))
       if (typeof result !== 'string') await SearchIndexUseCase.refresh(userId, id)
       return match(result)
         .with('not-found', () => notFound('Beverage not found'))

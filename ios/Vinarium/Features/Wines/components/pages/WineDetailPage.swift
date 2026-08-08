@@ -4,15 +4,13 @@ struct WineDetailPage: View {
     let content: WineDetailContent.Content
     var onRemoveRequested: () -> Void = {}
     var onEditLocation: () -> Void = {}
-    var onEditTasting: (() -> Void)? = nil
     var onRefresh: () async -> Void = {}
 
     var body: some View {
         WineDetailContent(
             content: content,
             onRemoveRequested: onRemoveRequested,
-            onEditLocation: onEditLocation,
-            onEditTasting: onEditTasting
+            onEditLocation: onEditLocation
         )
         .refreshable { await onRefresh() }
     }

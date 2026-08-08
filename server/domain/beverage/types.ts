@@ -11,6 +11,30 @@ import type {
   Year,
 } from '~/domain/shared/types'
 
+// What an update may erase. The names are the ones the API speaks, flat, because
+// that is how the caller designates a field it wants emptied — the nesting of the
+// stored document is the domain's business, not the caller's.
+export type ErasableField =
+  | 'alcoholContent'
+  | 'producer'
+  | 'region'
+  | 'country'
+  | 'notes'
+  | 'subtype'
+  | 'purchasePrice'
+  | 'purchaseDate'
+  | 'latitude'
+  | 'longitude'
+  | 'placeName'
+  | 'color'
+  | 'vintage'
+  | 'appellation'
+  | 'classification'
+  | 'grapeVarieties'
+  | 'servingTemperature'
+  | 'drinkFrom'
+  | 'drinkUntil'
+
 export type BeverageId = Brand<string, 'BeverageId'>
 export type BeverageName = Brand<string, 'BeverageName'>
 export type Producer = Brand<string, 'Producer'>

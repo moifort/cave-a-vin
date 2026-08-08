@@ -7,7 +7,7 @@ import type {
   GrapeVariety,
   WineColor,
 } from '~/domain/beverage/types'
-import type { Percentage, UserId } from '~/domain/shared/types'
+import type { Percentage, Region, UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
@@ -91,6 +91,91 @@ describe('BeverageCommand.update', () => {
     fake.seed('beverages', beer.id as string, beer)
     return beer
   }
+
+  const seedWine = (): Beverage => {
+    const wine = {
+      id: 'b06cd9e2-8a7f-4a05-9b0e-222222222222' as BeverageId,
+      userId,
+      name: name('Margaux'),
+      beverageType: 'wine',
+      producer: 'Château Margaux',
+      region: 'Bordeaux',
+      notes: 'À boire sur un gibier',
+      alcoholContent: 13.5 as Percentage,
+      purchase: { price: 350, date: new Date('2026-01-05') },
+      place: { latitude: 44.8, longitude: -0.5, name: 'Pauillac' },
+      wine: {
+        color: 'red' as WineColor,
+        vintage: 2015,
+        appellation: 'Margaux',
+        drinkWindow: { from: 2025, until: 2045 },
+      },
+      createdAt: new Date('2026-01-01'),
+      updatedAt: new Date('2026-01-01'),
+    } as unknown as Beverage
+    fake.seed('beverages', wine.id as string, wine)
+    return wine
+  }
+
+  describe('erasing fields', () => {
+    test('empties a plain field the caller asked to clear', async () => {
+      const wine = seedWine()
+
+      await BeverageCommand.update(userId, wine.id, {}, ['notes', 'producer'])
+
+      const saved = fake.snapshot('beverages').get(wine.id as string)
+      expect(saved).not.toHaveProperty('notes')
+      expect(saved).not.toHaveProperty('producer')
+      expect(saved?.region).toBe('Bordeaux')
+    })
+
+    test('empties a nested field and keeps its siblings', async () => {
+      const wine = seedWine()
+
+      await BeverageCommand.update(userId, wine.id, {}, ['purchasePrice', 'appellation'])
+
+      const saved = fake.snapshot('beverages').get(wine.id as string)
+      expect(saved?.purchase).toEqual({ date: new Date('2026-01-05') })
+      expect(saved?.wine).not.toHaveProperty('appellation')
+      expect((saved?.wine as { vintage?: number } | undefined)?.vintage).toBe(2015)
+    })
+
+    test('drops a container left empty by the erasure', async () => {
+      const wine = seedWine()
+
+      await BeverageCommand.update(userId, wine.id, {}, [
+        'latitude',
+        'longitude',
+        'placeName',
+        'drinkFrom',
+        'drinkUntil',
+      ])
+
+      const saved = fake.snapshot('beverages').get(wine.id as string)
+      expect(saved).not.toHaveProperty('place')
+      expect(saved?.wine).not.toHaveProperty('drinkWindow')
+    })
+
+    test('erases what is asked without touching what is written in the same call', async () => {
+      const wine = seedWine()
+
+      await BeverageCommand.update(userId, wine.id, { region: 'Médoc' as Region }, ['notes'])
+
+      const saved = fake.snapshot('beverages').get(wine.id as string)
+      expect(saved?.region).toBe('Médoc')
+      expect(saved).not.toHaveProperty('notes')
+    })
+
+    test('refuses to erase the colour of a wine and writes nothing', async () => {
+      const wine = seedWine()
+
+      const result = await BeverageCommand.update(userId, wine.id, {}, ['color'])
+
+      expect(result).toBe('color-required')
+      const saved = fake.snapshot('beverages').get(wine.id as string)
+      expect((saved?.wine as { color?: WineColor } | undefined)?.color).toBe('red')
+    })
+  })
 
   test('rejects switching to wine without providing a color', async () => {
     const beer = seedBeer()

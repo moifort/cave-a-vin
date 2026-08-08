@@ -4,8 +4,6 @@ struct WineDetailContent: View {
     let content: Content
     var onRemoveRequested: () -> Void = {}
     var onEditLocation: () -> Void = {}
-    /// Absent on someone else's wine: only the owner edits their tasting note.
-    var onEditTasting: (() -> Void)? = nil
 
     var body: some View {
         List {
@@ -66,8 +64,7 @@ struct WineDetailContent: View {
                     consumedDate: consumption.consumedDate,
                     rating: consumption.rating,
                     tastingNotes: consumption.tastingNotes,
-                    contacts: consumption.contacts,
-                    onEdit: onEditTasting
+                    contacts: consumption.contacts
                 )
             }
 

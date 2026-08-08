@@ -31,6 +31,8 @@ import '~/domain/tasting/infrastructure/graphql/mutations'
 
 // Gift domain (extends BeverageType with .gift field)
 import '~/domain/gift/infrastructure/graphql/types'
+import '~/domain/gift/infrastructure/graphql/inputs'
+import '~/domain/gift/infrastructure/graphql/mutations'
 
 // Recommendation domain (extends BeverageType with .recommendation field)
 import '~/domain/recommendation/infrastructure/graphql/types'

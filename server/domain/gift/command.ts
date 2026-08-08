@@ -12,6 +12,24 @@ export namespace GiftCommand {
     return repository.save({ ...(existing ?? { userId, beverageId }), given })
   }
 
+  // Correct a gift already made: the bottle left the cellar long ago, only the
+  // record is wrong. An unnamed recipient is erased rather than kept, since the
+  // caller edits the whole facet at once.
+  export const correctGiven = async (
+    userId: UserId,
+    beverageId: BeverageId,
+    correction: { recipientName?: PersonName; date?: Date },
+  ) => {
+    const existing = await repository.findBy(userId, beverageId)
+    if (!existing?.given) return 'not-found' as const
+    const given: GiftGiven = {
+      date: correction.date ?? existing.given.date,
+      ...(correction.recipientName ? { recipientName: correction.recipientName } : {}),
+    }
+    await repository.save({ ...existing, given })
+    return undefined
+  }
+
   // Record who gave the bottle to us, preserving any given-away facet.
   export const receiveFrom = async (userId: UserId, beverageId: BeverageId, from: PersonName) => {
     const existing = await repository.findBy(userId, beverageId)

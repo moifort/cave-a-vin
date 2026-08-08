@@ -20,7 +20,6 @@ struct WineDetailView: View {
     @State private var showRecommendation = false
     @State private var isEditing = false
     @State private var showLocationEditor = false
-    @State private var showTastingEditor = false
     @State private var sheetError = ErrorPresenter()
     @State private var actionError = ErrorPresenter()
 
@@ -32,9 +31,9 @@ struct WineDetailView: View {
                 } else if let detail {
                     if isEditing {
                         WineEditForm(
-                            initial: editFields(from: detail),
-                            onSave: { request in
-                                _ = try await WineAPI.update(id: wineId, request)
+                            initial: Self.editFields(from: detail),
+                            onSave: { submission in
+                                try await save(submission, of: detail)
                                 self.detail = try await WineAPI.getDetail(id: wineId)
                                 isEditing = false
                                 onUpdated?()
@@ -46,7 +45,6 @@ struct WineDetailView: View {
                             content: Self.mapContent(detail),
                             onRemoveRequested: { showRemovalChoice = true },
                             onEditLocation: { showLocationEditor = true },
-                            onEditTasting: detail.isMine ? { showTastingEditor = true } : nil,
                             onRefresh: { await loadData() }
                         )
                     }
@@ -208,11 +206,14 @@ struct WineDetailView: View {
             }
             .sheet(isPresented: $showLocationEditor) {
                 if let detail {
-                    LocationEditorSheet(initial: locationDraft(from: detail)) { draft in
+                    LocationEditorSheet(initial: Self.locationDraft(from: detail)) { draft in
+                        // "Aucun lieu" has to say so out loud: an absent coordinate
+                        // reads as "unchanged" and would leave the old pin in place.
                         let request = UpdateWineRequest(
                             latitude: draft?.latitude,
                             longitude: draft?.longitude,
-                            placeName: draft?.placeName
+                            placeName: draft?.placeName,
+                            cleared: draft == nil ? [.latitude, .longitude, .placeName] : []
                         )
                         await sheetError.run {
                             _ = try await WineAPI.update(id: detail.id, request)
@@ -224,33 +225,6 @@ struct WineDetailView: View {
                             }
                         }
                     }
-                    .errorAlert(sheetError)
-                }
-            }
-            .sheet(isPresented: $showTastingEditor) {
-                if let detail {
-                    TastingEditSheet(
-                        initialRating: detail.consumption?.rating,
-                        initialNotes: detail.consumption?.tastingNotes
-                    ) { rating, notes in
-                        await sheetError.run {
-                            // An emptied comment is sent as such to erase the previous one;
-                            // the rating has no equivalent empty value, hence the sheet
-                            // refuses to unset a score that is already recorded.
-                            try await WineAPI.recordTasting(
-                                id: detail.id,
-                                rating: rating == 0 ? nil : rating,
-                                tastingNotes: notes
-                            )
-                        } onSuccess: {
-                            showTastingEditor = false
-                            Task {
-                                await loadData()
-                                onUpdated?()
-                            }
-                        }
-                    }
-                    .presentationDetents([.medium])
                     .errorAlert(sheetError)
                 }
             }
@@ -415,7 +389,45 @@ struct WineDetailView: View {
         }
     }
 
-    private func locationDraft(from detail: UserWineDetail) -> TastingLocationDraft? {
+    /// The sheet edits one screen but three records, so the form's save is three
+    /// writes. The tasting note and the recommendation are only written when the
+    /// user actually touched them: an untouched wine must not grow an empty tasting
+    /// note just because its name was corrected.
+    private func save(_ submission: WineEditSubmission, of detail: UserWineDetail) async throws {
+        _ = try await WineAPI.update(id: detail.id, submission.wine)
+
+        let initial = Self.editFields(from: detail)
+        if submission.tasting != initial.tasting {
+            let tasting = submission.tasting
+            try await WineAPI.recordTasting(
+                id: detail.id,
+                consumedDate: tasting.consumedDate.map { ISO8601DateFormatter().string(from: $0) },
+                rating: tasting.rating == 0 ? nil : tasting.rating,
+                contacts: tasting.contacts,
+                // An emptied comment is sent as such: that is how it gets erased.
+                tastingNotes: tasting.tastingNotes
+            )
+        }
+
+        if let gift = submission.gift, gift != initial.gift {
+            try await WineAPI.updateGift(
+                id: detail.id,
+                recipientName: gift.recipientName.isEmpty ? nil : gift.recipientName,
+                giftedDate: ISO8601DateFormatter().string(from: gift.date)
+            )
+        }
+
+        if submission.recommendation != initial.recommendation {
+            let reco = submission.recommendation
+            try await RecommendationAPI.create(
+                wineId: detail.id,
+                recommenderName: reco.recommenderName.isEmpty ? nil : reco.recommenderName,
+                comment: reco.comment.isEmpty ? nil : reco.comment
+            )
+        }
+    }
+
+    private static func locationDraft(from detail: UserWineDetail) -> TastingLocationDraft? {
         guard let latitude = detail.latitude, let longitude = detail.longitude else { return nil }
         return TastingLocationDraft(
             latitude: latitude,
@@ -474,7 +486,7 @@ struct WineDetailView: View {
         )
     }
 
-    private func editFields(from detail: UserWineDetail) -> WineEditForm.Fields {
+    private static func editFields(from detail: UserWineDetail) -> WineEditForm.Fields {
         var parsedPurchaseDate: Date?
         if let dateString = detail.purchaseDate {
             parsedPurchaseDate = ISO8601DateFormatter().date(from: dateString)
@@ -491,12 +503,27 @@ struct WineDetailView: View {
             country: detail.country ?? "",
             classification: detail.classification ?? "",
             grapeVarieties: detail.grapeVarieties.joined(separator: ", "),
-            purchasePrice: detail.purchasePrice.map { String(format: "%.0f", Money.fromEur($0)) } ?? "",
+            purchasePrice: detail.purchasePrice.map(Money.editableTextFromEur) ?? "",
             purchaseDate: parsedPurchaseDate,
             drinkFrom: detail.drinkFrom.map(String.init) ?? "",
             drinkUntil: detail.drinkUntil.map(String.init) ?? "",
             giftedBy: detail.giftedBy ?? "",
-            notes: detail.notes ?? ""
+            notes: detail.notes ?? "",
+            alcoholContent: detail.alcoholContent.map(Money.decimalText) ?? "",
+            place: Self.locationDraft(from: detail),
+            gift: detail.gift.map {
+                GiftDraft(recipientName: $0.recipientName ?? "", date: $0.giftedDate)
+            },
+            tasting: TastingDraft(
+                rating: detail.consumption?.rating ?? 0,
+                consumedDate: detail.consumption?.consumedDate,
+                contacts: detail.consumption?.contacts ?? [],
+                tastingNotes: detail.consumption?.tastingNotes ?? ""
+            ),
+            recommendation: RecommendationDraft(
+                recommenderName: detail.recommendation?.recommenderName ?? "",
+                comment: detail.recommendation?.comment ?? ""
+            )
         )
     }
 }

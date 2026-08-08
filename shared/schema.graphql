@@ -935,6 +935,19 @@ type GiftReceived {
 }
 
 """
+Who a bottle was given to, and when.
+
+Passed to `updateGift` to correct a gift already recorded. Unlike `giftBottle`, this touches nothing but the gift record: the bottle has already left the cellar.
+"""
+input GivenGiftInput {
+  """When the bottle was given away."""
+  giftedDate: DateTime
+
+  """Who received the bottle."""
+  recipientName: PersonName
+}
+
+"""
 A single grape variety (cepage), a non-empty string.
 
 A wine carries a list of these. Example: "Cabernet Sauvignon".
@@ -1461,6 +1474,19 @@ type Mutation {
     """Fields to overwrite"""
     input: UpdateBeverageInput!
   ): Beverage!
+
+  """
+  Correct the gift record of a bottle already given away, and return true.
+  
+  Only the recipient and the date change; the bottle stays out of the cellar. Fails with not-found when the bottle was never given away — recording a gift is `giftBottle`, which also takes the bottle out.
+  """
+  updateGift(
+    """Bottle given away"""
+    beverageId: BeverageId!
+
+    """Corrected recipient and date"""
+    input: GivenGiftInput!
+  ): Boolean!
 }
 
 """

@@ -46,3 +46,7 @@ mutation RecordTasting($beverageId: BeverageId!, $input: TastingInput!) {
 mutation AddRecommendation($beverageId: BeverageId!, $input: RecommendationInput!) {
   addRecommendation(beverageId: $beverageId, input: $input)
 }
+
+mutation UpdateGift($beverageId: BeverageId!, $input: GivenGiftInput!) {
+  updateGift(beverageId: $beverageId, input: $input)
+}

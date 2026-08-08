@@ -11,12 +11,72 @@ import type {
   BeverageStatus,
   BeverageSubtype,
   BeverageType,
+  ErasableField,
   WineDetails,
 } from '~/domain/beverage/types'
 
 // Years as plain numbers: the drink-window rules are pure arithmetic, decoupled
 // from the branded Year of the aggregate (a Year is assignable to number).
 type YearRange = { from?: number; until?: number }
+
+// Where each erasable field lives in the stored document. A write model that
+// nests (purchase, place, wine, drinkWindow) still has to answer a flat "empty
+// this one".
+const fieldLocation: Record<ErasableField, readonly string[]> = {
+  alcoholContent: ['alcoholContent'],
+  producer: ['producer'],
+  region: ['region'],
+  country: ['country'],
+  notes: ['notes'],
+  subtype: ['subtype'],
+  purchasePrice: ['purchase', 'price'],
+  purchaseDate: ['purchase', 'date'],
+  latitude: ['place', 'latitude'],
+  longitude: ['place', 'longitude'],
+  placeName: ['place', 'name'],
+  color: ['wine', 'color'],
+  vintage: ['wine', 'vintage'],
+  appellation: ['wine', 'appellation'],
+  classification: ['wine', 'classification'],
+  grapeVarieties: ['wine', 'grapeVarieties'],
+  servingTemperature: ['wine', 'servingTemperature'],
+  drinkFrom: ['wine', 'drinkWindow', 'from'],
+  drinkUntil: ['wine', 'drinkWindow', 'until'],
+}
+
+// Remove the named fields from a record, then drop the containers they leave
+// empty: a purchase with neither price nor date is no purchase at all, and an
+// empty object read back as `{}` would make the API answer a hollow node.
+export const withoutFields = <T extends Record<string, unknown>>(
+  record: T,
+  fields: readonly ErasableField[],
+): T => {
+  if (fields.length === 0) return record
+  const copy = structuredClone(record) as Record<string, unknown>
+  for (const field of fields) {
+    const path = fieldLocation[field]
+    const parent = path.slice(0, -1).reduce<Record<string, unknown> | undefined>((node, key) => {
+      const child = node?.[key]
+      return child && typeof child === 'object' ? (child as Record<string, unknown>) : undefined
+    }, copy)
+    if (parent) delete parent[path[path.length - 1] as string]
+  }
+  pruneEmptyContainers(copy)
+  return copy as T
+}
+
+// A wine always keeps its `wine` object (the type demands it); every other
+// container disappears once it holds nothing.
+const pruneEmptyContainers = (record: Record<string, unknown>) => {
+  const wine = record.wine as Record<string, unknown> | undefined
+  if (wine && isEmpty(wine.drinkWindow)) delete wine.drinkWindow
+  for (const key of ['purchase', 'place'] as const) {
+    if (isEmpty(record[key])) delete record[key]
+  }
+}
+
+const isEmpty = (value: unknown) =>
+  typeof value === 'object' && value !== null && Object.keys(value).length === 0
 
 export const beverageStatus = (context: {
   inCellar: boolean

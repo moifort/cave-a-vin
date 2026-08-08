@@ -121,6 +121,7 @@ struct UpdateWineRequest: Encodable, Sendable {
     var country: String?
     var grapeVarieties: [String]?
     var classification: String?
+    var alcoholContent: Double?
     var purchasePrice: Double?
     var purchaseDate: String?
     var drinkFrom: Int?
@@ -130,4 +131,16 @@ struct UpdateWineRequest: Encodable, Sendable {
     var latitude: Double?
     var longitude: Double?
     var placeName: String?
+    /// Fields the user emptied. A field left out of the request means "leave it
+    /// alone", so erasing has to be said out loud: these travel as explicit nulls.
+    var cleared: Set<ClearedWineField> = []
+}
+
+/// Named after the API's own fields, since that is what travels.
+enum ClearedWineField: String, Encodable, Sendable {
+    case producer, region, country, notes, subtype, alcoholContent
+    case purchasePrice, purchaseDate
+    case latitude, longitude, placeName
+    case vintage, appellation, classification, grapeVarieties
+    case drinkFrom, drinkUntil
 }

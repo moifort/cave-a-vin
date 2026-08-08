@@ -128,6 +128,19 @@ enum WineAPI {
         )
     }
 
+    /// Correct the recipient and date of a bottle already given away. Recording a
+    /// gift is `CellarAPI.gift`, which also takes the bottle out of the cellar.
+    static func updateGift(id: String, recipientName: String?, giftedDate: String) async throws {
+        let input = VinariumGraphQL.GivenGiftInput(
+            giftedDate: .some(giftedDate),
+            recipientName: GraphQLHelpers.graphQLNullable(recipientName)
+        )
+        _ = try await GraphQLHelpers.perform(
+            GraphQLClient.shared.apollo,
+            mutation: VinariumGraphQL.UpdateGiftMutation(beverageId: id, input: input)
+        )
+    }
+
     /// Record a tasting note (rating, notes, favorite flag) for a wine.
     static func recordTasting(
         id: String,
@@ -281,26 +294,34 @@ private func addWineInput(from r: CreateWineRequest) -> VinariumGraphQL.AddBever
 }
 
 private func updateWineInput(from r: UpdateWineRequest) -> VinariumGraphQL.UpdateBeverageInput {
-    VinariumGraphQL.UpdateBeverageInput(
-        appellation: GraphQLHelpers.graphQLNullable(r.appellation),
+    // `.null` erases server-side, `.none` leaves the stored value alone. Every
+    // field the user emptied is listed in `cleared`, which is the whole difference
+    // between "I did not touch this" and "take this away".
+    func field<T>(_ name: ClearedWineField, _ value: GraphQLNullable<T>) -> GraphQLNullable<T> {
+        r.cleared.contains(name) ? .null : value
+    }
+
+    return VinariumGraphQL.UpdateBeverageInput(
+        alcoholContent: field(.alcoholContent, GraphQLHelpers.graphQLNullable(r.alcoholContent)),
+        appellation: field(.appellation, GraphQLHelpers.graphQLNullable(r.appellation)),
         beverageType: r.beverageType.map { .some($0.graphQLValue) } ?? .none,
-        classification: GraphQLHelpers.graphQLNullable(r.classification),
+        classification: field(.classification, GraphQLHelpers.graphQLNullable(r.classification)),
         color: r.color.map { .some(graphQLColor($0)) } ?? .none,
-        country: GraphQLHelpers.graphQLNullable(r.country),
-        drinkFrom: GraphQLHelpers.graphQLNullable(r.drinkFrom),
-        drinkUntil: GraphQLHelpers.graphQLNullable(r.drinkUntil),
+        country: field(.country, GraphQLHelpers.graphQLNullable(r.country)),
+        drinkFrom: field(.drinkFrom, GraphQLHelpers.graphQLNullable(r.drinkFrom)),
+        drinkUntil: field(.drinkUntil, GraphQLHelpers.graphQLNullable(r.drinkUntil)),
         giftedBy: GraphQLHelpers.graphQLNullable(r.giftedBy),
-        grapeVarieties: GraphQLHelpers.graphQLNullable(r.grapeVarieties),
-        latitude: GraphQLHelpers.graphQLNullable(r.latitude),
-        longitude: GraphQLHelpers.graphQLNullable(r.longitude),
+        grapeVarieties: field(.grapeVarieties, GraphQLHelpers.graphQLNullable(r.grapeVarieties)),
+        latitude: field(.latitude, GraphQLHelpers.graphQLNullable(r.latitude)),
+        longitude: field(.longitude, GraphQLHelpers.graphQLNullable(r.longitude)),
         name: GraphQLHelpers.graphQLNullable(r.name),
-        notes: GraphQLHelpers.graphQLNullable(r.notes),
-        placeName: GraphQLHelpers.graphQLNullable(r.placeName),
-        producer: GraphQLHelpers.graphQLNullable(r.domain),
-        purchaseDate: GraphQLHelpers.graphQLNullable(r.purchaseDate),
-        purchasePrice: GraphQLHelpers.graphQLNullable(r.purchasePrice),
-        region: GraphQLHelpers.graphQLNullable(r.region),
-        subtype: r.subtype.map { .some($0.graphql) } ?? .none,
-        vintage: GraphQLHelpers.graphQLNullable(r.vintage)
+        notes: field(.notes, GraphQLHelpers.graphQLNullable(r.notes)),
+        placeName: field(.placeName, GraphQLHelpers.graphQLNullable(r.placeName)),
+        producer: field(.producer, GraphQLHelpers.graphQLNullable(r.domain)),
+        purchaseDate: field(.purchaseDate, GraphQLHelpers.graphQLNullable(r.purchaseDate)),
+        purchasePrice: field(.purchasePrice, GraphQLHelpers.graphQLNullable(r.purchasePrice)),
+        region: field(.region, GraphQLHelpers.graphQLNullable(r.region)),
+        subtype: r.subtype.map { .some($0.graphql) } ?? (r.cleared.contains(.subtype) ? .null : .none),
+        vintage: field(.vintage, GraphQLHelpers.graphQLNullable(r.vintage))
     )
 }
