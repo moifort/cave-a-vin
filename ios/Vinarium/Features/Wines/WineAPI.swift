@@ -128,6 +128,59 @@ enum WineAPI {
         )
     }
 
+    /// Save the whole wine sheet in one call. The bottle, its tasting note, its
+    /// gift and its recommendation are four records: sending them one mutation at a
+    /// time meant four round trips and a half-saved sheet as soon as one failed.
+    /// Only the parts the user touched are sent — an absent part is left alone.
+    static func saveSheet(
+        id: String,
+        wine: UpdateWineRequest,
+        tasting: TastingDraft? = nil,
+        gift: GiftDraft? = nil,
+        recommendation: RecommendationDraft? = nil
+    ) async throws {
+        let formatter = ISO8601DateFormatter()
+        // The generated initialiser orders its arguments alphabetically.
+        let input = VinariumGraphQL.BeverageSheetInput(
+            beverage: .some(updateWineInput(from: wine)),
+            gift: gift.map { draft in
+                .some(
+                    VinariumGraphQL.GivenGiftInput(
+                        giftedDate: .some(formatter.string(from: draft.date)),
+                        recipientName: GraphQLHelpers.graphQLNullable(draft.recipientName)
+                    )
+                )
+            } ?? .none,
+            recommendation: recommendation.map { draft in
+                .some(
+                    VinariumGraphQL.RecommendationInput(
+                        comment: GraphQLHelpers.graphQLNullable(draft.comment),
+                        recommenderName: GraphQLHelpers.graphQLNullable(draft.recommenderName)
+                    )
+                )
+            } ?? .none,
+            tasting: tasting.map { draft in
+                .some(
+                    VinariumGraphQL.TastingInput(
+                        consumedDate: GraphQLHelpers.graphQLNullable(
+                            draft.consumedDate.map { formatter.string(from: $0) }
+                        ),
+                        contacts: .some(draft.contacts),
+                        rating: GraphQLHelpers.graphQLNullable(
+                            draft.rating == 0 ? nil : draft.rating
+                        ),
+                        // An emptied comment travels as such: that is how it is erased.
+                        tastingNotes: .some(draft.tastingNotes)
+                    )
+                )
+            } ?? .none
+        )
+        _ = try await GraphQLHelpers.perform(
+            GraphQLClient.shared.apollo,
+            mutation: VinariumGraphQL.SaveWineSheetMutation(id: id, input: input)
+        )
+    }
+
     /// Correct the recipient and date of a bottle already given away. Recording a
     /// gift is `CellarAPI.gift`, which also takes the bottle out of the cellar.
     static func updateGift(id: String, recipientName: String?, giftedDate: String) async throws {

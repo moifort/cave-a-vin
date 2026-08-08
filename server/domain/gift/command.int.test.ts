@@ -17,15 +17,15 @@ beforeEach(() => {
   fake = resetFakeFirestore()
 })
 
-describe('GiftCommand.correctGiven', () => {
+describe('GiftCommand.correct', () => {
   const seedGiven = (given: Record<string, unknown>) =>
     fake.seed('gift', `${userId}_w1`, { userId, beverageId, given })
 
   test('renames the recipient without moving the date', async () => {
     seedGiven({ recipientName: 'Jean', date: new Date('2026-02-20') })
 
-    const result = await GiftCommand.correctGiven(userId, beverageId, {
-      recipientName: person('Jeanne'),
+    const result = await GiftCommand.correct(userId, beverageId, {
+      given: { recipientName: person('Jeanne') },
     })
 
     expect(result).toBeUndefined()
@@ -38,7 +38,7 @@ describe('GiftCommand.correctGiven', () => {
   test('drops a recipient the caller no longer names', async () => {
     seedGiven({ recipientName: 'Jean', date: new Date('2026-02-20') })
 
-    await GiftCommand.correctGiven(userId, beverageId, { date: new Date('2026-03-01') })
+    await GiftCommand.correct(userId, beverageId, { given: { date: new Date('2026-03-01') } })
 
     expect(fake.snapshot('gift').get(`${userId}_w1`)?.given).toEqual({
       date: new Date('2026-03-01'),
@@ -53,7 +53,7 @@ describe('GiftCommand.correctGiven', () => {
       received: { from: 'Marie' },
     })
 
-    await GiftCommand.correctGiven(userId, beverageId, { recipientName: person('Paul') })
+    await GiftCommand.correct(userId, beverageId, { given: { recipientName: person('Paul') } })
 
     expect(fake.snapshot('gift').get(`${userId}_w1`)?.received).toEqual({ from: 'Marie' })
   })
@@ -62,8 +62,8 @@ describe('GiftCommand.correctGiven', () => {
   test('refuses a bottle that was never given away', async () => {
     fake.seed('gift', `${userId}_w1`, { userId, beverageId, received: { from: 'Marie' } })
 
-    const result = await GiftCommand.correctGiven(userId, beverageId, {
-      recipientName: person('Paul'),
+    const result = await GiftCommand.correct(userId, beverageId, {
+      given: { recipientName: person('Paul') },
     })
 
     expect(result).toBe('not-found')

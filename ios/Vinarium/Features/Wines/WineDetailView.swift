@@ -389,42 +389,21 @@ struct WineDetailView: View {
         }
     }
 
-    /// The sheet edits one screen but three records, so the form's save is three
-    /// writes. The tasting note and the recommendation are only written when the
-    /// user actually touched them: an untouched wine must not grow an empty tasting
-    /// note just because its name was corrected.
+    /// One screen, one save: the sheet goes up as a single mutation, so the four
+    /// records it spans land together or not at all. Only what the user touched is
+    /// sent — an untouched wine must not grow an empty tasting note because its
+    /// name was corrected.
     private func save(_ submission: WineEditSubmission, of detail: UserWineDetail) async throws {
-        _ = try await WineAPI.update(id: detail.id, submission.wine)
-
         let initial = Self.editFields(from: detail)
-        if submission.tasting != initial.tasting {
-            let tasting = submission.tasting
-            try await WineAPI.recordTasting(
-                id: detail.id,
-                consumedDate: tasting.consumedDate.map { ISO8601DateFormatter().string(from: $0) },
-                rating: tasting.rating == 0 ? nil : tasting.rating,
-                contacts: tasting.contacts,
-                // An emptied comment is sent as such: that is how it gets erased.
-                tastingNotes: tasting.tastingNotes
-            )
-        }
-
-        if let gift = submission.gift, gift != initial.gift {
-            try await WineAPI.updateGift(
-                id: detail.id,
-                recipientName: gift.recipientName.isEmpty ? nil : gift.recipientName,
-                giftedDate: ISO8601DateFormatter().string(from: gift.date)
-            )
-        }
-
-        if submission.recommendation != initial.recommendation {
-            let reco = submission.recommendation
-            try await RecommendationAPI.create(
-                wineId: detail.id,
-                recommenderName: reco.recommenderName.isEmpty ? nil : reco.recommenderName,
-                comment: reco.comment.isEmpty ? nil : reco.comment
-            )
-        }
+        try await WineAPI.saveSheet(
+            id: detail.id,
+            wine: submission.wine,
+            tasting: submission.tasting == initial.tasting ? nil : submission.tasting,
+            gift: submission.gift == initial.gift ? nil : submission.gift,
+            recommendation: submission.recommendation == initial.recommendation
+                ? nil
+                : submission.recommendation
+        )
     }
 
     private static func locationDraft(from detail: UserWineDetail) -> TastingLocationDraft? {

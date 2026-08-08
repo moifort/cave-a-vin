@@ -12,9 +12,9 @@ export namespace TastingCommand {
   // drop, e.g., a favorite flag when later recording a consumption. Callers pass
   // only the fields they mean to set (nulls stripped at the API boundary), so
   // the merge preserves everything they leave untouched.
-  export const create = async (note: TastingNote) => {
+  export const create = async (note: TastingNote, batch?: WriteBatch) => {
     const existing = await repository.findBy(note.userId, note.beverageId)
-    return repository.save(existing ? { ...existing, ...note } : note)
+    return repository.save(existing ? { ...existing, ...note } : note, batch)
   }
 
   // Toggle the favorite (heart) flag without clobbering an existing note:

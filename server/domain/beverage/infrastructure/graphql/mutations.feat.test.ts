@@ -77,3 +77,73 @@ describe('updateBeverage', () => {
     expect((stored()?.wine as { color?: string } | undefined)?.color).toBe('red')
   })
 })
+
+describe('saveBeverageSheet', () => {
+  const tastingDoc = () => fake.snapshot('tasting').get(`${userId}_${wineId}`)
+
+  test('writes the beverage and its satellites in one go', async () => {
+    fake.seed('tasting', `${userId}_${wineId}`, { userId, beverageId: wineId, favorite: true })
+
+    const result = await execute(`
+      mutation {
+        saveBeverageSheet(id: "${wineId}", input: {
+          beverage: { region: "Médoc", notes: null }
+          tasting: { rating: 5, tastingNotes: "Superbe" }
+          recommendation: { recommenderName: "Marie" }
+        }) { id }
+      }
+    `)
+
+    expect(result.errors).toBeUndefined()
+    expect(stored()?.region).toBe('Médoc')
+    expect(stored()).not.toHaveProperty('notes')
+    expect(tastingDoc()?.rating).toBe(5)
+    // The merge still protects what the sheet did not carry.
+    expect(tastingDoc()?.favorite).toBe(true)
+    expect(fake.snapshot('recommendation').get(`${userId}_${wineId}`)?.recommenderName).toBe(
+      'Marie',
+    )
+  })
+
+  test('leaves untouched parts alone rather than creating them', async () => {
+    await execute(`
+      mutation {
+        saveBeverageSheet(id: "${wineId}", input: { beverage: { region: "Médoc" } }) { id }
+      }
+    `)
+
+    expect(tastingDoc()).toBeUndefined()
+    expect(fake.snapshot('recommendation').get(`${userId}_${wineId}`)).toBeUndefined()
+  })
+
+  // The point of the single mutation: a refused beverage must not leave a tasting
+  // note behind, the way four separate calls did.
+  test('writes nothing at all when one part is refused', async () => {
+    const result = await execute(`
+      mutation {
+        saveBeverageSheet(id: "${wineId}", input: {
+          beverage: { color: null }
+          tasting: { rating: 5 }
+        }) { id }
+      }
+    `)
+
+    expect(result.errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
+    expect(tastingDoc()).toBeUndefined()
+    expect((stored()?.wine as { color?: string } | undefined)?.color).toBe('red')
+  })
+
+  test('refuses a gift correction on a bottle never given away', async () => {
+    const result = await execute(`
+      mutation {
+        saveBeverageSheet(id: "${wineId}", input: {
+          beverage: { region: "Médoc" }
+          gift: { recipientName: "Paul" }
+        }) { id }
+      }
+    `)
+
+    expect(result.errors?.[0]?.extensions?.code).toBe('NOT_FOUND')
+    expect(stored()?.region).toBe('Bordeaux')
+  })
+})

@@ -23,9 +23,8 @@ builder.mutationField('updateGift', (t) =>
     },
     resolve: async (_root, { beverageId, input }, { userId }) => {
       const { giftedDate, recipientName } = stripNulls(input)
-      const result = await GiftCommand.correctGiven(userId, beverageId, {
-        date: giftedDate,
-        recipientName,
+      const result = await GiftCommand.correct(userId, beverageId, {
+        given: { date: giftedDate, recipientName },
       })
       return match(result)
         .with('not-found', () => notFound('This bottle was not given away'))

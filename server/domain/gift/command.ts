@@ -12,21 +12,37 @@ export namespace GiftCommand {
     return repository.save({ ...(existing ?? { userId, beverageId }), given })
   }
 
-  // Correct a gift already made: the bottle left the cellar long ago, only the
-  // record is wrong. An unnamed recipient is erased rather than kept, since the
-  // caller edits the whole facet at once.
-  export const correctGiven = async (
+  // Correct the record of a bottle whose gifting already happened: it left the
+  // cellar long ago, only what was written about it is wrong. An unnamed recipient
+  // is erased rather than kept, since the caller edits the whole facet at once.
+  //
+  // Both facets are corrected in a single read-and-write: they share one document,
+  // and two successive writes enlisted in the same batch would each be built on a
+  // read that predates the other, so the last one would silently drop the first.
+  export const correct = async (
     userId: UserId,
     beverageId: BeverageId,
-    correction: { recipientName?: PersonName; date?: Date },
+    facets: { given?: { recipientName?: PersonName; date?: Date }; receivedFrom?: PersonName },
+    batch?: WriteBatch,
   ) => {
     const existing = await repository.findBy(userId, beverageId)
-    if (!existing?.given) return 'not-found' as const
-    const given: GiftGiven = {
-      date: correction.date ?? existing.given.date,
-      ...(correction.recipientName ? { recipientName: correction.recipientName } : {}),
-    }
-    await repository.save({ ...existing, given })
+    const alreadyGiven = existing?.given
+    // Correcting is not recording: a bottle nobody gave away has no gift to fix.
+    if (facets.given && !alreadyGiven) return 'not-found' as const
+
+    const given: GiftGiven | undefined =
+      facets.given && alreadyGiven
+        ? {
+            date: facets.given.date ?? alreadyGiven.date,
+            ...(facets.given.recipientName ? { recipientName: facets.given.recipientName } : {}),
+          }
+        : alreadyGiven
+    const received = facets.receivedFrom ? { from: facets.receivedFrom } : existing?.received
+
+    await repository.save(
+      { userId, beverageId, ...(given && { given }), ...(received && { received }) },
+      batch,
+    )
     return undefined
   }
 

@@ -1,4 +1,7 @@
+import { GivenGiftInput } from '~/domain/gift/infrastructure/graphql/inputs'
+import { RecommendationInput } from '~/domain/recommendation/infrastructure/graphql/inputs'
 import { builder } from '~/domain/shared/graphql/builder'
+import { TastingInput } from '~/domain/tasting/infrastructure/graphql/inputs'
 import { BeverageSubtypeEnum, BeverageTypeEnum, WineColorEnum } from './enums'
 
 export const AddBeverageInput = builder.inputType('AddBeverageInput', {
@@ -86,5 +89,33 @@ export const UpdateBeverageInput = builder.inputType('UpdateBeverageInput', {
     latitude: t.field({ type: 'Latitude', description: 'Latitude of the purchase place' }),
     longitude: t.field({ type: 'Longitude', description: 'Longitude of the purchase place' }),
     placeName: t.field({ type: 'PlaceName', description: 'Name of the place of purchase' }),
+  }),
+})
+
+// The wine sheet as the app edits it: one screen spanning four records. Each part
+// is optional and stands for "the user touched this"; the domains own their own
+// input types, this one only assembles them.
+export const BeverageSheetInput = builder.inputType('BeverageSheetInput', {
+  description:
+    'Everything the wine sheet can change, grouped by the record it belongs to.\n\n' +
+    'Passed to `saveBeverageSheet`. Omit a part the user did not touch: sending ' +
+    '`tasting` on a bottle that was never tasted creates its tasting note.',
+  fields: (t) => ({
+    beverage: t.field({
+      type: UpdateBeverageInput,
+      description: 'Fields of the bottle itself. Absent keeps, null erases.',
+    }),
+    tasting: t.field({
+      type: TastingInput,
+      description: 'The tasting note: score, date, people, comment.',
+    }),
+    gift: t.field({
+      type: GivenGiftInput,
+      description: 'Recipient and date of a bottle already given away.',
+    }),
+    recommendation: t.field({
+      type: RecommendationInput,
+      description: 'Who recommended the bottle, and what they said.',
+    }),
   }),
 })

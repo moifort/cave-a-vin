@@ -5,7 +5,7 @@ import { badUserInput, notFound } from '~/domain/shared/graphql/errors'
 import { stripNulls } from '~/utils/input'
 import type { BeverageData, ErasableField, WineDetails } from '../../types'
 import { BeverageUseCase } from '../../use-case'
-import { AddBeverageInput, UpdateBeverageInput } from './inputs'
+import { AddBeverageInput, BeverageSheetInput, UpdateBeverageInput } from './inputs'
 import { BeverageType } from './types'
 
 // Drop null/undefined entries; return undefined if nothing survives — so an
@@ -165,6 +165,53 @@ builder.mutationField('updateBeverage', (t) =>
       if (typeof result !== 'string') await SearchIndexUseCase.refresh(userId, id)
       return match(result)
         .with('not-found', () => notFound('Beverage not found'))
+        .with('color-required', colorRequired)
+        .with('subtype-invalid', subtypeInvalid)
+        .with(P.not(P.string), (beverage) => beverage)
+        .exhaustive()
+    },
+  }),
+)
+
+builder.mutationField('saveBeverageSheet', (t) =>
+  t.field({
+    type: BeverageType,
+    description:
+      'Save every edit made on the wine sheet at once, and return the beverage.\n\n' +
+      'The sheet spans four records — the beverage, its tasting note, its gift and its ' +
+      'recommendation — and this writes them in one batch: either the whole sheet lands ' +
+      'or none of it does. Send only the parts the user touched; an absent part is left ' +
+      'untouched, so a bottle that was never tasted grows no tasting note. Within ' +
+      '`beverage`, absent fields keep their value and an explicit null erases. Fails with ' +
+      'not-found when the beverage does not exist or when `gift` is sent for a bottle ' +
+      'that was never given away, and with bad-user-input on the beverage rules.',
+    args: {
+      id: t.arg({ type: 'BeverageId', required: true, description: 'Id of the beverage' }),
+      input: t.arg({
+        type: BeverageSheetInput,
+        required: true,
+        description: 'The parts of the sheet that changed',
+      }),
+    },
+    resolve: async (_root, { id, input }, { userId }) => {
+      const beverageInput = input.beverage ?? {}
+      const clean = stripNulls(beverageInput)
+      const tasting = input.tasting ? stripNulls(input.tasting) : undefined
+      const gift = input.gift ? stripNulls(input.gift) : undefined
+      const recommendation = input.recommendation ? stripNulls(input.recommendation) : undefined
+
+      const result = await BeverageUseCase.saveSheet(userId, id, {
+        beverage: { ...toData(clean), name: clean.name, beverageType: clean.beverageType },
+        erase: erasedBy(beverageInput),
+        receivedFrom: clean.giftedBy,
+        tasting,
+        gift: gift && { recipientName: gift.recipientName, date: gift.giftedDate },
+        recommendation,
+      })
+      if (typeof result !== 'string') await SearchIndexUseCase.refresh(userId, id)
+      return match(result)
+        .with('not-found', () => notFound('Beverage not found'))
+        .with('gift-not-found', () => notFound('This bottle was not given away'))
         .with('color-required', colorRequired)
         .with('subtype-invalid', subtypeInvalid)
         .with(P.not(P.string), (beverage) => beverage)

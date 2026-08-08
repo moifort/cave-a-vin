@@ -52,6 +52,7 @@ export namespace BeverageCommand {
     id: BeverageId,
     data: BeverageData & { name?: BeverageName; beverageType?: BeverageType },
     erase: readonly ErasableField[] = [],
+    batch?: WriteBatch,
   ) => {
     const existing = await repository.findBy(userId, id)
     if (!existing) return 'not-found' as const
@@ -86,7 +87,7 @@ export namespace BeverageCommand {
     const beverage = withoutFields(merged, erase)
     if (requiresColor(beverageType) && !(beverage as { wine?: WineDetails }).wine?.color)
       return 'color-required' as const
-    return await repository.save(beverage)
+    return await repository.save(beverage, batch)
   }
 
   // Store the terms this beverage can be found by. The beverage domain owns the

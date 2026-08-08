@@ -5,6 +5,9 @@ import type { UserId } from '~/domain/shared/types'
 export namespace GiftQuery {
   export const all = async (userId: UserId) => repository.findAllByUser(userId)
 
+  export const byBeverage = async (userId: UserId, beverageId: BeverageId) =>
+    repository.findBy(userId, beverageId)
+
   // Gifts are sparse (a handful of records per user), so filtering the memoized
   // full scan beats a keyed getAll: one query costing #gifts reads for the whole
   // request, instead of one billed lookup per beverage on every page.

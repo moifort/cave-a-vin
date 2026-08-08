@@ -6,7 +6,8 @@ import type { UserId } from '~/domain/shared/types'
 import { bulkSave } from '~/utils/firestore'
 
 export namespace RecommendationCommand {
-  export const create = async (rec: Recommendation) => repository.save(rec)
+  export const create = async (rec: Recommendation, batch?: WriteBatch) =>
+    repository.save(rec, batch)
 
   export const removeBeverage = async (
     userId: UserId,

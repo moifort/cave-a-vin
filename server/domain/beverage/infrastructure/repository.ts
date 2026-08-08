@@ -94,8 +94,10 @@ export const findPage = async (userId: UserId, args: PageArgs): Promise<Beverage
   return { beverages: hasMore ? docs.slice(0, args.limit) : docs, hasMore }
 }
 
-export const save = async (beverage: Beverage): Promise<Beverage> => {
-  await beverages().doc(beverage.id).set(beverage)
+export const save = async (beverage: Beverage, batch?: WriteBatch): Promise<Beverage> => {
+  const ref = beverages().doc(beverage.id)
+  if (batch) batch.set(ref, beverage)
+  else await ref.set(beverage)
   return beverage
 }
 

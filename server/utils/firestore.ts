@@ -98,8 +98,10 @@ export const userBeverageRecordRepository = <T extends { userId: UserId; beverag
     // Writes drop the memoized scan so a read later in the same request sees them.
     // Search reindexing does exactly that: it rewrites the wine's terms right
     // after a satellite changed, and a stale scan would index the previous state.
-    save: async (record: T): Promise<T> => {
-      await records().doc(docId(record.userId, record.beverageId)).set(record)
+    save: async (record: T, batch?: WriteBatch): Promise<T> => {
+      const ref = records().doc(docId(record.userId, record.beverageId))
+      if (batch) batch.set(ref, record)
+      else await ref.set(record)
       evictFromRequestCache(allCacheKey(record.userId))
       return record
     },

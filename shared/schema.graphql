@@ -297,6 +297,25 @@ Example: "Chateau Margaux".
 scalar BeverageName
 
 """
+Everything the wine sheet can change, grouped by the record it belongs to.
+
+Passed to `saveBeverageSheet`. Omit a part the user did not touch: sending `tasting` on a bottle that was never tasted creates its tasting note.
+"""
+input BeverageSheetInput {
+  """Fields of the bottle itself. Absent keeps, null erases."""
+  beverage: UpdateBeverageInput
+
+  """Recipient and date of a bottle already given away."""
+  gift: GivenGiftInput
+
+  """Who recommended the bottle, and what they said."""
+  recommendation: RecommendationInput
+
+  """The tasting note: score, date, people, comment."""
+  tasting: TastingInput
+}
+
+"""
 The field the beverage list is ordered by.
 
 Paired with a `SortOrder` on the `beverages` query.
@@ -1426,6 +1445,19 @@ type Mutation {
     """The still-open invitation code to invalidate."""
     code: String!
   ): Boolean!
+
+  """
+  Save every edit made on the wine sheet at once, and return the beverage.
+  
+  The sheet spans four records — the beverage, its tasting note, its gift and its recommendation — and this writes them in one batch: either the whole sheet lands or none of it does. Send only the parts the user touched; an absent part is left untouched, so a bottle that was never tasted grows no tasting note. Within `beverage`, absent fields keep their value and an explicit null erases. Fails with not-found when the beverage does not exist or when `gift` is sent for a bottle that was never given away, and with bad-user-input on the beverage rules.
+  """
+  saveBeverageSheet(
+    """Id of the beverage"""
+    id: BeverageId!
+
+    """The parts of the sheet that changed"""
+    input: BeverageSheetInput!
+  ): Beverage!
 
   """
   Extract structured beverage details from a bottle-label photo using AI.

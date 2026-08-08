@@ -50,3 +50,10 @@ mutation AddRecommendation($beverageId: BeverageId!, $input: RecommendationInput
 mutation UpdateGift($beverageId: BeverageId!, $input: GivenGiftInput!) {
   updateGift(beverageId: $beverageId, input: $input)
 }
+
+mutation SaveWineSheet($id: BeverageId!, $input: BeverageSheetInput!) {
+  saveBeverageSheet(id: $id, input: $input) {
+    id
+    updatedAt
+  }
+}

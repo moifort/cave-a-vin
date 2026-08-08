@@ -2,10 +2,13 @@ import { BeverageCommand } from '~/domain/beverage/command'
 import type { BeverageId, BeverageName, BeverageType } from '~/domain/beverage/types'
 import { CellarCommand } from '~/domain/cellar/command'
 import { GiftCommand } from '~/domain/gift/command'
+import { GiftQuery } from '~/domain/gift/query'
 import { JournalCommand } from '~/domain/journal/command'
 import { RecommendationCommand } from '~/domain/recommendation/command'
+import type { Recommendation } from '~/domain/recommendation/types'
 import type { PersonName, UserId } from '~/domain/shared/types'
 import { TastingCommand } from '~/domain/tasting/command'
+import type { TastingNote } from '~/domain/tasting/types'
 import { atomically } from '~/utils/firestore'
 
 type BeverageData = Parameters<typeof BeverageCommand.add>[3]
@@ -37,6 +40,56 @@ export namespace BeverageUseCase {
     if (typeof result !== 'string' && receivedFrom)
       await GiftCommand.receiveFrom(userId, id, receivedFrom)
     return result
+  }
+
+  // One screen, one save. The wine sheet edits four records at once (the bottle,
+  // its tasting note, the gift it was, the recommendation behind it); sending them
+  // as four mutations meant four round trips and a half-written sheet whenever the
+  // second one failed. Everything below lands together or not at all.
+  //
+  // Each part is optional: what the user did not touch is not sent, so a bottle
+  // that was never tasted does not grow an empty tasting note just because its
+  // name was corrected.
+  export const saveSheet = async (
+    userId: UserId,
+    id: BeverageId,
+    sheet: {
+      beverage: Parameters<typeof BeverageCommand.update>[2]
+      erase?: Parameters<typeof BeverageCommand.update>[3]
+      receivedFrom?: PersonName
+      tasting?: Omit<TastingNote, 'userId' | 'beverageId'>
+      gift?: { recipientName?: PersonName; date?: Date }
+      recommendation?: Omit<Recommendation, 'userId' | 'beverageId'>
+    },
+  ) => {
+    // Every refusal is settled before the first write is enlisted: a batch commits
+    // whatever it already holds, so a part refused halfway would leave the earlier
+    // ones written — the very thing this exists to prevent. The beverage rules
+    // (colour, subtype, existence) refuse before writing on their own; the gift
+    // precondition is the one that has to be read up front.
+    if (sheet.gift && !(await GiftQuery.byBeverage(userId, id))?.given)
+      return 'gift-not-found' as const
+
+    return await atomically(async (batch) => {
+      const updated = await BeverageCommand.update(userId, id, sheet.beverage, sheet.erase, batch)
+      if (typeof updated === 'string') return updated
+
+      if (sheet.gift || sheet.receivedFrom)
+        await GiftCommand.correct(
+          userId,
+          id,
+          { given: sheet.gift, receivedFrom: sheet.receivedFrom },
+          batch,
+        )
+      if (sheet.tasting)
+        await TastingCommand.create({ userId, beverageId: id, ...sheet.tasting }, batch)
+      if (sheet.recommendation)
+        await RecommendationCommand.create(
+          { userId, beverageId: id, ...sheet.recommendation },
+          batch,
+        )
+      return updated
+    })
   }
 
   export const removeCompletely = async (userId: UserId, id: BeverageId) =>
