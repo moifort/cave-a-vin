@@ -70,7 +70,7 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
     - *Contact info* → Name, Email (only if the user shares them via Sign in with Apple) — purpose **App Functionality**.
     - *User Content* → the wine catalog, tasting notes, photos of labels — purpose **App Functionality**.
     - *Identifiers* → the Apple user ID / account id — purpose **App Functionality**.
-    - *Location* → Coarse/precise location, **only** the discovery place the user opts to save — purpose **App Functionality**.
+    - *Location* → Coarse/precise location, **only** the tasting place the user opts to save — purpose **App Functionality**.
   - **Not** used for tracking. **No** third-party advertising. **No** data used for tracking across apps.
 - **Age rating**: no objectionable content → 4+ (answer "No" to everything; alcohol is *reference to*, set the alcohol/tobacco question to "Infrequent/Mild" if it appears → typically 17+ because the app is about alcohol; answer honestly).
 - **Content rights**: you own or are licensed for all content → Yes.
@@ -92,7 +92,18 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 >    headings — a dated `## YYYY.MM.DD` (dots) shows as a proper release, whereas
 >    `## Unreleased` shows literally as "Unreleased". So the changelog only displays correctly
 >    once it's been stamped by a `main` deploy.
-> 4. **Push a `ios-v<version>` tag** (e.g. `ios-v1.1`) — runs
+> 4. **Captures and panels, locally** — if any screen changed since the last release,
+>    recapture and redraw before tagging:
+>
+>    ```bash
+>    scripts/screenshots.sh all                    # the seven languages, ~30 min
+>    bun scripts/generate-appstore-previews.ts     # the five panels per language
+>    ```
+>
+>    Commit `screenshots/` and `screenshots/appstore/`. The release runner uploads what the
+>    checkout carries and captures nothing itself, so a panel left stale in the repo is a
+>    panel left stale in the store. See [docs/screenshots.md](../docs/screenshots.md).
+> 5. **Push a `ios-v<version>` tag** (e.g. `ios-v1.1`) — runs
 >    **`.github/workflows/release-ios.yml`** on a GitHub macOS runner: archive → export →
 >    upload to App Store Connect (automatic signing driven by the App Store Connect API key).
 >    Once the binary is up, the tag also pushes the marketing panels of
@@ -103,7 +114,7 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 >    `git rev-list --count HEAD` — no manual `CURRENT_PROJECT_VERSION` bump. Also triggerable
 >    from the Actions tab (`workflow_dispatch`). The runner is on a **final** macOS, so the
 >    `BuildMachineOSBuild` patch below is unnecessary there.
-> 5. **Attach the build** to the version in App Store Connect (Phase 4 below) once it finishes
+> 6. **Attach the build** to the version in App Store Connect (Phase 4 below) once it finishes
 >    processing.
 >
 > One-time setup — GitHub secrets: `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store
@@ -111,7 +122,7 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 > the gitignored `GoogleService-Info.plist`). Do **not** reuse the `APPLE_*` secrets — those
 > are the *Sign in with Apple* AuthKey used by Terraform.
 
-The manual archive/upload below stays as the fallback for step 4:
+The manual archive/upload below stays as the fallback for step 5:
 
 ```bash
 # 1. Archive (Release, real device destination)
