@@ -20,6 +20,7 @@ struct WineDetailView: View {
     @State private var showRecommendation = false
     @State private var isEditing = false
     @State private var showLocationEditor = false
+    @State private var showTastingEditor = false
     @State private var sheetError = ErrorPresenter()
     @State private var actionError = ErrorPresenter()
 
@@ -45,6 +46,7 @@ struct WineDetailView: View {
                             content: Self.mapContent(detail),
                             onRemoveRequested: { showRemovalChoice = true },
                             onEditLocation: { showLocationEditor = true },
+                            onEditTasting: detail.isMine ? { showTastingEditor = true } : nil,
                             onRefresh: { await loadData() }
                         )
                     }
@@ -225,6 +227,33 @@ struct WineDetailView: View {
                     .errorAlert(sheetError)
                 }
             }
+            .sheet(isPresented: $showTastingEditor) {
+                if let detail {
+                    TastingEditSheet(
+                        initialRating: detail.consumption?.rating,
+                        initialNotes: detail.consumption?.tastingNotes
+                    ) { rating, notes in
+                        await sheetError.run {
+                            // An emptied comment is sent as such to erase the previous one;
+                            // the rating has no equivalent empty value, hence the sheet
+                            // refuses to unset a score that is already recorded.
+                            try await WineAPI.recordTasting(
+                                id: detail.id,
+                                rating: rating == 0 ? nil : rating,
+                                tastingNotes: notes
+                            )
+                        } onSuccess: {
+                            showTastingEditor = false
+                            Task {
+                                await loadData()
+                                onUpdated?()
+                            }
+                        }
+                    }
+                    .presentationDetents([.medium])
+                    .errorAlert(sheetError)
+                }
+            }
         }
     }
 
@@ -386,9 +415,9 @@ struct WineDetailView: View {
         }
     }
 
-    private func locationDraft(from detail: UserWineDetail) -> DiscoveryLocationDraft? {
+    private func locationDraft(from detail: UserWineDetail) -> TastingLocationDraft? {
         guard let latitude = detail.latitude, let longitude = detail.longitude else { return nil }
-        return DiscoveryLocationDraft(
+        return TastingLocationDraft(
             latitude: latitude,
             longitude: longitude,
             placeName: detail.placeName

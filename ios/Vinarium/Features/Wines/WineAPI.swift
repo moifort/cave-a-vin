@@ -142,7 +142,10 @@ enum WineAPI {
             contacts: GraphQLHelpers.graphQLNullable(contacts),
             favorite: GraphQLHelpers.graphQLNullable(favorite),
             rating: GraphQLHelpers.graphQLNullable(rating),
-            tastingNotes: GraphQLHelpers.graphQLNullable(tastingNotes)
+            // The server overlays the fields it receives onto the existing note, so an
+            // omitted comment leaves the previous one in place. An empty comment is sent
+            // verbatim rather than dropped: that is how the user erases what they wrote.
+            tastingNotes: tastingNotes.map { .some($0) } ?? .none
         )
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,

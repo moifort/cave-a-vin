@@ -51,6 +51,42 @@ describe('TastingCommand.create (merge-upsert)', () => {
     expect(saved?.tastingNotes).toBe('Épicé')
   })
 
+  test('raises an existing rating without touching the rest of the note', async () => {
+    fake.seed('tasting', `${userId}_w1`, {
+      userId,
+      beverageId,
+      favorite: true,
+      rating: rating(3),
+      tastingNotes: 'Un peu fermé',
+      consumedDate: new Date('2026-02-20'),
+    })
+
+    await TastingCommand.create({ userId, beverageId, rating: rating(5) })
+
+    const saved = fake.snapshot('tasting').get(`${userId}_w1`)
+    expect(saved?.rating).toBe(5)
+    expect(saved?.favorite).toBe(true)
+    expect(saved?.tastingNotes).toBe('Un peu fermé')
+    expect(saved?.consumedDate).toEqual(new Date('2026-02-20'))
+  })
+
+  // How the app erases a comment: there is no "absent" value to send, so the empty
+  // string is written as is and overwrites what was there.
+  test('erases the comment when an empty one is recorded', async () => {
+    fake.seed('tasting', `${userId}_w1`, {
+      userId,
+      beverageId,
+      rating: rating(4),
+      tastingNotes: 'À revoir',
+    })
+
+    await TastingCommand.create({ userId, beverageId, tastingNotes: '' })
+
+    const saved = fake.snapshot('tasting').get(`${userId}_w1`)
+    expect(saved?.tastingNotes).toBe('')
+    expect(saved?.rating).toBe(4)
+  })
+
   test('saves a fresh note when none exists', async () => {
     await TastingCommand.create({ userId, beverageId, rating: rating(5) })
 
