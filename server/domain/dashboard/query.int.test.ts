@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import type { BeverageId } from '~/domain/beverage/types'
 import type { HouseholdId, HouseholdMember } from '~/domain/household/types'
 import type { PersonName, UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
@@ -6,6 +7,7 @@ import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
 
 const { DashboardQuery } = await import('~/domain/dashboard/query')
+const { CellarCommand } = await import('~/domain/cellar/command')
 
 const userId = 'user-1' as UserId
 const currentYear = new Date().getFullYear()
@@ -166,6 +168,36 @@ describe('DashboardQuery.view', () => {
     expect(view.lastBottle).toMatchObject({ wine: { id: 'w1' }, position: 'A1' })
     expect(view.lastExit).toMatchObject({ beverageId: 'w2', type: 'out' })
     expect(view.history).toHaveLength(2)
+  })
+
+  test('the total value counts the bottles in the cellar, not the whole library', async () => {
+    seedDashboardData()
+    // A priced wine that never made it to a slot: owned, listed, but not stock.
+    fake.seed('beverages', 'w3', {
+      id: 'w3',
+      userId,
+      name: 'Château Jamais Rangé',
+      beverageType: 'wine',
+      purchase: { price: 80 },
+      wine: { color: 'red' },
+      createdAt: new Date('2026-01-12'),
+    })
+
+    const view = await DashboardQuery.view(userId)
+
+    expect(view.totalValue).toBe(30)
+    expect(view.bottleCount).toBe(1)
+  })
+
+  test('taking a bottle out drops its price from the total value', async () => {
+    seedDashboardData()
+
+    await CellarCommand.removeBeverage(userId, 'w1' as BeverageId)
+    const view = await DashboardQuery.view(userId)
+
+    // The wine stays in the library, its price leaves the cellar with the bottle.
+    expect(view.totalValue).toBe(0)
+    expect(view.bottleCount).toBe(0)
   })
 
   test('every read is bounded: no library or journal scan', async () => {
