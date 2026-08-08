@@ -287,7 +287,7 @@ struct ScanView: View {
 
     private func attachLocation(_ coordinate: CLLocationCoordinate2D) {
         viewModel.attachLocation(
-            DiscoveryLocationDraft(
+            TastingLocationDraft(
                 latitude: coordinate.latitude,
                 longitude: coordinate.longitude,
                 placeName: nil

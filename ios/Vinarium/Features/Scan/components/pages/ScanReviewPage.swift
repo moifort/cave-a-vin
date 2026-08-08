@@ -26,7 +26,7 @@ struct ScanReviewPage: View {
     @State private var drinkUntil: String
     @State private var giftedBy = ""
     @State private var showGiftedByPicker = false
-    @State private var location: DiscoveryLocationDraft?
+    @State private var location: TastingLocationDraft?
 
     // Optional tasting / recommendation fields, all editable inline.
     @State private var favorite = false
@@ -43,7 +43,7 @@ struct ScanReviewPage: View {
         scanResult: ScanResult,
         imageData: Data,
         isSaving: Bool = false,
-        initialLocation: DiscoveryLocationDraft? = nil,
+        initialLocation: TastingLocationDraft? = nil,
         onSubmit: @escaping (ScanSubmission) async -> Void,
         onCancel: @escaping () -> Void = {}
     ) {

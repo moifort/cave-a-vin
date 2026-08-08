@@ -8457,42 +8457,42 @@
         }
       }
     },
-    "Lieu de découverte": {
+    "Lieu de dégustation": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ort der Entdeckung"
+            "value": "Ort der Verkostung"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Where discovered"
+            "value": "Where tasted"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lugar del descubrimiento"
+            "value": "Lugar de la degustación"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Luogo della scoperta"
+            "value": "Luogo della degustazione"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "発見場所"
+            "value": "試飲場所"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Local da descoberta"
+            "value": "Local da prova"
           }
         }
       }

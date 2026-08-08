@@ -13,7 +13,7 @@ struct LocationSection: View {
     }
 
     var body: some View {
-        Section("Lieu de d\u{00E9}couverte") {
+        Section("Lieu de d\u{00E9}gustation") {
             if let coordinate {
                 LocationCard(
                     coordinate: coordinate,

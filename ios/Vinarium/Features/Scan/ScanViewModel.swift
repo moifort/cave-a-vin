@@ -44,7 +44,7 @@ final class ScanViewModel {
     /// while another one is dismissing fails, so it is deferred to `onDismiss`.
     private var pendingPaywall = false
     var isSaving = false
-    var pendingLocation: DiscoveryLocationDraft?
+    var pendingLocation: TastingLocationDraft?
     /// Wine already created during this review session: if a post-creation write
     /// (tasting / recommendation) fails, tapping again does not create a duplicate,
     /// the existing wine is reused.
@@ -111,7 +111,7 @@ final class ScanViewModel {
         !isFlowActive && !paywallShown
     }
 
-    func attachLocation(_ draft: DiscoveryLocationDraft?) {
+    func attachLocation(_ draft: TastingLocationDraft?) {
         pendingLocation = draft
     }
 

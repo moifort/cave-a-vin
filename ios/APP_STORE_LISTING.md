@@ -69,7 +69,7 @@ Déclare la collecte des types suivants. Pour CHACUN : lié à l'utilisateur = *
 - **Coordonnées** → Nom, Adresse e-mail (uniquement si l'utilisateur les partage via Sign in with Apple)
 - **Contenu utilisateur** → Photos (scans d'étiquettes) + Autre contenu (fiches de vins, notes de dégustation)
 - **Identifiants** → Identifiant utilisateur (compte)
-- **Localisation** → Localisation précise (uniquement le lieu de découverte que l'utilisateur choisit d'enregistrer)
+- **Localisation** → Localisation précise (uniquement le lieu de dégustation que l'utilisateur choisit d'enregistrer)
 
 Aucune donnée utilisée pour le suivi entre apps. Aucune publicité tierce.
 

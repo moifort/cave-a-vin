@@ -1,7 +1,7 @@
 import MapKit
 import SwiftUI
 
-struct DiscoveryLocationDraft: Sendable, Equatable {
+struct TastingLocationDraft: Sendable, Equatable {
     var latitude: Double
     var longitude: Double
     var placeName: String?
@@ -12,8 +12,8 @@ struct DiscoveryLocationDraft: Sendable, Equatable {
 }
 
 struct LocationEditorSheet: View {
-    let initial: DiscoveryLocationDraft?
-    let onConfirm: (DiscoveryLocationDraft?) async -> Void
+    let initial: TastingLocationDraft?
+    let onConfirm: (TastingLocationDraft?) async -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var searchModel = LocationSearchModel()
@@ -179,7 +179,7 @@ struct LocationEditorSheet: View {
         defer { resolvingId = nil }
 
         guard let coordinate = await resolveCoordinate(for: completion) else { return }
-        let draft = DiscoveryLocationDraft(
+        let draft = TastingLocationDraft(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude,
             placeName: composedPlaceName(for: completion)
@@ -314,7 +314,7 @@ extension MKLocalSearchCompletion {
 
 #Preview("Pre-filled") {
     LocationEditorSheet(
-        initial: DiscoveryLocationDraft(
+        initial: TastingLocationDraft(
             latitude: 48.8769,
             longitude: 2.3370,
             placeName: "Paris - 9e Arr."
