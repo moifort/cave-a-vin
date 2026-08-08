@@ -1,15 +1,19 @@
 # Changelog
 
-## 1.6 (2026.08.06)
+## 1.6 (2026.08.08)
 
 ### Nouveautés
 - Dans le menu Réglages, vous pouvez maintenant signaler un bug, suggérer des améliorations ou de nouvelles fonctionnalités.
 - En cadeau de bienvenue, nous offrons 20 scans à l'ouverture du compte, afin que vous puissiez tester et apprécier l'application au mieux.
 - Toutes les informations sur vos quotas sont maintenant accessibles depuis les Réglages.
 - Pour être plus clair, nous affichons le nombre de résultats que la recherche a trouvés.
+- Dans le menu d'une bouteille, « Modifier » permet maintenant de corriger toute sa fiche : la note de dégustation avec ses étoiles, la date, les personnes présentes et vos commentaires, mais aussi le degré, le lieu de dégustation, qui vous a conseillé la bouteille et à qui vous l'avez offerte.
 
 ### Corrections
 - La recherche retrouve vos bouteilles même si vous oubliez les accents ou les pluriels : « chateaux margaux » trouve « Château Margaux ».
+- Un champ que vous videz est maintenant effacé pour de bon, au lieu de retrouver son ancienne valeur.
+- Un prix saisi avec une virgule est enfin pris en compte, et ses centimes ne sont plus arrondis quand vous rouvrez la fiche.
+- La fiche s'enregistre d'un seul bloc : si quelque chose échoue, plus rien n'est enregistré à moitié.
 
 ### Performance
 - La recherche affiche maintenant les résultats plus rapidement, même sur un grand nombre de bouteilles.

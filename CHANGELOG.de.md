@@ -1,15 +1,19 @@
 # Changelog
 
-## 1.6 (2026.08.06)
+## 1.6 (2026.08.08)
 
 ### Neu
 - Im Menü Einstellungen kannst du jetzt einen Fehler melden oder Verbesserungen und neue Funktionen vorschlagen.
 - Als Willkommensgeschenk schenken wir dir 20 Scans bei der Kontoeröffnung, damit du die App in Ruhe ausprobieren kannst.
 - Alle Angaben zu deinem Kontingent findest du jetzt in den Einstellungen.
 - Für mehr Klarheit zeigen wir dir, wie viele Treffer die Suche gefunden hat.
+- Im Menü einer Flasche korrigierst du mit „Bearbeiten“ jetzt ihr ganzes Datenblatt: die Verkostungsnotiz mit ihren Sternen, das Datum, wer dabei war und deine Kommentare, aber auch den Alkoholgehalt, den Ort der Verkostung, wer dir die Flasche empfohlen hat und wem du sie geschenkt hast.
 
 ### Korrekturen
 - Die Suche findet deine Flaschen auch dann, wenn du Akzente oder Pluralformen vergisst: „chateaux margaux“ findet „Château Margaux“.
+- Ein Feld, das du leerst, bleibt jetzt leer, statt wieder mit seinem alten Wert aufzutauchen.
+- Ein Preis mit Komma wird endlich übernommen, und seine Cents werden beim erneuten Öffnen des Datenblatts nicht mehr gerundet.
+- Das Datenblatt wird in einem Zug gespeichert: Schlägt etwas fehl, bleibt nichts halb gespeichert.
 
 ### Performance
 - Die Suche zeigt ihre Treffer jetzt schneller an, auch bei vielen Flaschen.

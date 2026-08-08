@@ -1,15 +1,19 @@
 # Changelog
 
-## 1.6 (2026.08.06)
+## 1.6 (2026.08.08)
 
 ### New
 - From the Settings menu, you can now report a bug or suggest improvements and new features.
 - As a welcome gift, we are giving you 20 scans when you open your account, so you can try the app properly.
 - Everything about your allowance is now available from the Settings.
 - To make things clearer, we show how many results the search found.
+- From a bottle's menu, "Edit" now corrects its whole sheet: the tasting note with its stars, the date, who was there and your comments, but also the alcohol content, the tasting place, who recommended the bottle to you and who you gave it to.
 
 ### Fixes
 - Search finds your bottles even when you forget the accents or the plurals: "chateaux margaux" finds "Château Margaux".
+- A field you empty is now cleared for good, instead of coming back with its old value.
+- A price typed with a comma is taken into account at last, and its cents are no longer rounded when you reopen the sheet.
+- The sheet is saved in one go: if something fails, nothing is left half saved.
 
 ### Performance
 - Search now shows its results faster, even on a large number of bottles.

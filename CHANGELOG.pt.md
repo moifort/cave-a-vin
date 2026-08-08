@@ -1,15 +1,19 @@
 # Changelog
 
-## 1.6 (2026.08.06)
+## 1.6 (2026.08.08)
 
 ### Novidades
 - No menu Definições, pode agora comunicar um erro ou sugerir melhorias e novas funcionalidades.
 - Como prenda de boas-vindas, oferecemos 20 digitalizações na abertura da conta, para que possa experimentar bem a aplicação.
 - Todas as informações sobre a sua quota estão agora disponíveis nas Definições.
 - Para ser mais claro, mostramos quantos resultados a pesquisa encontrou.
+- No menu de uma garrafa, «Editar» corrige agora toda a sua ficha: a nota de prova com as estrelas, a data, quem estava presente e os seus comentários, mas também a graduação, o local da prova, quem lhe recomendou a garrafa e a quem a ofereceu.
 
 ### Correções
 - A pesquisa encontra as suas garrafas mesmo que se esqueça dos acentos ou dos plurais: «chateaux margaux» encontra «Château Margaux».
+- Um campo que esvazia fica agora apagado de vez, em vez de recuperar o valor anterior.
+- Um preço escrito com vírgula é finalmente tido em conta, e os cêntimos deixam de ser arredondados quando reabre a ficha.
+- A ficha é guardada de uma só vez: se algo falhar, nada fica guardado a meio.
 
 ### Desempenho
 - A pesquisa mostra agora os resultados mais depressa, mesmo com muitas garrafas.

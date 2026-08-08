@@ -1,15 +1,19 @@
 # Changelog
 
-## 1.6 (2026.08.06)
+## 1.6 (2026.08.08)
 
 ### Novità
 - Dal menu Impostazioni puoi ora segnalare un problema o proporre miglioramenti e nuove funzioni.
 - Come regalo di benvenuto ti offriamo 20 scansioni all'apertura dell'account, così puoi provare l'app come si deve.
 - Tutte le informazioni sulla tua quota sono ora disponibili nelle Impostazioni.
 - Per essere più chiari, ti mostriamo quanti risultati ha trovato la ricerca.
+- Dal menu di una bottiglia, «Modifica» corregge ora tutta la sua scheda: la nota di degustazione con le stelle, la data, chi era presente e i tuoi commenti, ma anche la gradazione, il luogo della degustazione, chi ti ha consigliato la bottiglia e a chi l'hai regalata.
 
 ### Correzioni
 - La ricerca trova le tue bottiglie anche se dimentichi gli accenti o i plurali: «chateaux margaux» trova «Château Margaux».
+- Un campo che svuoti resta ora cancellato, invece di tornare con il valore di prima.
+- Un prezzo scritto con la virgola viene finalmente considerato, e i centesimi non sono più arrotondati quando riapri la scheda.
+- La scheda si salva in un solo colpo: se qualcosa non riesce, non resta niente salvato a metà.
 
 ### Prestazioni
 - La ricerca mostra ora i risultati più in fretta, anche con tante bottiglie.

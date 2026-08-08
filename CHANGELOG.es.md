@@ -1,15 +1,19 @@
 # Changelog
 
-## 1.6 (2026.08.06)
+## 1.6 (2026.08.08)
 
 ### Novedades
 - Desde el menú Ajustes, ahora puedes informar de un error o sugerir mejoras y nuevas funciones.
 - Como regalo de bienvenida, te ofrecemos 20 escaneos al abrir tu cuenta, para que pruebes la app a fondo.
 - Toda la información sobre tu cupo está ahora disponible desde los Ajustes.
 - Para que quede más claro, te mostramos cuántos resultados ha encontrado la búsqueda.
+- Desde el menú de una botella, «Editar» corrige ahora toda su ficha: la nota de cata con sus estrellas, la fecha, quién estaba y tus comentarios, y también la graduación, el lugar de la degustación, quién te recomendó la botella y a quién se la regalaste.
 
 ### Correcciones
 - La búsqueda encuentra tus botellas aunque olvides los acentos o los plurales: «chateaux margaux» encuentra «Château Margaux».
+- Un campo que vacías queda ahora borrado de verdad, en lugar de recuperar su valor anterior.
+- Un precio escrito con coma por fin se tiene en cuenta, y sus céntimos ya no se redondean al volver a abrir la ficha.
+- La ficha se guarda de una sola vez: si algo falla, no queda nada a medio guardar.
 
 ### Rendimiento
 - La búsqueda muestra ahora sus resultados más rápido, incluso con muchas botellas.
