@@ -46,11 +46,15 @@ const breadth = (segment: string) => {
 // longest, a long word being the rarer. Only one segment can reach the single
 // array clause Firestore allows, so the choice is pure economy — every other
 // segment is settled in memory either way.
-export const narrowestSegment = (segments: string[]) =>
-  segments.reduce((best, segment) => {
-    if (breadth(segment) !== breadth(best)) return breadth(segment) < breadth(best) ? segment : best
-    return segment.length > best.length ? segment : best
-  })
+export const narrowestSegment = (segments: string[]) => {
+  const scored = segments.map((segment) => ({ segment, breadth: breadth(segment) }))
+  const narrowest = Math.min(...scored.map((candidate) => candidate.breadth))
+  return scored
+    .filter((candidate) => candidate.breadth === narrowest)
+    .reduce((longest, candidate) =>
+      candidate.segment.length > longest.segment.length ? candidate : longest,
+    ).segment
+}
 
 // How strongly a candidate text matches a searched word: an exact match beats a
 // prefix match, which beats a mere substring. Zero means no match.
