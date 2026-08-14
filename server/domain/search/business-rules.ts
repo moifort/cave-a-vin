@@ -33,6 +33,25 @@ export const querySegments = (query: string) => {
   return segments
 }
 
+// How many bottles a segment is likely to bring back, narrowest first: a plain
+// word is rarer than any category, a subtype rarer than a robe, a robe rarer
+// than a beverage type.
+const BREADTH = { subtype: 1, color: 2, type: 3 } as const
+const breadth = (segment: string) => {
+  const kinds = facetsOf(segment).map((facet) => facet.split(':')[0] as keyof typeof BREADTH)
+  return kinds.length === 0 ? 0 : Math.min(...kinds.map((kind) => BREADTH[kind]))
+}
+
+// The one segment worth asking Firestore for: the narrowest, and among equals the
+// longest, a long word being the rarer. Only one segment can reach the single
+// array clause Firestore allows, so the choice is pure economy — every other
+// segment is settled in memory either way.
+export const narrowestSegment = (segments: string[]) =>
+  segments.reduce((best, segment) => {
+    if (breadth(segment) !== breadth(best)) return breadth(segment) < breadth(best) ? segment : best
+    return segment.length > best.length ? segment : best
+  })
+
 // How strongly a candidate text matches a searched word: an exact match beats a
 // prefix match, which beats a mere substring. Zero means no match.
 //

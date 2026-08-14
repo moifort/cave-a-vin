@@ -158,6 +158,24 @@ describe('SearchQuery.acrossCollections', () => {
     expect(totalCount).toBe(2)
   })
 
+  test('finds a sparkling wine whose text carries no such word', async () => {
+    fake.seed('beverages', 'w4', {
+      id: 'w4',
+      userId,
+      name: 'Dom Pérignon',
+      beverageType: 'wine',
+      subtype: 'sparkling',
+      wine: { color: 'white', vintage: 2012 },
+      createdAt: new Date('2026-01-04'),
+      updatedAt: new Date('2026-01-04'),
+    })
+    await seedAndIndex()
+
+    for (const query of ['champagne', 'bulles', 'pétillant', 'sparkling']) {
+      expect((await run(query)).hits.map((hit) => String(hit.item.id))).toEqual(['w4'])
+    }
+  })
+
   test('asks Firestore for the matching wines, never for the collection', async () => {
     await seedAndIndex()
     const before = { docReads: fake.docReads, queryReads: fake.queryReads }

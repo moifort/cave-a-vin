@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   hasActiveFilters,
   matchStrength,
+  narrowestSegment,
   passesFilters,
   querySegments,
   rankedHits,
@@ -74,6 +75,23 @@ describe('querySegments', () => {
   test('prefers the longest entry over the words it contains', () => {
     // "vin" alone designates the wine type, but "vin jaune" is what was typed.
     expect(querySegments('vin jaune')).toEqual(['vin jaune'])
+  })
+})
+
+describe('narrowestSegment', () => {
+  test('a plain word is rarer than any category', () => {
+    expect(narrowestSegment(['vin', 'margaux'])).toBe('margaux')
+    expect(narrowestSegment(['champagne', 'bollinger'])).toBe('bollinger')
+  })
+
+  test('the longest wins among plain words', () => {
+    expect(narrowestSegment(['clos', 'vougeot'])).toBe('vougeot')
+  })
+
+  test('among categories, the narrowest kind wins', () => {
+    // Fewer bottles are sparkling than are white, and fewer are white than wine.
+    expect(narrowestSegment(['vin', 'blanc'])).toBe('blanc')
+    expect(narrowestSegment(['blanc', 'champagne'])).toBe('champagne')
   })
 })
 

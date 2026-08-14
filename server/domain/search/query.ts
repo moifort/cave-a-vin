@@ -6,9 +6,10 @@ import { HouseholdQuery } from '~/domain/household/query'
 import { RecommendationQuery } from '~/domain/recommendation/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
-import { hasActiveFilters, querySegments, rankedHits } from './business-rules'
+import { hasActiveFilters, narrowestSegment, querySegments, rankedHits } from './business-rules'
 import { facetTerms, queryTerms } from './tokens'
 import type { SearchableWine, SearchFilters } from './types'
+import { facetsOf } from './vocabulary'
 
 export namespace SearchQuery {
   // Search through the terms written on each wine: Firestore is asked for the
@@ -28,8 +29,15 @@ export namespace SearchQuery {
     if (tokens.length === 0 && !hasActiveFilters(filters)) return { hits: [], totalCount: 0 }
 
     const scope = await HouseholdQuery.cellarScope(userId)
+    // A segment is asked for as a word and as the facets it designates at once:
+    // "champagne" has to bring back the bottle named Champagne Charlie and the
+    // Dom Pérignon that carries the word nowhere. One disjunctive clause covers
+    // both, which is all Firestore allows anyway.
+    const segment = tokens.length > 0 ? narrowestSegment(tokens) : undefined
     const terms =
-      tokens.length > 0 ? queryTerms(mostSelective(tokens), userId) : facetTerms(filters, userId)
+      segment === undefined
+        ? facetTerms(filters, userId)
+        : [...queryTerms(segment, userId), ...facetsOf(segment)]
 
     // One query per member: Firestore takes a single disjunctive clause, so the
     // owner cannot be an `in` while the terms are an `array-contains-any`. A
@@ -49,11 +57,6 @@ export namespace SearchQuery {
     const hits = rankedHits(visible, query, filters)
     return { hits: hits.slice(0, limit), totalCount: hits.length }
   }
-
-  // The word Firestore is asked for. The longest is the rarest, near enough: a
-  // short word narrows little, and the remaining words cost nothing in memory.
-  const mostSelective = (tokens: string[]) =>
-    tokens.reduce((longest, token) => (token.length > longest.length ? token : longest))
 
   // Attach the viewer's own satellites to the candidates, by id — never a scan.
   const withSatellites = async (userId: UserId, candidates: Beverage[]) => {
