@@ -200,6 +200,31 @@ describe('searchHit', () => {
     expect(searchHit(wine, 'vin jaune')?.matchedFields).toEqual(['subtype'])
   })
 
+  test('finds a bottle through the facet its words designate', () => {
+    const wine = aWine({ name: 'Dom Pérignon', subtype: 'sparkling', color: 'white' })
+    expect(searchHit(wine, 'champagne')?.matchedFields).toEqual(['subtype'])
+    expect(searchHit(wine, 'bulles')?.matchedFields).toEqual(['subtype'])
+    expect(searchHit(wine, 'blanc')?.matchedFields).toEqual(['color'])
+    expect(searchHit(wine, 'vin')?.matchedFields).toEqual(['beverage-type'])
+  })
+
+  test('a word designating a facet still searches the text', () => {
+    const still = aWine({ name: 'Champagne Charlie', subtype: 'sweet' })
+    expect(searchHit(still, 'champagne')?.matchedFields).toEqual(['name'])
+  })
+
+  test('every segment must match, facet or text', () => {
+    const rosé = aWine({ name: 'Laurent-Perrier', subtype: 'sparkling', color: 'rosé' })
+    const blanc = aWine({ name: 'Ruinart', subtype: 'sparkling', color: 'white' })
+    expect(searchHit(rosé, 'champagne rosé')).not.toBeNull()
+    expect(searchHit(blanc, 'champagne rosé')).toBeNull()
+  })
+
+  test('a facet the bottle does not carry matches nothing', () => {
+    const red = aWine({ subtype: 'porto', color: 'red' })
+    expect(searchHit(red, 'champagne')).toBeNull()
+  })
+
   test('matches gift recipient and recommender', () => {
     const wine = aWine({
       gift: {
@@ -294,6 +319,13 @@ describe('rankedHits', () => {
   test('empty query with no filter searches nothing', () => {
     expect(rankedHits([margaux], '', {})).toEqual([])
     expect(rankedHits([margaux], '   ', {})).toEqual([])
+  })
+
+  test('ranks a bottle named after the region above one merely of the kind', () => {
+    const real = aWine({ id: 'real', name: 'Bollinger', region: 'Champagne', subtype: 'sparkling' })
+    const kind = aWine({ id: 'kind', name: 'Crémant d’Alsace', subtype: 'sparkling' })
+    const ranked = rankedHits([kind, real], 'champagne', {})
+    expect(ranked.map((hit) => String(hit.item.id))).toEqual(['real', 'kind'])
   })
 
   test('empty query with filters browses by name, without matched fields', () => {

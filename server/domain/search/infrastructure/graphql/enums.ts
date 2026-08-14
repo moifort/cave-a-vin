@@ -10,6 +10,8 @@ export const SearchMatchedFieldEnum = builder.enumType('SearchMatchedField', {
     NAME: { value: 'name', description: 'Matched the beverage name' },
     PRODUCER: { value: 'producer', description: 'Matched the producer / domain' },
     SUBTYPE: { value: 'subtype', description: 'Matched the beverage subtype' },
+    COLOR: { value: 'color', description: 'Matched the robe of a wine' },
+    BEVERAGE_TYPE: { value: 'beverage-type', description: 'Matched the kind of beverage' },
     APPELLATION: { value: 'appellation', description: 'Matched the appellation' },
     REGION: { value: 'region', description: 'Matched the region' },
     VINTAGE: { value: 'vintage', description: 'Matched the vintage year' },

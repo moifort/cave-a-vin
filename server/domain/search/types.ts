@@ -26,6 +26,8 @@ export type SearchMatchedField =
   | 'name'
   | 'producer'
   | 'subtype'
+  | 'color'
+  | 'beverage-type'
   | 'appellation'
   | 'region'
   | 'vintage'

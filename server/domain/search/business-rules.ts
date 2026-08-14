@@ -61,23 +61,29 @@ export const vintageStrength = (vintage: number | undefined, query: string) => {
 }
 
 // What the search result should surface first: the wine itself (name), then who
-// makes it, what it is, where it comes from, when, and finally who it relates to.
+// makes it, where it comes from, when, what kind of thing it is, and finally who
+// it relates to. The three facet fields sit below region and appellation on
+// purpose: a champagne is not a synonym for a sparkling wine, so on "champagne" a
+// bottle from the Champagne region has to outrank a crémant that merely shares
+// the kind.
 const FIELD_WEIGHTS: Record<SearchMatchedField, number> = {
   name: 100,
   producer: 80,
-  subtype: 70,
   appellation: 60,
   region: 60,
+  subtype: 55,
+  color: 50,
   vintage: 50,
+  'beverage-type': 45,
   'gifted-by': 40,
   'gift-recipient': 40,
   recommender: 40,
   'tasting-contact': 40,
 }
 
-// Every field of the wine (and its satellites) a word is matched against, with
-// the strength of that match. Contacts keep their best match only.
-const fieldStrengths = (item: SearchableWine, token: string) => {
+// Every text field of the wine (and its satellites) a word is matched against,
+// with the strength of that match. Contacts keep their best match only.
+const textStrengths = (item: SearchableWine, token: string) => {
   const contacts = item.consumption?.contacts ?? []
   const details = wineDetails(item)
   const strengths: [SearchMatchedField, number][] = [
@@ -94,6 +100,29 @@ const fieldStrengths = (item: SearchableWine, token: string) => {
   ]
   return strengths.filter(([, strength]) => strength > 0)
 }
+
+// The facets a segment designates, kept only when this bottle carries them. A
+// facet is designated whole or not at all, so its strength is the exact-match 3:
+// what holds it behind a real word is its weight, not its strength.
+const facetStrengths = (item: SearchableWine, segment: string) => {
+  const facets = facetsOf(segment)
+  const strengths: [SearchMatchedField, number][] = []
+  if (facets.length === 0) return strengths
+  const color = wineDetails(item)?.color
+  if (item.subtype !== undefined && facets.includes(`subtype:${item.subtype}`))
+    strengths.push(['subtype', 3])
+  if (color !== undefined && facets.includes(`color:${color}`)) strengths.push(['color', 3])
+  if (facets.includes(`type:${item.beverageType}`)) strengths.push(['beverage-type', 3])
+  return strengths
+}
+
+// Every way a segment can be answered: the wine's own words, and the facets the
+// segment names. A word can do both — "champagne" names the kind and is written
+// on the label of a Champagne Charlie.
+const fieldStrengths = (item: SearchableWine, segment: string) => [
+  ...textStrengths(item, segment),
+  ...facetStrengths(item, segment),
+]
 
 // The hit a wine scores for a query, or null when one of the words found
 // nothing. Every word must match some field (their order is free), and the score
