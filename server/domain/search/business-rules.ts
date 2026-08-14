@@ -1,13 +1,37 @@
 import { wineDetails } from '~/domain/beverage/business-rules'
 import { normalizedForSearch, wordTokens } from './tokens'
 import type { SearchableWine, SearchFilters, SearchHit, SearchMatchedField } from './types'
+import { facetsOf, LONGEST_PHRASE } from './vocabulary'
 
-// The query split into words. Word order carries no meaning: "margaux chateau"
-// and "chateau margaux" search for the same two words.
-export const queryTokens = (query: string) =>
-  normalizedForSearch(query)
+// How many words from `index` a vocabulary entry covers, one when none does. The
+// widest span wins: "vin jaune" is the yellow wine of the Jura, not the wine
+// type followed by a colour.
+const knownSpan = (words: string[], index: number) => {
+  const widest = Math.min(LONGEST_PHRASE, words.length - index)
+  for (let span = widest; span > 1; span--) {
+    if (facetsOf(words.slice(index, index + span).join(' ')).length > 0) return span
+  }
+  return 1
+}
+
+// The query split into what has to be searched for as a whole. A word is a
+// segment of its own, and the words a vocabulary entry spans travel together —
+// "vendanges tardives" means nothing cut in two. Segment order carries no
+// meaning: "margaux chateau" and "chateau margaux" search for the same two
+// segments.
+export const querySegments = (query: string) => {
+  const words = normalizedForSearch(query)
     .split(/\s+/)
-    .filter((token) => token.length > 0)
+    .filter((word) => word.length > 0)
+  const segments: string[] = []
+  let index = 0
+  while (index < words.length) {
+    const span = knownSpan(words, index)
+    segments.push(words.slice(index, index + span).join(' '))
+    index += span
+  }
+  return segments
+}
 
 // How strongly a candidate text matches a searched word: an exact match beats a
 // prefix match, which beats a mere substring. Zero means no match.
@@ -79,7 +103,7 @@ const fieldStrengths = (item: SearchableWine, token: string) => {
 // the same words. Single-word queries take no bonus, their word already is the
 // whole query.
 export const searchHit = (item: SearchableWine, query: string): SearchHit | null => {
-  const tokens = queryTokens(query)
+  const tokens = querySegments(query)
   if (tokens.length === 0) return null
   const matchedFields: SearchMatchedField[] = []
   let score = 0
@@ -125,7 +149,7 @@ export const rankedHits = (
   query: string,
   filters: SearchFilters,
 ): SearchHit[] => {
-  const tokens = queryTokens(query)
+  const tokens = querySegments(query)
   const filtered = items.filter((item) => passesFilters(item, filters))
   const byName = (a: SearchableWine, b: SearchableWine) => a.name.localeCompare(b.name)
   if (tokens.length === 0) {

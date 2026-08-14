@@ -3,7 +3,7 @@ import {
   hasActiveFilters,
   matchStrength,
   passesFilters,
-  queryTokens,
+  querySegments,
   rankedHits,
   searchHit,
   vintageStrength,
@@ -58,13 +58,22 @@ describe('normalizedForSearch', () => {
   })
 })
 
-describe('queryTokens', () => {
+describe('querySegments', () => {
   test('splits the normalized query into words', () => {
-    expect(queryTokens('Château  Margaux')).toEqual(['chateau', 'margaux'])
+    expect(querySegments('Château  Margaux')).toEqual(['chateau', 'margaux'])
   })
 
-  test('a blank query has no word', () => {
-    expect(queryTokens('   ')).toEqual([])
+  test('a blank query has no segment', () => {
+    expect(querySegments('   ')).toEqual([])
+  })
+
+  test('keeps the words of a vocabulary entry together', () => {
+    expect(querySegments('vendanges tardives alsace')).toEqual(['vendanges tardives', 'alsace'])
+  })
+
+  test('prefers the longest entry over the words it contains', () => {
+    // "vin" alone designates the wine type, but "vin jaune" is what was typed.
+    expect(querySegments('vin jaune')).toEqual(['vin jaune'])
   })
 })
 

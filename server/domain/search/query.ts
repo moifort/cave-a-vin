@@ -6,7 +6,7 @@ import { HouseholdQuery } from '~/domain/household/query'
 import { RecommendationQuery } from '~/domain/recommendation/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
-import { hasActiveFilters, queryTokens, rankedHits } from './business-rules'
+import { hasActiveFilters, querySegments, rankedHits } from './business-rules'
 import { facetTerms, queryTerms } from './tokens'
 import type { SearchableWine, SearchFilters } from './types'
 
@@ -24,7 +24,7 @@ export namespace SearchQuery {
     userId: UserId,
     { query, filters, limit }: { query: string; filters: SearchFilters; limit: number },
   ) => {
-    const tokens = queryTokens(query)
+    const tokens = querySegments(query)
     if (tokens.length === 0 && !hasActiveFilters(filters)) return { hits: [], totalCount: 0 }
 
     const scope = await HouseholdQuery.cellarScope(userId)
