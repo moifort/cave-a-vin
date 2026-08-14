@@ -2001,6 +2001,12 @@ enum SearchMatchedField {
   """Matched the appellation"""
   APPELLATION
 
+  """Matched the kind of beverage"""
+  BEVERAGE_TYPE
+
+  """Matched the robe of a wine"""
+  COLOR
+
   """Matched the person who gave the wine as a gift"""
   GIFTED_BY
 
